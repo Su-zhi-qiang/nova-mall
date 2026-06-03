@@ -1,5 +1,6 @@
 package com.su.mall.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.su.mall.dao.OmsOrderReturnApplyDao;
 import com.su.mall.dto.OmsOrderReturnApplyResult;
@@ -7,7 +8,6 @@ import com.su.mall.dto.OmsReturnApplyQueryParam;
 import com.su.mall.dto.OmsUpdateStatusParam;
 import com.su.mall.mapper.OmsOrderReturnApplyMapper;
 import com.su.mall.model.OmsOrderReturnApply;
-import com.su.mall.model.OmsOrderReturnApplyExample;
 import com.su.mall.service.OmsOrderReturnApplyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,9 +33,10 @@ public class OmsOrderReturnApplyServiceImpl implements OmsOrderReturnApplyServic
 
     @Override
     public int delete(List<Long> ids) {
-        OmsOrderReturnApplyExample example = new OmsOrderReturnApplyExample();
-        example.createCriteria().andIdIn(ids).andStatusEqualTo(3);
-        return returnApplyMapper.deleteByExample(example);
+        // ✅ 改造：deleteByExample → delete + LambdaQueryWrapper
+        return returnApplyMapper.delete(new LambdaQueryWrapper<OmsOrderReturnApply>()
+                .eq(OmsOrderReturnApply::getStatus, 3)
+                .in(OmsOrderReturnApply::getId, ids));
     }
 
     @Override
@@ -68,7 +69,8 @@ public class OmsOrderReturnApplyServiceImpl implements OmsOrderReturnApplyServic
         }else{
             return 0;
         }
-        return returnApplyMapper.updateByPrimaryKeySelective(returnApply);
+        // ✅ 改造：updateByPrimaryKeySelective → updateById
+        return returnApplyMapper.updateById(returnApply);
     }
 
     @Override

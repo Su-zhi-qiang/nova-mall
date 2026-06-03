@@ -1,0 +1,102 @@
+# 测试配置 - 使用你的数据库
+spring:
+  application:
+    name: mall-admin
+  datasource:
+    url: jdbc:mysql://192.168.100.128:3307/mall?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: 123456
+  data:
+    redis:
+      host: 192.168.100.128
+      port: 6379
+      database: 0
+      password: root
+      timeout: 300ms
+
+# MyBatis-Plus配置
+mybatis-plus:
+  mapper-locations:
+    - classpath:dao/*.xml
+    - classpath*:com/**/mapper/*.xml
+  type-aliases-package: com.su.mall.model,com.su.mall.dao
+  global-config:
+    db-config:
+      id-type: auto
+
+# JWT配置
+jwt:
+  tokenHeader: Authorization
+  secret: mall-admin-secret
+  expiration: 604800
+  tokenHead: 'Bearer '
+
+# Redis配置
+redis:
+  database: mall
+  key:
+    admin: 'ums:admin'
+    resourceList: 'ums:resourceList'
+  expire:
+    common: 86400
+
+# 日志配置
+logging:
+  level:
+    root: info
+    com.su.mall: debug
+
+# 安全配置
+secure:
+  ignored:
+    urls:
+      - /swagger-ui/
+      - /v3/api-docs/*
+      - /*/*.html
+      - /*/*.js
+      - /*/*.css
+      - /*/*.png
+      - /favicon.ico
+      - /actuator/**
+      - /druid/**
+      - /admin/login
+      - /admin/register
+      - /admin/info
+      - /admin/logout
+      - /minio/upload
+      - /aliyun/oss/policy
+
+# SpringDoc配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    doc-expansion: 'none'
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  group-configs:
+    - group: 'default'
+      packages-to-scan: com.su.mall.controller
+  default-flat-param-object: false
+
+# 阿里云OSS配置
+aliyun:
+  oss:
+    endpoint: oss-cn-shenzhen.aliyuncs.com
+    accessKeyId: test
+    accessKeySecret: test
+    bucketName: macro-oss
+    policy:
+      expire: 300
+    maxSize: 10
+    callback: http://localhost:8080/aliyun/oss/callback
+    dir:
+      prefix: mall/images/
+
+# MinIO配置
+minio:
+  endpoint: http://192.168.100.128:9000
+  bucketName: mall
+  accessKey: minioadmin
+  secretKey: minioadmin

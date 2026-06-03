@@ -1,10 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.su.mall.dao.OmsOrderReturnApplyDao">
-    <resultMap id="returnApplyDetailResultMap" type="com.su.mall.dto.OmsOrderReturnApplyResult" extends="com.su.mall.mapper.OmsOrderReturnApplyMapper.BaseResultMap">
-        <association property="companyAddress" resultMap="com.su.mall.mapper.OmsCompanyAddressMapper.BaseResultMap" columnPrefix="ca_"/>
+    <resultMap id="returnApplyDetailResultMap" type="com.su.mall.dto.OmsOrderReturnApplyResult">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="orderId" jdbcType="BIGINT" property="orderId"/>
+        <result column="companyAddressId" jdbcType="BIGINT" property="companyAddressId"/>
+        <result column="productId" jdbcType="BIGINT" property="productId"/>
+        <result column="orderSn" jdbcType="VARCHAR" property="orderSn"/>
+        <result column="createTime" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="memberUsername" jdbcType="VARCHAR" property="memberUsername"/>
+        <result column="returnAmount" jdbcType="DECIMAL" property="returnAmount"/>
+        <result column="returnName" jdbcType="VARCHAR" property="returnName"/>
+        <result column="returnPhone" jdbcType="VARCHAR" property="returnPhone"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="handleTime" jdbcType="TIMESTAMP" property="handleTime"/>
+        <result column="productPic" jdbcType="VARCHAR" property="productPic"/>
+        <result column="productName" jdbcType="VARCHAR" property="productName"/>
+        <result column="productBrand" jdbcType="VARCHAR" property="productBrand"/>
+        <result column="productAttr" jdbcType="VARCHAR" property="productAttr"/>
+        <result column="productCount" jdbcType="INTEGER" property="productCount"/>
+        <result column="productPrice" jdbcType="DECIMAL" property="productPrice"/>
+        <result column="productRealPrice" jdbcType="DECIMAL" property="productRealPrice"/>
+        <result column="reason" jdbcType="VARCHAR" property="reason"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="proofPics" jdbcType="VARCHAR" property="proofPics"/>
+        <result column="handleNote" jdbcType="VARCHAR" property="handleNote"/>
+        <result column="handleMan" jdbcType="VARCHAR" property="handleMan"/>
+        <result column="receiveMan" jdbcType="VARCHAR" property="receiveMan"/>
+        <result column="receiveTime" jdbcType="TIMESTAMP" property="receiveTime"/>
+        <result column="receiveNote" jdbcType="VARCHAR" property="receiveNote"/>
+        <association property="companyAddress" columnPrefix="ca_" javaType="com.su.mall.model.OmsCompanyAddress">
+            <id column="id" jdbcType="BIGINT" property="id"/>
+            <result column="addressName" jdbcType="VARCHAR" property="addressName"/>
+            <result column="sendStatus" jdbcType="INTEGER" property="sendStatus"/>
+            <result column="receiveStatus" jdbcType="INTEGER" property="receiveStatus"/>
+            <result column="name" jdbcType="VARCHAR" property="name"/>
+            <result column="phone" jdbcType="VARCHAR" property="phone"/>
+            <result column="province" jdbcType="VARCHAR" property="province"/>
+            <result column="city" jdbcType="VARCHAR" property="city"/>
+            <result column="region" jdbcType="VARCHAR" property="region"/>
+            <result column="detailAddress" jdbcType="VARCHAR" property="detailAddress"/>
+        </association>
     </resultMap>
-    <select id="getList" resultMap="com.su.mall.mapper.OmsOrderReturnApplyMapper.BaseResultMap">
+    <!-- 改为使用 resultType -->
+    <select id="getList" resultType="com.su.mall.model.OmsOrderReturnApply">
         SELECT
         id,
         create_time,
@@ -42,7 +81,7 @@
         SELECT
             ra.*, ca.id ca_id,
                   ca.address_name ca_address_name,
-                  ca.`name` ca_name,
+                  ca.name ca_name,
                   ca.phone ca_phone,
                   ca.province ca_province,
                   ca.city ca_city,

@@ -1,12 +1,12 @@
 package com.su.mall.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.su.mall.common.service.RedisService;
 import com.su.mall.dao.UmsAdminRoleRelationDao;
 import com.su.mall.mapper.UmsAdminRoleRelationMapper;
 import com.su.mall.model.UmsAdmin;
 import com.su.mall.model.UmsAdminRoleRelation;
-import com.su.mall.model.UmsAdminRoleRelationExample;
 import com.su.mall.model.UmsResource;
 import com.su.mall.service.UmsAdminCacheService;
 import com.su.mall.service.UmsAdminService;
@@ -57,9 +57,9 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
 
     @Override
     public void delResourceListByRole(Long roleId) {
-        UmsAdminRoleRelationExample example = new UmsAdminRoleRelationExample();
-        example.createCriteria().andRoleIdEqualTo(roleId);
-        List<UmsAdminRoleRelation> relationList = adminRoleRelationMapper.selectByExample(example);
+        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
+        List<UmsAdminRoleRelation> relationList = adminRoleRelationMapper.selectList(
+                new LambdaQueryWrapper<UmsAdminRoleRelation>().eq(UmsAdminRoleRelation::getRoleId, roleId));
         if (CollUtil.isNotEmpty(relationList)) {
             String keyPrefix = REDIS_DATABASE + ":" + REDIS_KEY_RESOURCE_LIST + ":";
             List<String> keys = relationList.stream().map(relation -> keyPrefix + relation.getAdminId()).collect(Collectors.toList());
@@ -69,9 +69,9 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
 
     @Override
     public void delResourceListByRoleIds(List<Long> roleIds) {
-        UmsAdminRoleRelationExample example = new UmsAdminRoleRelationExample();
-        example.createCriteria().andRoleIdIn(roleIds);
-        List<UmsAdminRoleRelation> relationList = adminRoleRelationMapper.selectByExample(example);
+        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
+        List<UmsAdminRoleRelation> relationList = adminRoleRelationMapper.selectList(
+                new LambdaQueryWrapper<UmsAdminRoleRelation>().in(UmsAdminRoleRelation::getRoleId, roleIds));
         if (CollUtil.isNotEmpty(relationList)) {
             String keyPrefix = REDIS_DATABASE + ":" + REDIS_KEY_RESOURCE_LIST + ":";
             List<String> keys = relationList.stream().map(relation -> keyPrefix + relation.getAdminId()).collect(Collectors.toList());

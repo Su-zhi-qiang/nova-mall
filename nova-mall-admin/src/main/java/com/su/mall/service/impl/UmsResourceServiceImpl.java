@@ -1,10 +1,10 @@
 package com.su.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.su.mall.mapper.UmsResourceMapper;
 import com.su.mall.model.UmsResource;
-import com.su.mall.model.UmsResourceExample;
 import com.su.mall.service.UmsAdminCacheService;
 import com.su.mall.service.UmsResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,19 +32,22 @@ public class UmsResourceServiceImpl implements UmsResourceService {
     @Override
     public int update(Long id, UmsResource umsResource) {
         umsResource.setId(id);
-        int count = resourceMapper.updateByPrimaryKeySelective(umsResource);
+        // ✅ 改造：updateByPrimaryKeySelective → updateById
+        int count = resourceMapper.updateById(umsResource);
         adminCacheService.delResourceListByResource(id);
         return count;
     }
 
     @Override
     public UmsResource getItem(Long id) {
-        return resourceMapper.selectByPrimaryKey(id);
+        // ✅ 改造：selectByPrimaryKey → selectById
+        return resourceMapper.selectById(id);
     }
 
     @Override
     public int delete(Long id) {
-        int count = resourceMapper.deleteByPrimaryKey(id);
+        // ✅ 改造：deleteByPrimaryKey → deleteById
+        int count = resourceMapper.deleteById(id);
         adminCacheService.delResourceListByResource(id);
         return count;
     }
@@ -52,22 +55,23 @@ public class UmsResourceServiceImpl implements UmsResourceService {
     @Override
     public List<UmsResource> list(Long categoryId, String nameKeyword, String urlKeyword, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum,pageSize);
-        UmsResourceExample example = new UmsResourceExample();
-        UmsResourceExample.Criteria criteria = example.createCriteria();
+        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
+        LambdaQueryWrapper<UmsResource> wrapper = new LambdaQueryWrapper<>();
         if(categoryId!=null){
-            criteria.andCategoryIdEqualTo(categoryId);
+            wrapper.eq(UmsResource::getCategoryId, categoryId);
         }
         if(StrUtil.isNotEmpty(nameKeyword)){
-            criteria.andNameLike('%'+nameKeyword+'%');
+            wrapper.like(UmsResource::getName, nameKeyword);
         }
         if(StrUtil.isNotEmpty(urlKeyword)){
-            criteria.andUrlLike('%'+urlKeyword+'%');
+            wrapper.like(UmsResource::getUrl, urlKeyword);
         }
-        return resourceMapper.selectByExample(example);
+        return resourceMapper.selectList(wrapper);
     }
 
     @Override
     public List<UmsResource> listAll() {
-        return resourceMapper.selectByExample(new UmsResourceExample());
+        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
+        return resourceMapper.selectList(new LambdaQueryWrapper<>());
     }
 }

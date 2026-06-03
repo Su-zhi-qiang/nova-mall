@@ -1,6 +1,7 @@
 package com.su.mall.portal.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.su.mall.common.exception.Asserts;
 import com.su.mall.mapper.*;
 import com.su.mall.model.*;
@@ -43,7 +44,8 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
     public void add(Long couponId) {
         UmsMember currentMember = memberService.getCurrentMember();
         //获取优惠券信息，判断数量
-        SmsCoupon coupon = couponMapper.selectByPrimaryKey(couponId);
+        // ✅ 改造：selectByPrimaryKey → selectById
+        SmsCoupon coupon = couponMapper.selectById(couponId);
         if(coupon==null){
             Asserts.fail("优惠券不存在");
         }
@@ -55,9 +57,10 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
             Asserts.fail("优惠券还没到领取时间");
         }
         //判断用户领取的优惠券数量是否超过限制
-        SmsCouponHistoryExample couponHistoryExample = new SmsCouponHistoryExample();
-        couponHistoryExample.createCriteria().andCouponIdEqualTo(couponId).andMemberIdEqualTo(currentMember.getId());
-        long count = couponHistoryMapper.countByExample(couponHistoryExample);
+        long count = couponHistoryMapper.selectCount(
+                new LambdaQueryWrapper<SmsCouponHistory>()
+                        .eq(SmsCouponHistory::getCouponId, couponId)
+                        .eq(SmsCouponHistory::getMemberId, currentMember.getId()));
         if(count>=coupon.getPerLimit()){
             Asserts.fail("您已经领取过该优惠券");
         }
@@ -72,11 +75,13 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
         couponHistory.setGetType(1);
         //未使用
         couponHistory.setUseStatus(0);
+        // ✅ 改造：insertSelective → insert
         couponHistoryMapper.insert(couponHistory);
         //修改优惠券表的数量、领取数量
         coupon.setCount(coupon.getCount()-1);
         coupon.setReceiveCount(coupon.getReceiveCount()==null?1:coupon.getReceiveCount()+1);
-        couponMapper.updateByPrimaryKey(coupon);
+        // ✅ 改造：updateByPrimaryKey → updateById
+        couponMapper.updateById(coupon);
     }
 
     /**
@@ -102,13 +107,10 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
     @Override
     public List<SmsCouponHistory> listHistory(Integer useStatus) {
         UmsMember currentMember = memberService.getCurrentMember();
-        SmsCouponHistoryExample couponHistoryExample=new SmsCouponHistoryExample();
-        SmsCouponHistoryExample.Criteria criteria = couponHistoryExample.createCriteria();
-        criteria.andMemberIdEqualTo(currentMember.getId());
-        if(useStatus!=null){
-            criteria.andUseStatusEqualTo(useStatus);
-        }
-        return couponHistoryMapper.selectByExample(couponHistoryExample);
+        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<SmsCouponHistory>())
+        return couponHistoryMapper.selectList(new LambdaQueryWrapper<SmsCouponHistory>()
+                .eq(SmsCouponHistory::getMemberId, currentMember.getId())
+                .eq(useStatus != null, SmsCouponHistory::getUseStatus, useStatus));
     }
 
     @Override
@@ -173,35 +175,35 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
     public List<SmsCoupon> listByProduct(Long productId) {
         List<Long> allCouponIds = new ArrayList<>();
         //获取指定商品优惠券
-        SmsCouponProductRelationExample cprExample = new SmsCouponProductRelationExample();
-        cprExample.createCriteria().andProductIdEqualTo(productId);
-        List<SmsCouponProductRelation> cprList = couponProductRelationMapper.selectByExample(cprExample);
+        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<SmsCouponProductRelation>())
+        List<SmsCouponProductRelation> cprList = couponProductRelationMapper.selectList(
+                new LambdaQueryWrapper<SmsCouponProductRelation>()
+                        .eq(SmsCouponProductRelation::getProductId, productId));
         if(CollUtil.isNotEmpty(cprList)){
             List<Long> couponIds = cprList.stream().map(SmsCouponProductRelation::getCouponId).collect(Collectors.toList());
             allCouponIds.addAll(couponIds);
         }
         //获取指定分类优惠券
-        PmsProduct product = productMapper.selectByPrimaryKey(productId);
-        SmsCouponProductCategoryRelationExample cpcrExample = new SmsCouponProductCategoryRelationExample();
-        cpcrExample.createCriteria().andProductCategoryIdEqualTo(product.getProductCategoryId());
-        List<SmsCouponProductCategoryRelation> cpcrList = couponProductCategoryRelationMapper.selectByExample(cpcrExample);
+        // ✅ 改造：selectByPrimaryKey → selectById
+        PmsProduct product = productMapper.selectById(productId);
+        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<SmsCouponProductCategoryRelation>())
+        List<SmsCouponProductCategoryRelation> cpcrList = couponProductCategoryRelationMapper.selectList(
+                new LambdaQueryWrapper<SmsCouponProductCategoryRelation>()
+                        .eq(SmsCouponProductCategoryRelation::getProductCategoryId, product.getProductCategoryId()));
         if(CollUtil.isNotEmpty(cpcrList)){
             List<Long> couponIds = cpcrList.stream().map(SmsCouponProductCategoryRelation::getCouponId).collect(Collectors.toList());
             allCouponIds.addAll(couponIds);
         }
-        //所有优惠券
-        SmsCouponExample couponExample = new SmsCouponExample();
-        couponExample.createCriteria().andEndTimeGreaterThan(new Date())
-                .andStartTimeLessThan(new Date())
-                .andUseTypeEqualTo(0);
-        if(CollUtil.isNotEmpty(allCouponIds)){
-            couponExample.or(couponExample.createCriteria()
-                    .andEndTimeGreaterThan(new Date())
-                    .andStartTimeLessThan(new Date())
-                    .andUseTypeNotEqualTo(0)
-                    .andIdIn(allCouponIds));
-        }
-        return couponMapper.selectByExample(couponExample);
+        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<SmsCoupon>())
+        return couponMapper.selectList(new LambdaQueryWrapper<SmsCoupon>()
+                .gt(SmsCoupon::getEndTime, new Date())
+                .lt(SmsCoupon::getStartTime, new Date())
+                .eq(SmsCoupon::getUseType, 0)
+                .or()
+                .and(w -> w.gt(SmsCoupon::getEndTime, new Date())
+                        .lt(SmsCoupon::getStartTime, new Date())
+                        .ne(SmsCoupon::getUseType, 0)
+                        .in(SmsCoupon::getId, allCouponIds)));
     }
 
     @Override

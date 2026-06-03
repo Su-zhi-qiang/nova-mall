@@ -1,5 +1,7 @@
 package com.su.mall.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.pagehelper.PageHelper;
 import com.su.mall.dao.OmsOrderDao;
 import com.su.mall.dao.OmsOrderOperateHistoryDao;
@@ -7,7 +9,6 @@ import com.su.mall.dto.*;
 import com.su.mall.mapper.OmsOrderMapper;
 import com.su.mall.mapper.OmsOrderOperateHistoryMapper;
 import com.su.mall.model.OmsOrder;
-import com.su.mall.model.OmsOrderExample;
 import com.su.mall.model.OmsOrderOperateHistory;
 import com.su.mall.service.OmsOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,9 +63,10 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     public int close(List<Long> ids, String note) {
         OmsOrder record = new OmsOrder();
         record.setStatus(4);
-        OmsOrderExample example = new OmsOrderExample();
-        example.createCriteria().andDeleteStatusEqualTo(0).andIdIn(ids);
-        int count = orderMapper.updateByExampleSelective(record, example);
+        // ✅ 改造：updateByExampleSelective → update + LambdaUpdateWrapper
+        int count = orderMapper.update(record, new LambdaUpdateWrapper<OmsOrder>()
+                .eq(OmsOrder::getDeleteStatus, 0)
+                .in(OmsOrder::getId, ids));
         List<OmsOrderOperateHistory> historyList = ids.stream().map(orderId -> {
             OmsOrderOperateHistory history = new OmsOrderOperateHistory();
             history.setOrderId(orderId);
@@ -82,9 +84,10 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     public int delete(List<Long> ids) {
         OmsOrder record = new OmsOrder();
         record.setDeleteStatus(1);
-        OmsOrderExample example = new OmsOrderExample();
-        example.createCriteria().andDeleteStatusEqualTo(0).andIdIn(ids);
-        return orderMapper.updateByExampleSelective(record, example);
+        // ✅ 改造：updateByExampleSelective → update + LambdaUpdateWrapper
+        return orderMapper.update(record, new LambdaUpdateWrapper<OmsOrder>()
+                .eq(OmsOrder::getDeleteStatus, 0)
+                .in(OmsOrder::getId, ids));
     }
 
     @Override
@@ -104,7 +107,8 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         order.setReceiverCity(receiverInfoParam.getReceiverCity());
         order.setReceiverRegion(receiverInfoParam.getReceiverRegion());
         order.setModifyTime(new Date());
-        int count = orderMapper.updateByPrimaryKeySelective(order);
+        // ✅ 改造：updateByPrimaryKeySelective → updateById
+        int count = orderMapper.updateById(order);
         //插入操作记录
         OmsOrderOperateHistory history = new OmsOrderOperateHistory();
         history.setOrderId(receiverInfoParam.getOrderId());
@@ -123,7 +127,8 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         order.setFreightAmount(moneyInfoParam.getFreightAmount());
         order.setDiscountAmount(moneyInfoParam.getDiscountAmount());
         order.setModifyTime(new Date());
-        int count = orderMapper.updateByPrimaryKeySelective(order);
+        // ✅ 改造：updateByPrimaryKeySelective → updateById
+        int count = orderMapper.updateById(order);
         //插入操作记录
         OmsOrderOperateHistory history = new OmsOrderOperateHistory();
         history.setOrderId(moneyInfoParam.getOrderId());
@@ -141,7 +146,8 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         order.setId(id);
         order.setNote(note);
         order.setModifyTime(new Date());
-        int count = orderMapper.updateByPrimaryKeySelective(order);
+        // ✅ 改造：updateByPrimaryKeySelective → updateById
+        int count = orderMapper.updateById(order);
         OmsOrderOperateHistory history = new OmsOrderOperateHistory();
         history.setOrderId(id);
         history.setCreateTime(new Date());

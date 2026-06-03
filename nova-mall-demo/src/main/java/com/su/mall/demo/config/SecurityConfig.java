@@ -1,16 +1,14 @@
 package com.su.mall.demo.config;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.su.mall.demo.bo.AdminUserDetails;
 import com.su.mall.mapper.UmsAdminMapper;
 import com.su.mall.model.UmsAdmin;
-import com.su.mall.model.UmsAdminExample;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -47,9 +45,9 @@ public class SecurityConfig{
         return new UserDetailsService() {
             @Override
             public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-                UmsAdminExample example = new UmsAdminExample();
-                example.createCriteria().andUsernameEqualTo(username);
-                List<UmsAdmin> umsAdminList = umsAdminMapper.selectByExample(example);
+                List<UmsAdmin> umsAdminList = umsAdminMapper.selectList(
+                    new LambdaQueryWrapper<UmsAdmin>().eq(UmsAdmin::getUsername, username)
+                );
                 if (umsAdminList != null && umsAdminList.size() > 0) {
                     return new AdminUserDetails(umsAdminList.get(0));
                 }

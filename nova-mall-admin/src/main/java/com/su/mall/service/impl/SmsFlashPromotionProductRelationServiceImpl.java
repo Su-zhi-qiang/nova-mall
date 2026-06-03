@@ -1,11 +1,11 @@
 package com.su.mall.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.su.mall.dao.SmsFlashPromotionProductRelationDao;
 import com.su.mall.dto.SmsFlashPromotionProduct;
 import com.su.mall.mapper.SmsFlashPromotionProductRelationMapper;
 import com.su.mall.model.SmsFlashPromotionProductRelation;
-import com.su.mall.model.SmsFlashPromotionProductRelationExample;
 import com.su.mall.service.SmsFlashPromotionProductRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,31 +33,33 @@ public class SmsFlashPromotionProductRelationServiceImpl implements SmsFlashProm
     @Override
     public int update(Long id, SmsFlashPromotionProductRelation relation) {
         relation.setId(id);
-        return relationMapper.updateByPrimaryKey(relation);
+        return relationMapper.updateById(relation);
     }
 
     @Override
     public int delete(Long id) {
-        return relationMapper.deleteByPrimaryKey(id);
+        // ✅ 改造：deleteByPrimaryKey → deleteById
+        return relationMapper.deleteById(id);
     }
 
     @Override
     public SmsFlashPromotionProductRelation getItem(Long id) {
-        return relationMapper.selectByPrimaryKey(id);
+        // ✅ 改造：selectByPrimaryKey → selectById
+        return relationMapper.selectById(id);
     }
 
     @Override
     public List<SmsFlashPromotionProduct> list(Long flashPromotionId, Long flashPromotionSessionId, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum,pageSize);
+        // ✅ 改造：保留手写的 DAO（getList）不动
         return relationDao.getList(flashPromotionId,flashPromotionSessionId);
     }
 
     @Override
     public long getCount(Long flashPromotionId, Long flashPromotionSessionId) {
-        SmsFlashPromotionProductRelationExample example = new SmsFlashPromotionProductRelationExample();
-        example.createCriteria()
-                .andFlashPromotionIdEqualTo(flashPromotionId)
-                .andFlashPromotionSessionIdEqualTo(flashPromotionSessionId);
-        return relationMapper.countByExample(example);
+        // ✅ 改造：countByExample → selectCount(new LambdaQueryWrapper<>())
+        return relationMapper.selectCount(new LambdaQueryWrapper<SmsFlashPromotionProductRelation>()
+                .eq(SmsFlashPromotionProductRelation::getFlashPromotionId, flashPromotionId)
+                .eq(SmsFlashPromotionProductRelation::getFlashPromotionSessionId, flashPromotionSessionId));
     }
 }

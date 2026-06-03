@@ -7,10 +7,15 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
 
-mybatis:
+# MyBatis-Plus配置
+mybatis-plus:
   mapper-locations:
     - classpath:dao/*.xml
     - classpath*:com/**/mapper/*.xml
+  type-aliases-package: com.su.mall.model,com.su.mall.portal.dao
+  global-config:
+    db-config:
+      id-type: auto
 
 jwt:
   tokenHeader: Authorization #JWT存储的请求头

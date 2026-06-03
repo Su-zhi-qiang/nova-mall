@@ -1,14 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.su.mall.portal.dao.HomeDao">
-    <resultMap id="flashPromotionProduct" type="com.su.mall.portal.domain.FlashPromotionProduct"
-               extends="com.su.mall.mapper.PmsProductMapper.BaseResultMap">
-        <result column="flash_promotion_price" property="flashPromotionPrice"/>
-        <result column="flash_promotion_count" property="flashPromotionCount"/>
-        <result column="flash_promotion_limit" property="flashPromotionLimit"/>
+    <resultMap id="flashPromotionProduct" type="com.su.mall.portal.domain.FlashPromotionProduct">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="brandId" jdbcType="BIGINT" property="brandId"/>
+        <result column="productCategoryId" jdbcType="BIGINT" property="productCategoryId"/>
+        <result column="feightTemplateId" jdbcType="BIGINT" property="feightTemplateId"/>
+        <result column="productAttributeCategoryId" jdbcType="BIGINT" property="productAttributeCategoryId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="pic" jdbcType="VARCHAR" property="pic"/>
+        <result column="productSn" jdbcType="VARCHAR" property="productSn"/>
+        <result column="deleteStatus" jdbcType="INTEGER" property="deleteStatus"/>
+        <result column="publishStatus" jdbcType="INTEGER" property="publishStatus"/>
+        <result column="newStatus" jdbcType="INTEGER" property="newStatus"/>
+        <result column="recommandStatus" jdbcType="INTEGER" property="recommandStatus"/>
+        <result column="verifyStatus" jdbcType="INTEGER" property="verifyStatus"/>
+        <result column="sort" jdbcType="INTEGER" property="sort"/>
+        <result column="sale" jdbcType="INTEGER" property="sale"/>
+        <result column="price" jdbcType="DECIMAL" property="price"/>
+        <result column="promotionPrice" jdbcType="DECIMAL" property="promotionPrice"/>
+        <result column="giftGrowth" jdbcType="INTEGER" property="giftGrowth"/>
+        <result column="giftPoint" jdbcType="INTEGER" property="giftPoint"/>
+        <result column="usePointLimit" jdbcType="INTEGER" property="usePointLimit"/>
+        <result column="subTitle" jdbcType="VARCHAR" property="subTitle"/>
+        <result column="originalPrice" jdbcType="DECIMAL" property="originalPrice"/>
+        <result column="stock" jdbcType="INTEGER" property="stock"/>
+        <result column="lowStock" jdbcType="INTEGER" property="lowStock"/>
+        <result column="unit" jdbcType="VARCHAR" property="unit"/>
+        <result column="weight" jdbcType="DECIMAL" property="weight"/>
+        <result column="previewStatus" jdbcType="INTEGER" property="previewStatus"/>
+        <result column="serviceIds" jdbcType="VARCHAR" property="serviceIds"/>
+        <result column="keywords" jdbcType="VARCHAR" property="keywords"/>
+        <result column="note" jdbcType="VARCHAR" property="note"/>
+        <result column="albumPics" jdbcType="VARCHAR" property="albumPics"/>
+        <result column="detailTitle" jdbcType="VARCHAR" property="detailTitle"/>
+        <result column="promotionStartTime" jdbcType="TIMESTAMP" property="promotionStartTime"/>
+        <result column="promotionEndTime" jdbcType="TIMESTAMP" property="promotionEndTime"/>
+        <result column="promotionPerLimit" jdbcType="INTEGER" property="promotionPerLimit"/>
+        <result column="promotionType" jdbcType="INTEGER" property="promotionType"/>
+        <result column="brandName" jdbcType="VARCHAR" property="brandName"/>
+        <result column="productCategoryName" jdbcType="VARCHAR" property="productCategoryName"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="detailDesc" jdbcType="VARCHAR" property="detailDesc"/>
+        <result column="detailHtml" jdbcType="VARCHAR" property="detailHtml"/>
+        <result column="detailMobileHtml" jdbcType="VARCHAR" property="detailMobileHtml"/>
+        <result column="flashPromotionPrice" property="flashPromotionPrice"/>
+        <result column="flashPromotionCount" property="flashPromotionCount"/>
+        <result column="flashPromotionLimit" property="flashPromotionLimit"/>
     </resultMap>
 
-    <select id="getRecommendBrandList" resultMap="com.su.mall.mapper.PmsBrandMapper.BaseResultMap">
+    <!-- 改为使用 resultType -->
+    <select id="getRecommendBrandList" resultType="com.su.mall.model.PmsBrand">
         SELECT b.*
         FROM
             sms_home_brand hb
@@ -17,7 +59,7 @@
             hb.recommend_status = 1
             AND b.show_status = 1
         ORDER BY
-            hb.sort DESC
+            hb.sort desc
         LIMIT #{offset}, #{limit}
     </select>
 
@@ -35,7 +77,8 @@
             AND pr.flash_promotion_session_id = #{sessionId}
     </select>
 
-    <select id="getNewProductList" resultMap="com.su.mall.mapper.PmsProductMapper.BaseResultMap">
+    <!-- 改为使用 resultType -->
+    <select id="getNewProductList" resultType="com.su.mall.model.PmsProduct">
         SELECT p.*
         FROM
             sms_home_new_product hp
@@ -44,11 +87,12 @@
             hp.recommend_status = 1
             AND p.publish_status = 1
         ORDER BY
-            hp.sort DESC
+            hp.sort desc
         LIMIT #{offset}, #{limit};
     </select>
 
-    <select id="getHotProductList" resultMap="com.su.mall.mapper.PmsProductMapper.BaseResultMap">
+    <!-- 改为使用 resultType -->
+    <select id="getHotProductList" resultType="com.su.mall.model.PmsProduct">
         SELECT p.*
         FROM
             sms_home_recommend_product hp
@@ -57,11 +101,12 @@
             hp.recommend_status = 1
             AND p.publish_status = 1
         ORDER BY
-            hp.sort DESC
+            hp.sort desc
         LIMIT #{offset}, #{limit};
     </select>
 
-    <select id="getRecommendSubjectList" resultMap="com.su.mall.mapper.CmsSubjectMapper.BaseResultMap">
+    <!-- 改为使用 resultType -->
+    <select id="getRecommendSubjectList" resultType="com.su.mall.model.CmsSubject">
         SELECT s.*
         FROM
             sms_home_recommend_subject hs
@@ -70,7 +115,7 @@
             hs.recommend_status = 1
             AND s.show_status = 1
         ORDER BY
-            hs.sort DESC
+            hs.sort desc
         LIMIT #{offset}, #{limit};
     </select>
 </mapper>

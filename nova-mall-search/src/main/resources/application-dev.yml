@@ -15,8 +15,8 @@ spring:
   data:
     elasticsearch:
       repositories:
-        enabled: true # 开启Repository，只保留这一行
-  elasticsearch: # 和data平级，uris写在这里
+        enabled: true # 开启Repository
+  elasticsearch:
     uris: http://192.168.100.128:9200
 
 logging:

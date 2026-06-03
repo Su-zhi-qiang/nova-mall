@@ -2,32 +2,116 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.su.mall.portal.dao.PortalProductDao">
     <resultMap id="cartProductMap" type="com.su.mall.portal.domain.CartProduct" autoMapping="true">
-        <id column="id" jdbcType="BIGINT" property="id" />
-        <collection property="productAttributeList" columnPrefix="attr_" resultMap="com.su.mall.mapper.PmsProductAttributeMapper.BaseResultMap">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <collection property="productAttributeList" columnPrefix="attr_" ofType="com.su.mall.model.PmsProductAttribute">
+            <id column="id" jdbcType="BIGINT" property="id"/>
+            <result column="productAttributeCategoryId" jdbcType="BIGINT" property="productAttributeCategoryId"/>
+            <result column="name" jdbcType="VARCHAR" property="name"/>
+            <result column="selectType" jdbcType="INTEGER" property="selectType"/>
+            <result column="inputType" jdbcType="INTEGER" property="inputType"/>
+            <result column="inputList" jdbcType="VARCHAR" property="inputList"/>
+            <result column="sort" jdbcType="INTEGER" property="sort"/>
+            <result column="filterType" jdbcType="INTEGER" property="filterType"/>
+            <result column="searchType" jdbcType="INTEGER" property="searchType"/>
+            <result column="relatedStatus" jdbcType="INTEGER" property="relatedStatus"/>
+            <result column="handAddStatus" jdbcType="INTEGER" property="handAddStatus"/>
+            <result column="type" jdbcType="INTEGER" property="type"/>
         </collection>
-        <collection property="skuStockList" columnPrefix="sku_" resultMap="com.su.mall.mapper.PmsSkuStockMapper.BaseResultMap">
+        <collection property="skuStockList" columnPrefix="sku_" ofType="com.su.mall.model.PmsSkuStock">
+            <id column="id" jdbcType="BIGINT" property="id"/>
+            <result column="productId" jdbcType="BIGINT" property="productId"/>
+            <result column="skuCode" jdbcType="VARCHAR" property="skuCode"/>
+            <result column="price" jdbcType="DECIMAL" property="price"/>
+            <result column="stock" jdbcType="INTEGER" property="stock"/>
+            <result column="lowStock" jdbcType="INTEGER" property="lowStock"/>
+            <result column="pic" jdbcType="VARCHAR" property="pic"/>
+            <result column="sale" jdbcType="INTEGER" property="sale"/>
+            <result column="promotionPrice" jdbcType="DECIMAL" property="promotionPrice"/>
+            <result column="lockStock" jdbcType="INTEGER" property="lockStock"/>
+            <result column="spData" jdbcType="VARCHAR" property="spData"/>
         </collection>
     </resultMap>
-    <resultMap id="promotionProductMap" type="com.su.mall.portal.domain.PromotionProduct" extends="com.su.mall.mapper.PmsProductMapper.BaseResultMap">
-        <id column="id" jdbcType="BIGINT" property="id" />
-        <collection property="skuStockList" columnPrefix="sku_" resultMap="com.su.mall.mapper.PmsSkuStockMapper.BaseResultMap">
+    <resultMap id="promotionProductMap" type="com.su.mall.portal.domain.PromotionProduct">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="brandId" jdbcType="BIGINT" property="brandId"/>
+        <result column="productCategoryId" jdbcType="BIGINT" property="productCategoryId"/>
+        <result column="feightTemplateId" jdbcType="BIGINT" property="feightTemplateId"/>
+        <result column="productAttributeCategoryId" jdbcType="BIGINT" property="productAttributeCategoryId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="pic" jdbcType="VARCHAR" property="pic"/>
+        <result column="productSn" jdbcType="VARCHAR" property="productSn"/>
+        <result column="deleteStatus" jdbcType="INTEGER" property="deleteStatus"/>
+        <result column="publishStatus" jdbcType="INTEGER" property="publishStatus"/>
+        <result column="newStatus" jdbcType="INTEGER" property="newStatus"/>
+        <result column="recommandStatus" jdbcType="INTEGER" property="recommandStatus"/>
+        <result column="verifyStatus" jdbcType="INTEGER" property="verifyStatus"/>
+        <result column="sort" jdbcType="INTEGER" property="sort"/>
+        <result column="sale" jdbcType="INTEGER" property="sale"/>
+        <result column="price" jdbcType="DECIMAL" property="price"/>
+        <result column="promotionPrice" jdbcType="DECIMAL" property="promotionPrice"/>
+        <result column="giftGrowth" jdbcType="INTEGER" property="giftGrowth"/>
+        <result column="giftPoint" jdbcType="INTEGER" property="giftPoint"/>
+        <result column="usePointLimit" jdbcType="INTEGER" property="usePointLimit"/>
+        <result column="subTitle" jdbcType="VARCHAR" property="subTitle"/>
+        <result column="originalPrice" jdbcType="DECIMAL" property="originalPrice"/>
+        <result column="stock" jdbcType="INTEGER" property="stock"/>
+        <result column="lowStock" jdbcType="INTEGER" property="lowStock"/>
+        <result column="unit" jdbcType="VARCHAR" property="unit"/>
+        <result column="weight" jdbcType="DECIMAL" property="weight"/>
+        <result column="previewStatus" jdbcType="INTEGER" property="previewStatus"/>
+        <result column="serviceIds" jdbcType="VARCHAR" property="serviceIds"/>
+        <result column="keywords" jdbcType="VARCHAR" property="keywords"/>
+        <result column="note" jdbcType="VARCHAR" property="note"/>
+        <result column="albumPics" jdbcType="VARCHAR" property="albumPics"/>
+        <result column="detailTitle" jdbcType="VARCHAR" property="detailTitle"/>
+        <result column="promotionStartTime" jdbcType="TIMESTAMP" property="promotionStartTime"/>
+        <result column="promotionEndTime" jdbcType="TIMESTAMP" property="promotionEndTime"/>
+        <result column="promotionPerLimit" jdbcType="INTEGER" property="promotionPerLimit"/>
+        <result column="promotionType" jdbcType="INTEGER" property="promotionType"/>
+        <result column="brandName" jdbcType="VARCHAR" property="brandName"/>
+        <result column="productCategoryName" jdbcType="VARCHAR" property="productCategoryName"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="detailDesc" jdbcType="VARCHAR" property="detailDesc"/>
+        <result column="detailHtml" jdbcType="VARCHAR" property="detailHtml"/>
+        <result column="detailMobileHtml" jdbcType="VARCHAR" property="detailMobileHtml"/>
+        <collection property="skuStockList" columnPrefix="sku_" ofType="com.su.mall.model.PmsSkuStock">
+            <id column="id" jdbcType="BIGINT" property="id"/>
+            <result column="productId" jdbcType="BIGINT" property="productId"/>
+            <result column="skuCode" jdbcType="VARCHAR" property="skuCode"/>
+            <result column="price" jdbcType="DECIMAL" property="price"/>
+            <result column="stock" jdbcType="INTEGER" property="stock"/>
+            <result column="lowStock" jdbcType="INTEGER" property="lowStock"/>
+            <result column="pic" jdbcType="VARCHAR" property="pic"/>
+            <result column="sale" jdbcType="INTEGER" property="sale"/>
+            <result column="promotionPrice" jdbcType="DECIMAL" property="promotionPrice"/>
+            <result column="lockStock" jdbcType="INTEGER" property="lockStock"/>
+            <result column="spData" jdbcType="VARCHAR" property="spData"/>
         </collection>
-        <collection property="productLadderList" columnPrefix="ladder_" resultMap="com.su.mall.mapper.PmsProductLadderMapper.BaseResultMap">
+        <collection property="productLadderList" columnPrefix="ladder_" ofType="com.su.mall.model.PmsProductLadder">
+            <id column="id" jdbcType="BIGINT" property="id"/>
+            <result column="productId" jdbcType="BIGINT" property="productId"/>
+            <result column="count" jdbcType="INTEGER" property="count"/>
+            <result column="discount" jdbcType="DECIMAL" property="discount"/>
+            <result column="price" jdbcType="DECIMAL" property="price"/>
         </collection>
-        <collection property="productFullReductionList" columnPrefix="full_" resultMap="com.su.mall.mapper.PmsProductFullReductionMapper.BaseResultMap">
+        <collection property="productFullReductionList" columnPrefix="full_" ofType="com.su.mall.model.PmsProductFullReduction">
+            <id column="id" jdbcType="BIGINT" property="id"/>
+            <result column="productId" jdbcType="BIGINT" property="productId"/>
+            <result column="fullPrice" jdbcType="DECIMAL" property="fullPrice"/>
+            <result column="reducePrice" jdbcType="DECIMAL" property="reducePrice"/>
         </collection>
     </resultMap>
     <select id="getCartProduct" resultMap="cartProductMap">
         SELECT
             p.id id,
-            p.`name` name,
+            p.name name,
             p.sub_title subTitle,
             p.price price,
             p.pic pic,
             p.product_attribute_category_id productAttributeCategoryId,
             p.stock stock,
             pa.id attr_id,
-            pa.`name` attr_name,
+            pa.name attr_name,
             ps.id sku_id,
             ps.sku_code sku_code,
             ps.price sku_price,
@@ -45,7 +129,7 @@
     <select id="getPromotionProductList" resultMap="promotionProductMap">
         SELECT
             p.id,
-            p.`name`,
+            p.name,
             p.promotion_type,
             p.gift_growth,
             p.gift_point,
@@ -72,7 +156,8 @@
             #{id}
         </foreach>
     </select>
-    <select id="getAvailableCouponList" resultMap="com.su.mall.mapper.SmsCouponMapper.BaseResultMap">
+    <!-- 改为使用 resultType -->
+    <select id="getAvailableCouponList" resultType="com.su.mall.model.SmsCoupon">
         SELECT *
         FROM sms_coupon
         WHERE use_type = 0

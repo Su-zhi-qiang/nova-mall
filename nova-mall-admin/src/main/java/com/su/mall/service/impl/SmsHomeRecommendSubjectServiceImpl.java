@@ -1,10 +1,10 @@
 package com.su.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.su.mall.mapper.SmsHomeRecommendSubjectMapper;
 import com.su.mall.model.SmsHomeRecommendSubject;
-import com.su.mall.model.SmsHomeRecommendSubjectExample;
 import com.su.mall.service.SmsHomeRecommendSubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,40 +32,41 @@ public class SmsHomeRecommendSubjectServiceImpl implements SmsHomeRecommendSubje
 
     @Override
     public int updateSort(Long id, Integer sort) {
+        // ✅ 改造：updateByPrimaryKeySelective → updateById
         SmsHomeRecommendSubject recommendSubject = new SmsHomeRecommendSubject();
         recommendSubject.setId(id);
         recommendSubject.setSort(sort);
-        return smsHomeRecommendSubjectMapper.updateByPrimaryKeySelective(recommendSubject);
+        return smsHomeRecommendSubjectMapper.updateById(recommendSubject);
     }
 
     @Override
     public int delete(List<Long> ids) {
-        SmsHomeRecommendSubjectExample example = new SmsHomeRecommendSubjectExample();
-        example.createCriteria().andIdIn(ids);
-        return smsHomeRecommendSubjectMapper.deleteByExample(example);
+        // ✅ 改造：deleteByExample → delete(new LambdaQueryWrapper<>())
+        return smsHomeRecommendSubjectMapper.delete(new LambdaQueryWrapper<SmsHomeRecommendSubject>()
+                .in(SmsHomeRecommendSubject::getId, ids));
     }
 
     @Override
     public int updateRecommendStatus(List<Long> ids, Integer recommendStatus) {
-        SmsHomeRecommendSubjectExample example = new SmsHomeRecommendSubjectExample();
-        example.createCriteria().andIdIn(ids);
+        // ✅ 改造：updateByExampleSelective → update(new LambdaQueryWrapper<>().in(...))
         SmsHomeRecommendSubject record = new SmsHomeRecommendSubject();
         record.setRecommendStatus(recommendStatus);
-        return smsHomeRecommendSubjectMapper.updateByExampleSelective(record,example);
+        return smsHomeRecommendSubjectMapper.update(record, new LambdaQueryWrapper<SmsHomeRecommendSubject>()
+                .in(SmsHomeRecommendSubject::getId, ids));
     }
 
     @Override
     public List<SmsHomeRecommendSubject> list(String subjectName, Integer recommendStatus, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum,pageSize);
-        SmsHomeRecommendSubjectExample example = new SmsHomeRecommendSubjectExample();
-        SmsHomeRecommendSubjectExample.Criteria criteria = example.createCriteria();
+        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<>())
+        LambdaQueryWrapper<SmsHomeRecommendSubject> wrapper = new LambdaQueryWrapper<>();
         if(!StrUtil.isEmpty(subjectName)){
-            criteria.andSubjectNameLike("%"+subjectName+"%");
+            wrapper.like(SmsHomeRecommendSubject::getSubjectName, subjectName);
         }
         if(recommendStatus!=null){
-            criteria.andRecommendStatusEqualTo(recommendStatus);
+            wrapper.eq(SmsHomeRecommendSubject::getRecommendStatus, recommendStatus);
         }
-        example.setOrderByClause("sort desc");
-        return smsHomeRecommendSubjectMapper.selectByExample(example);
+        wrapper.orderByDesc(SmsHomeRecommendSubject::getSort);
+        return smsHomeRecommendSubjectMapper.selectList(wrapper);
     }
 }

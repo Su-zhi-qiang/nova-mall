@@ -1,10 +1,10 @@
 package com.su.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.su.mall.mapper.SmsHomeNewProductMapper;
 import com.su.mall.model.SmsHomeNewProduct;
-import com.su.mall.model.SmsHomeNewProductExample;
 import com.su.mall.service.SmsHomeNewProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,40 +32,41 @@ public class SmsHomeNewProductServiceImpl implements SmsHomeNewProductService {
 
     @Override
     public int updateSort(Long id, Integer sort) {
+        // ✅ 改造：updateByPrimaryKeySelective → updateById
         SmsHomeNewProduct homeNewProduct = new SmsHomeNewProduct();
         homeNewProduct.setId(id);
         homeNewProduct.setSort(sort);
-        return homeNewProductMapper.updateByPrimaryKeySelective(homeNewProduct);
+        return homeNewProductMapper.updateById(homeNewProduct);
     }
 
     @Override
     public int delete(List<Long> ids) {
-        SmsHomeNewProductExample example = new SmsHomeNewProductExample();
-        example.createCriteria().andIdIn(ids);
-        return homeNewProductMapper.deleteByExample(example);
+        // ✅ 改造：deleteByExample → delete(new LambdaQueryWrapper<>())
+        return homeNewProductMapper.delete(new LambdaQueryWrapper<SmsHomeNewProduct>()
+                .in(SmsHomeNewProduct::getId, ids));
     }
 
     @Override
     public int updateRecommendStatus(List<Long> ids, Integer recommendStatus) {
-        SmsHomeNewProductExample example = new SmsHomeNewProductExample();
-        example.createCriteria().andIdIn(ids);
+        // ✅ 改造：updateByExampleSelective → update(new LambdaQueryWrapper<>().in(...))
         SmsHomeNewProduct record = new SmsHomeNewProduct();
         record.setRecommendStatus(recommendStatus);
-        return homeNewProductMapper.updateByExampleSelective(record,example);
+        return homeNewProductMapper.update(record, new LambdaQueryWrapper<SmsHomeNewProduct>()
+                .in(SmsHomeNewProduct::getId, ids));
     }
 
     @Override
     public List<SmsHomeNewProduct> list(String productName, Integer recommendStatus, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum,pageSize);
-        SmsHomeNewProductExample example = new SmsHomeNewProductExample();
-        SmsHomeNewProductExample.Criteria criteria = example.createCriteria();
+        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<>())
+        LambdaQueryWrapper<SmsHomeNewProduct> wrapper = new LambdaQueryWrapper<>();
         if(!StrUtil.isEmpty(productName)){
-            criteria.andProductNameLike("%"+productName+"%");
+            wrapper.like(SmsHomeNewProduct::getProductName, productName);
         }
         if(recommendStatus!=null){
-            criteria.andRecommendStatusEqualTo(recommendStatus);
+            wrapper.eq(SmsHomeNewProduct::getRecommendStatus, recommendStatus);
         }
-        example.setOrderByClause("sort desc");
-        return homeNewProductMapper.selectByExample(example);
+        wrapper.orderByDesc(SmsHomeNewProduct::getSort);
+        return homeNewProductMapper.selectList(wrapper);
     }
 }

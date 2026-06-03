@@ -1,287 +1,271 @@
 package com.su.mall.search.service.impl;
 
 import cn.hutool.core.collection.ListUtil;
-import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.util.StrUtil;
-import co.elastic.clients.elasticsearch._types.aggregations.*;
-import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
-import co.elastic.clients.elasticsearch._types.query_dsl.*;
-import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
-import co.elastic.clients.util.ObjectBuilder;
 import com.su.mall.search.dao.EsProductDao;
 import com.su.mall.search.domain.EsProduct;
 import com.su.mall.search.domain.EsProductRelatedInfo;
-import com.su.mall.search.repository.EsProductRepository;
 import com.su.mall.search.service.EsProductService;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
-import org.springframework.data.elasticsearch.client.elc.*;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-
 
 /**
  * 搜索商品管理Service实现类
+ * 使用RestHighLevelClient连接Elasticsearch 7.17.3
  * @author Su
  */
 @Service
 public class EsProductServiceImpl implements EsProductService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EsProductServiceImpl.class);
+
     @Autowired
     private EsProductDao productDao;
+
     @Autowired
-    private EsProductRepository productRepository;
-    @Autowired
-    private ElasticsearchTemplate elasticsearchTemplate;
+    private EsClientService esClientService;
+
     @Override
     public int importAll() {
         List<EsProduct> esProductList = productDao.getAllEsProductList(null);
-        Iterable<EsProduct> esProductIterable = productRepository.saveAll(esProductList);
-        Iterator<EsProduct> iterator = esProductIterable.iterator();
-        int result = 0;
-        while (iterator.hasNext()) {
-            result++;
-            iterator.next();
+        if (esProductList.isEmpty()) {
+            return 0;
         }
-        return result;
+
+        try {
+            List<Map<String, Object>> documents = esProductList.stream()
+                    .map(this::convertToMap)
+                    .collect(Collectors.toList());
+            esClientService.bulkIndexDocuments(documents);
+            return documents.size();
+        } catch (IOException e) {
+            LOGGER.error("批量索引失败", e);
+            return 0;
+        }
     }
 
     @Override
     public void delete(Long id) {
-        productRepository.deleteById(id);
+        try {
+            esClientService.deleteDocument(String.valueOf(id));
+        } catch (IOException e) {
+            LOGGER.error("删除文档失败: {}", id, e);
+        }
     }
 
     @Override
     public EsProduct create(Long id) {
-        EsProduct result = null;
         List<EsProduct> esProductList = productDao.getAllEsProductList(id);
-        if (esProductList.size() > 0) {
+        if (!esProductList.isEmpty()) {
             EsProduct esProduct = esProductList.get(0);
-            result = productRepository.save(esProduct);
+            try {
+                Map<String, Object> document = convertToMap(esProduct);
+                esClientService.indexDocument(String.valueOf(esProduct.getId()), document);
+            } catch (IOException e) {
+                LOGGER.error("索引文档失败: {}", id, e);
+            }
+            return esProduct;
         }
-        return result;
+        return null;
     }
 
     @Override
     public void delete(List<Long> ids) {
         if (!CollectionUtils.isEmpty(ids)) {
-            List<EsProduct> esProductList = new ArrayList<>();
             for (Long id : ids) {
-                EsProduct esProduct = new EsProduct();
-                esProduct.setId(id);
-                esProductList.add(esProduct);
+                try {
+                    esClientService.deleteDocument(String.valueOf(id));
+                } catch (IOException e) {
+                    LOGGER.error("删除文档失败: {}", id, e);
+                }
             }
-            productRepository.deleteAll(esProductList);
         }
     }
 
     @Override
     public Page<EsProduct> search(String keyword, Integer pageNum, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNum, pageSize);
-        return productRepository.findByNameOrSubTitleOrKeywords(keyword, keyword, keyword, pageable);
+        try {
+            int from = pageNum * pageSize;
+            SearchHits searchHits = esClientService.simpleSearch(keyword, from, pageSize);
+
+            List<EsProduct> products = new ArrayList<>();
+            for (SearchHit hit : searchHits.getHits()) {
+                EsProduct product = convertFromMap(hit.getSourceAsMap());
+                products.add(product);
+            }
+            // ES7取值：value是成员变量，无括号；显式泛型消除无法推断类型
+            long total = searchHits.getTotalHits().value;
+            return new PageImpl<EsProduct>(products, pageable, total);
+        } catch (IOException e) {
+            LOGGER.error("搜索失败", e);
+            return new PageImpl<EsProduct>(ListUtil.empty(), pageable, 0);
+        }
     }
 
     @Override
-    public Page<EsProduct> search(String keyword, Long brandId, Long productCategoryId, Integer pageNum, Integer pageSize,Integer sort) {
+    public Page<EsProduct> search(String keyword, Long brandId, Long productCategoryId, Integer pageNum, Integer pageSize, Integer sort) {
         Pageable pageable = PageRequest.of(pageNum, pageSize);
-        NativeQueryBuilder nativeQueryBuilder = new NativeQueryBuilder();
-        //分页
-        nativeQueryBuilder.withPageable(pageable);
-        //过滤
-        if (brandId != null || productCategoryId != null) {
-            Query boolQuery = QueryBuilders.bool(builder -> {
-                if (brandId != null) {
-                    builder.must(QueryBuilders.term(b -> b.field("brandId").value(brandId)));
-                }
-                if (productCategoryId != null) {
-                    builder.must(QueryBuilders.term(b -> b.field("productCategoryId").value(productCategoryId)));
-                }
-                return builder;
-            });
-            nativeQueryBuilder.withFilter(boolQuery);
+        try {
+            int from = pageNum * pageSize;
+            SearchHits searchHits = esClientService.search(keyword, brandId, productCategoryId, from, pageSize);
+
+            List<EsProduct> products = new ArrayList<>();
+            for (SearchHit hit : searchHits.getHits()) {
+                EsProduct product = convertFromMap(hit.getSourceAsMap());
+                products.add(product);
+            }
+            long total = searchHits.getTotalHits().value;
+            return new PageImpl<EsProduct>(products, pageable, total);
+        } catch (IOException e) {
+            LOGGER.error("搜索失败", e);
+            return new PageImpl<EsProduct>(ListUtil.empty(), pageable, 0);
         }
-        //搜索
-        if (StrUtil.isEmpty(keyword)) {
-            nativeQueryBuilder.withQuery(QueryBuilders.matchAll(builder -> builder));
-        } else {
-            List<FunctionScore> functionScoreList = new ArrayList<>();
-            functionScoreList.add(new FunctionScore.Builder()
-                    .filter(QueryBuilders.match(builder -> builder.field("name").query(keyword)))
-                    .weight(10.0)
-                    .build());
-            functionScoreList.add(new FunctionScore.Builder()
-                    .filter(QueryBuilders.match(builder -> builder.field("subTitle").query(keyword)))
-                    .weight(5.0)
-                    .build());
-            functionScoreList.add(new FunctionScore.Builder()
-                    .filter(QueryBuilders.match(builder -> builder.field("keywords").query(keyword)))
-                    .weight(2.0)
-                    .build());
-            FunctionScoreQuery.Builder functionScoreQueryBuilder = QueryBuilders.functionScore()
-                    .functions(functionScoreList)
-                    .scoreMode(FunctionScoreMode.Sum)
-                    .minScore(2.0);
-            nativeQueryBuilder.withQuery(builder -> builder.functionScore(functionScoreQueryBuilder.build()));
-        }
-        //排序
-        if(sort==1){
-            //按新品从新到旧
-            nativeQueryBuilder.withSort(Sort.by(Sort.Order.desc("id")));
-        }else if(sort==2){
-            //按销量从高到低
-            nativeQueryBuilder.withSort(Sort.by(Sort.Order.desc("sale")));
-        }else if(sort==3){
-            //按价格从低到高
-            nativeQueryBuilder.withSort(Sort.by(Sort.Order.asc("price")));
-        }else if(sort==4){
-            //按价格从高到低
-            nativeQueryBuilder.withSort(Sort.by(Sort.Order.desc("price")));
-        }
-        //按相关度
-        nativeQueryBuilder.withSort(Sort.by(Sort.Order.desc("_score")));
-        NativeQuery nativeQuery = nativeQueryBuilder.build();
-        LOGGER.info("DSL:{}", nativeQuery.getQuery().toString());
-        SearchHits<EsProduct> searchHits = elasticsearchTemplate.search(nativeQuery, EsProduct.class);
-        if(searchHits.getTotalHits()<=0){
-            return new PageImpl<>(ListUtil.empty(),pageable,0);
-        }
-        List<EsProduct> searchProductList = searchHits.stream().map(SearchHit::getContent).collect(Collectors.toList());
-        return new PageImpl<>(searchProductList,pageable,searchHits.getTotalHits());
     }
 
     @Override
     public Page<EsProduct> recommend(Long id, Integer pageNum, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNum, pageSize);
         List<EsProduct> esProductList = productDao.getAllEsProductList(id);
-        if (esProductList.size() > 0) {
+
+        if (!esProductList.isEmpty()) {
             EsProduct esProduct = esProductList.get(0);
-            String keyword = esProduct.getName();
-            Long brandId = esProduct.getBrandId();
-            Long productCategoryId = esProduct.getProductCategoryId();
-            //构建查询条件
-            NativeQueryBuilder nativeQueryBuilder = new NativeQueryBuilder();
-            //分页
-            nativeQueryBuilder.withPageable(pageable);
-            //用于过滤掉相同的商品
-            nativeQueryBuilder.withFilter(QueryBuilders.bool(build -> build.mustNot(QueryBuilders.term(b->b.field("id").value(id)))));
-            //根据商品标题、品牌、分类进行搜索
-            List<FunctionScore> functionScoreList = new ArrayList<>();
-            functionScoreList.add(new FunctionScore.Builder()
-                    .filter(QueryBuilders.match(builder -> builder.field("name").query(keyword)))
-                    .weight(8.0)
-                    .build());
-            functionScoreList.add(new FunctionScore.Builder()
-                    .filter(QueryBuilders.match(builder -> builder.field("subTitle").query(keyword)))
-                    .weight(2.0)
-                    .build());
-            functionScoreList.add(new FunctionScore.Builder()
-                    .filter(QueryBuilders.match(builder -> builder.field("keywords").query(keyword)))
-                    .weight(2.0)
-                    .build());
-            functionScoreList.add(new FunctionScore.Builder()
-                    .filter(QueryBuilders.match(builder -> builder.field("brandId").query(brandId)))
-                    .weight(5.0)
-                    .build());
-            functionScoreList.add(new FunctionScore.Builder()
-                    .filter(QueryBuilders.match(builder -> builder.field("productCategoryId").query(productCategoryId)))
-                    .weight(3.0)
-                    .build());
-            FunctionScoreQuery.Builder functionScoreQueryBuilder = QueryBuilders.functionScore()
-                    .functions(functionScoreList)
-                    .scoreMode(FunctionScoreMode.Sum)
-                    .minScore(2.0);
-            nativeQueryBuilder.withQuery(builder -> builder.functionScore(functionScoreQueryBuilder.build()));
-            NativeQuery nativeQuery = nativeQueryBuilder.build();
-            LOGGER.info("DSL:{}", nativeQuery.getQuery().toString());
-            SearchHits<EsProduct> searchHits = elasticsearchTemplate.search(nativeQuery, EsProduct.class);
-            if(searchHits.getTotalHits()<=0){
-                return new PageImpl<>(ListUtil.empty(),pageable,0);
-            }
-            List<EsProduct> searchProductList = searchHits.stream().map(SearchHit::getContent).collect(Collectors.toList());
-            return new PageImpl<>(searchProductList,pageable,searchHits.getTotalHits());
+            return search(esProduct.getName(), esProduct.getBrandId(),
+                    esProduct.getProductCategoryId(), pageNum, pageSize, null);
         }
-        return new PageImpl<>(ListUtil.empty());
+        return new PageImpl<EsProduct>(ListUtil.empty(), pageable, 0);
     }
 
     @Override
     public EsProductRelatedInfo searchRelatedInfo(String keyword) {
-        NativeQueryBuilder nativeQueryBuilder = new NativeQueryBuilder();
-        //搜索条件
-        if(StrUtil.isEmpty(keyword)){
-            nativeQueryBuilder.withQuery(QueryBuilders.matchAll(builder -> builder));
-        }else{
-            nativeQueryBuilder.withQuery(QueryBuilders.multiMatch(builder -> builder.fields("name","subTitle","keywords").query(keyword)));
+        EsProductRelatedInfo productRelatedInfo = new EsProductRelatedInfo();
+        try {
+            SearchHits searchHits = esClientService.simpleSearch(keyword, 0, 100);
+
+            Set<String> brandNames = new HashSet<>();
+            Set<String> categoryNames = new HashSet<>();
+            List<EsProductRelatedInfo.ProductAttr> attrList = new ArrayList<>();
+
+            for (SearchHit hit : searchHits.getHits()) {
+                Map<String, Object> source = hit.getSourceAsMap();
+                if (source.containsKey("brandName")) {
+                    brandNames.add(String.valueOf(source.get("brandName")));
+                }
+                if (source.containsKey("productCategoryName")) {
+                    categoryNames.add(String.valueOf(source.get("productCategoryName")));
+                }
+                if (source.containsKey("attrValueList")) {
+                    Object attrValueListObj = source.get("attrValueList");
+                    if (attrValueListObj instanceof List<?>) {
+                        List<?> attrValues = (List<?>) attrValueListObj;
+                        for (Object attrObj : attrValues) {
+                            if (attrObj instanceof Map<?, ?>) {
+                                Map<?, ?> attrMap = (Map<?, ?>) attrObj;
+                                EsProductRelatedInfo.ProductAttr attr = new EsProductRelatedInfo.ProductAttr();
+                                if (attrMap.get("productAttributeId") != null) {
+                                    attr.setAttrId(Long.valueOf(attrMap.get("productAttributeId").toString()));
+                                }
+                                if (attrMap.get("name") != null) {
+                                    attr.setAttrName(String.valueOf(attrMap.get("name")));
+                                }
+                                List<String> values = new ArrayList<>();
+                                if (attrMap.get("value") != null) {
+                                    values.add(String.valueOf(attrMap.get("value")));
+                                }
+                                attr.setAttrValues(values);
+                                attrList.add(attr);
+                            }
+                        }
+                    }
+                }
+            }
+            productRelatedInfo.setBrandNames(new ArrayList<>(brandNames));
+            productRelatedInfo.setProductCategoryNames(new ArrayList<>(categoryNames));
+            productRelatedInfo.setProductAttrs(attrList);
+        } catch (IOException e) {
+            LOGGER.error("搜索相关信息失败", e);
         }
-        //聚合搜索品牌名称
-        nativeQueryBuilder.withAggregation("brandNames",AggregationBuilders.terms(builder -> builder.field("brandName").size(10)));
-        //聚合搜索分类名称
-        nativeQueryBuilder.withAggregation("productCategoryNames",AggregationBuilders.terms(builder -> builder.field("productCategoryName").size(10)));
-        //聚合搜索商品属性，去除type=0的属性
-        Aggregation aggregation = new Aggregation.Builder().nested(builder -> builder.path("attrValueList"))
-                .aggregations("productAttrs",new Aggregation.Builder()
-                        .filter(b->b.term(a->a.field("attrValueList.type").value("1")))
-                        .aggregations("attrIds",new Aggregation.Builder().terms(b->b.field("attrValueList.productAttributeId").size(10))
-                                .aggregations("attrValues",new Aggregation.Builder().terms(b->b.field("attrValueList.value").size(10)).build())
-                                .aggregations("attrNames",new Aggregation.Builder().terms(b->b.field("attrValueList.name").size(10)).build())
-                                .build()).build()).build();
-        nativeQueryBuilder.withAggregation("allAttrValues",aggregation);
-        NativeQuery nativeQuery = nativeQueryBuilder.build();
-        LOGGER.info("DSL:{}", nativeQueryBuilder.getQuery().toString());
-        SearchHits<EsProduct> searchHits = elasticsearchTemplate.search(nativeQuery, EsProduct.class);
-        return convertProductRelatedInfo(searchHits);
+        return productRelatedInfo;
     }
 
     /**
-     * 将返回结果转换为对象
+     * 将EsProduct转换为Map
      */
-    private EsProductRelatedInfo convertProductRelatedInfo(SearchHits<EsProduct> response) {
-        EsProductRelatedInfo productRelatedInfo = new EsProductRelatedInfo();
-        Map<String, ElasticsearchAggregation> esAggregationMap = ((ElasticsearchAggregations) response.getAggregations()).aggregationsAsMap();
-        //设置品牌
-        ElasticsearchAggregation brandNames = esAggregationMap.get("brandNames");
-        List<String> brandNameList = new ArrayList<>();
-        List<StringTermsBucket> brandNameBuckets = ((StringTermsAggregate) brandNames.aggregation().getAggregate()._get()).buckets().array();
-        for(int i = 0; i<brandNameBuckets.size(); i++){
-            brandNameList.add(brandNameBuckets.get(i).key().stringValue());
+    private Map<String, Object> convertToMap(EsProduct product) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", product.getId());
+        if (product.getProductSn() != null) map.put("productSn", product.getProductSn());
+        if (product.getBrandId() != null) map.put("brandId", product.getBrandId());
+        if (product.getBrandName() != null) map.put("brandName", product.getBrandName());
+        if (product.getProductCategoryId() != null) map.put("productCategoryId", product.getProductCategoryId());
+        if (product.getProductCategoryName() != null) map.put("productCategoryName", product.getProductCategoryName());
+        if (product.getPic() != null) map.put("pic", product.getPic());
+        if (product.getName() != null) map.put("name", product.getName());
+        if (product.getSubTitle() != null) map.put("subTitle", product.getSubTitle());
+        if (product.getKeywords() != null) map.put("keywords", product.getKeywords());
+        if (product.getPrice() != null) map.put("price", product.getPrice());
+        if (product.getSale() != null) map.put("sale", product.getSale());
+        if (product.getNewStatus() != null) map.put("newStatus", product.getNewStatus());
+        if (product.getRecommandStatus() != null) map.put("recommandStatus", product.getRecommandStatus());
+        if (product.getStock() != null) map.put("stock", product.getStock());
+        if (product.getPromotionType() != null) map.put("promotionType", product.getPromotionType());
+        if (product.getSort() != null) map.put("sort", product.getSort());
+        if (product.getAttrValueList() != null) {
+            List<Map<String, Object>> attrMaps = product.getAttrValueList().stream()
+                    .map(attr -> {
+                        Map<String, Object> attrMap = new HashMap<>();
+                        attrMap.put("value", attr.getValue());
+                        attrMap.put("name", attr.getName());
+                        if (attr.getProductAttributeId() != null) {
+                            attrMap.put("productAttributeId", attr.getProductAttributeId());
+                        }
+                        if (attr.getType() != null) {
+                            attrMap.put("type", attr.getType());
+                        }
+                        return attrMap;
+                    })
+                    .collect(Collectors.toList());
+            map.put("attrValueList", attrMaps);
         }
-        productRelatedInfo.setBrandNames(brandNameList);
-        //设置分类
-        ElasticsearchAggregation productCategoryNames = esAggregationMap.get("productCategoryNames");
-        List<String> productCategoryNameList = new ArrayList<>();
-        List<StringTermsBucket> productCategoryNameBuckets = ((StringTermsAggregate) productCategoryNames.aggregation().getAggregate()._get()).buckets().array();
-        for(int i = 0; i<productCategoryNameBuckets.size(); i++){
-            productCategoryNameList.add(productCategoryNameBuckets.get(i).key().stringValue());
+        return map;
+    }
+
+    /**
+     * 将Map转换为EsProduct
+     */
+    private EsProduct convertFromMap(Map<String, Object> map) {
+        EsProduct product = new EsProduct();
+        if (map.get("id") != null) {
+            product.setId(Long.valueOf(map.get("id").toString()));
         }
-        productRelatedInfo.setProductCategoryNames(productCategoryNameList);
-        //设置参数
-        ElasticsearchAggregation productAttrs = esAggregationMap.get("allAttrValues");
-        List<LongTermsBucket> attrIdBuckets = ((LongTermsAggregate) ((FilterAggregate) ((NestedAggregate) productAttrs.aggregation().getAggregate()._get()).aggregations().get("productAttrs")._get()).aggregations().get("attrIds")._get()).buckets().array();
-        List<EsProductRelatedInfo.ProductAttr> attrList = new ArrayList<>();
-        for (LongTermsBucket item : attrIdBuckets) {
-            EsProductRelatedInfo.ProductAttr attr = new EsProductRelatedInfo.ProductAttr();
-            attr.setAttrId(item.key());
-            List<String> attrValueList = new ArrayList<>();
-            List<StringTermsBucket> attrValues = ((StringTermsAggregate) item.aggregations().get("attrValues")._get()).buckets().array();
-            List<StringTermsBucket> attrNames = ((StringTermsAggregate) item.aggregations().get("attrNames")._get()).buckets().array();
-            for (StringTermsBucket attrValue : attrValues) {
-                attrValueList.add(attrValue.key().stringValue());
-            }
-            attr.setAttrValues(attrValueList);
-            if(!CollectionUtils.isEmpty(attrNames)){
-                String attrName = attrNames.get(0).key().stringValue();
-                attr.setAttrName(attrName);
-            }
-            attrList.add(attr);
-        }
-        productRelatedInfo.setProductAttrs(attrList);
-        return productRelatedInfo;
+        if (map.get("productSn") != null) product.setProductSn(String.valueOf(map.get("productSn")));
+        if (map.get("brandId") != null) product.setBrandId(Long.valueOf(map.get("brandId").toString()));
+        if (map.get("brandName") != null) product.setBrandName(String.valueOf(map.get("brandName")));
+        if (map.get("productCategoryId") != null) product.setProductCategoryId(Long.valueOf(map.get("productCategoryId").toString()));
+        if (map.get("productCategoryName") != null) product.setProductCategoryName(String.valueOf(map.get("productCategoryName")));
+        if (map.get("pic") != null) product.setPic(String.valueOf(map.get("pic")));
+        if (map.get("name") != null) product.setName(String.valueOf(map.get("name")));
+        if (map.get("subTitle") != null) product.setSubTitle(String.valueOf(map.get("subTitle")));
+        if (map.get("keywords") != null) product.setKeywords(String.valueOf(map.get("keywords")));
+        if (map.get("price") != null) product.setPrice(new BigDecimal(map.get("price").toString()));
+        if (map.get("sale") != null) product.setSale(Integer.valueOf(map.get("sale").toString()));
+        if (map.get("newStatus") != null) product.setNewStatus(Integer.valueOf(map.get("newStatus").toString()));
+        if (map.get("recommandStatus") != null) product.setRecommandStatus(Integer.valueOf(map.get("recommandStatus").toString()));
+        if (map.get("stock") != null) product.setStock(Integer.valueOf(map.get("stock").toString()));
+        if (map.get("promotionType") != null) product.setPromotionType(Integer.valueOf(map.get("promotionType").toString()));
+        if (map.get("sort") != null) product.setSort(Integer.valueOf(map.get("sort").toString()));
+        return product;
     }
 }

@@ -1,10 +1,10 @@
 package com.su.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.su.mall.mapper.SmsFlashPromotionMapper;
 import com.su.mall.model.SmsFlashPromotion;
-import com.su.mall.model.SmsFlashPromotionExample;
 import com.su.mall.service.SmsFlashPromotionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,34 +30,38 @@ public class SmsFlashPromotionServiceImpl implements SmsFlashPromotionService {
     @Override
     public int update(Long id, SmsFlashPromotion flashPromotion) {
         flashPromotion.setId(id);
-        return flashPromotionMapper.updateByPrimaryKey(flashPromotion);
+        return flashPromotionMapper.updateById(flashPromotion);
     }
 
     @Override
     public int delete(Long id) {
-        return flashPromotionMapper.deleteByPrimaryKey(id);
+        // ✅ 改造：deleteByPrimaryKey → deleteById
+        return flashPromotionMapper.deleteById(id);
     }
 
     @Override
     public int updateStatus(Long id, Integer status) {
+        // ✅ 改造：updateByPrimaryKeySelective → updateById
         SmsFlashPromotion flashPromotion = new SmsFlashPromotion();
         flashPromotion.setId(id);
         flashPromotion.setStatus(status);
-        return flashPromotionMapper.updateByPrimaryKeySelective(flashPromotion);
+        return flashPromotionMapper.updateById(flashPromotion);
     }
 
     @Override
     public SmsFlashPromotion getItem(Long id) {
-        return flashPromotionMapper.selectByPrimaryKey(id);
+        // ✅ 改造：selectByPrimaryKey → selectById
+        return flashPromotionMapper.selectById(id);
     }
 
     @Override
     public List<SmsFlashPromotion> list(String keyword, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum, pageSize);
-        SmsFlashPromotionExample example = new SmsFlashPromotionExample();
+        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<>())
+        LambdaQueryWrapper<SmsFlashPromotion> wrapper = new LambdaQueryWrapper<>();
         if (!StrUtil.isEmpty(keyword)) {
-            example.createCriteria().andTitleLike("%" + keyword + "%");
+            wrapper.like(SmsFlashPromotion::getTitle, keyword);
         }
-        return flashPromotionMapper.selectByExample(example);
+        return flashPromotionMapper.selectList(wrapper);
     }
 }

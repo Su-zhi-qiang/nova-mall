@@ -1,10 +1,10 @@
 package com.su.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.su.mall.mapper.SmsHomeAdvertiseMapper;
 import com.su.mall.model.SmsHomeAdvertise;
-import com.su.mall.model.SmsHomeAdvertiseExample;
 import com.su.mall.service.SmsHomeAdvertiseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,40 +33,44 @@ public class SmsHomeAdvertiseServiceImpl implements SmsHomeAdvertiseService {
 
     @Override
     public int delete(List<Long> ids) {
-        SmsHomeAdvertiseExample example = new SmsHomeAdvertiseExample();
-        example.createCriteria().andIdIn(ids);
-        return advertiseMapper.deleteByExample(example);
+        // ✅ 改造：deleteByExample → delete(new LambdaQueryWrapper<>())
+        return advertiseMapper.delete(new LambdaQueryWrapper<SmsHomeAdvertise>()
+                .in(SmsHomeAdvertise::getId, ids));
     }
 
     @Override
     public int updateStatus(Long id, Integer status) {
+        // ✅ 改造：updateByPrimaryKeySelective → updateById
         SmsHomeAdvertise record = new SmsHomeAdvertise();
         record.setId(id);
         record.setStatus(status);
-        return advertiseMapper.updateByPrimaryKeySelective(record);
+        return advertiseMapper.updateById(record);
     }
 
     @Override
     public SmsHomeAdvertise getItem(Long id) {
-        return advertiseMapper.selectByPrimaryKey(id);
+        // ✅ 改造：selectByPrimaryKey → selectById
+        return advertiseMapper.selectById(id);
     }
 
     @Override
     public int update(Long id, SmsHomeAdvertise advertise) {
+        // ✅ 改造：updateByPrimaryKeySelective → updateById
         advertise.setId(id);
-        return advertiseMapper.updateByPrimaryKeySelective(advertise);
+        return advertiseMapper.updateById(advertise);
     }
 
     @Override
     public List<SmsHomeAdvertise> list(String name, Integer type, String endTime, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum, pageSize);
-        SmsHomeAdvertiseExample example = new SmsHomeAdvertiseExample();
-        SmsHomeAdvertiseExample.Criteria criteria = example.createCriteria();
+        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<>())
+        LambdaQueryWrapper<SmsHomeAdvertise> wrapper = new LambdaQueryWrapper<>();
+        SmsHomeAdvertise temp = new SmsHomeAdvertise();
         if (!StrUtil.isEmpty(name)) {
-            criteria.andNameLike("%" + name + "%");
+            wrapper.like(SmsHomeAdvertise::getName, name);
         }
         if (type != null) {
-            criteria.andTypeEqualTo(type);
+            wrapper.eq(SmsHomeAdvertise::getType, type);
         }
         if (!StrUtil.isEmpty(endTime)) {
             String startStr = endTime + " 00:00:00";
@@ -85,10 +89,10 @@ public class SmsHomeAdvertiseServiceImpl implements SmsHomeAdvertiseService {
                 e.printStackTrace();
             }
             if (start != null && end != null) {
-                criteria.andEndTimeBetween(start, end);
+                wrapper.between(SmsHomeAdvertise::getEndTime, start, end);
             }
         }
-        example.setOrderByClause("sort desc");
-        return advertiseMapper.selectByExample(example);
+        wrapper.orderByDesc(SmsHomeAdvertise::getSort);
+        return advertiseMapper.selectList(wrapper);
     }
 }

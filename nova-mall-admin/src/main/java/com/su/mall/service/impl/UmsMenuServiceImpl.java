@@ -1,5 +1,6 @@
 package com.su.mall.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.su.mall.dto.UmsMenuNode;
 import com.su.mall.mapper.UmsMenuMapper;
@@ -38,7 +39,8 @@ public class UmsMenuServiceImpl implements UmsMenuService {
             umsMenu.setLevel(0);
         } else {
             //有父菜单时选择根据父菜单level设置
-            UmsMenu parentMenu = menuMapper.selectByPrimaryKey(umsMenu.getParentId());
+            // ✅ 改造：selectByPrimaryKey → selectById
+            UmsMenu parentMenu = menuMapper.selectById(umsMenu.getParentId());
             if (parentMenu != null) {
                 umsMenu.setLevel(parentMenu.getLevel() + 1);
             } else {
@@ -51,31 +53,35 @@ public class UmsMenuServiceImpl implements UmsMenuService {
     public int update(Long id, UmsMenu umsMenu) {
         umsMenu.setId(id);
         updateLevel(umsMenu);
-        return menuMapper.updateByPrimaryKeySelective(umsMenu);
+        // ✅ 改造：updateByPrimaryKeySelective → updateById
+        return menuMapper.updateById(umsMenu);
     }
 
     @Override
     public UmsMenu getItem(Long id) {
-        return menuMapper.selectByPrimaryKey(id);
+        // ✅ 改造：selectByPrimaryKey → selectById
+        return menuMapper.selectById(id);
     }
 
     @Override
     public int delete(Long id) {
-        return menuMapper.deleteByPrimaryKey(id);
+        // ✅ 改造：deleteByPrimaryKey → deleteById
+        return menuMapper.deleteById(id);
     }
 
     @Override
     public List<UmsMenu> list(Long parentId, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum, pageSize);
-        UmsMenuExample example = new UmsMenuExample();
-        example.setOrderByClause("sort desc");
-        example.createCriteria().andParentIdEqualTo(parentId);
-        return menuMapper.selectByExample(example);
+        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
+        return menuMapper.selectList(new LambdaQueryWrapper<UmsMenu>()
+                .eq(UmsMenu::getParentId, parentId)
+                .orderByDesc(UmsMenu::getSort));
     }
 
     @Override
     public List<UmsMenuNode> treeList() {
-        List<UmsMenu> menuList = menuMapper.selectByExample(new UmsMenuExample());
+        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
+        List<UmsMenu> menuList = menuMapper.selectList(new LambdaQueryWrapper<>());
         List<UmsMenuNode> result = menuList.stream()
                 .filter(menu -> menu.getParentId().equals(0L))
                 .map(menu -> covertMenuNode(menu, menuList))
@@ -88,7 +94,8 @@ public class UmsMenuServiceImpl implements UmsMenuService {
         UmsMenu umsMenu = new UmsMenu();
         umsMenu.setId(id);
         umsMenu.setHidden(hidden);
-        return menuMapper.updateByPrimaryKeySelective(umsMenu);
+        // ✅ 改造：updateByPrimaryKeySelective → updateById
+        return menuMapper.updateById(umsMenu);
     }
 
     /**

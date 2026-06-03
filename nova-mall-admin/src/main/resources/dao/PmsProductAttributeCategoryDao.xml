@@ -1,8 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.su.mall.dao.PmsProductAttributeCategoryDao">
-    <resultMap id="getListWithAttrMap" type="com.su.mall.dto.PmsProductAttributeCategoryItem" extends="com.su.mall.mapper.PmsProductAttributeCategoryMapper.BaseResultMap">
-        <collection property="productAttributeList" columnPrefix="attr_" resultMap="com.su.mall.mapper.PmsProductAttributeMapper.BaseResultMap">
+    <resultMap id="getListWithAttrMap" type="com.su.mall.dto.PmsProductAttributeCategoryItem">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="attributeCount" jdbcType="INTEGER" property="attributeCount"/>
+        <result column="paramCount" jdbcType="INTEGER" property="paramCount"/>
+        <collection property="productAttributeList" columnPrefix="attr_" ofType="com.su.mall.model.PmsProductAttribute">
+            <id column="id" jdbcType="BIGINT" property="id"/>
+            <result column="productAttributeCategoryId" jdbcType="BIGINT" property="productAttributeCategoryId"/>
+            <result column="name" jdbcType="VARCHAR" property="name"/>
+            <result column="selectType" jdbcType="INTEGER" property="selectType"/>
+            <result column="inputType" jdbcType="INTEGER" property="inputType"/>
+            <result column="inputList" jdbcType="VARCHAR" property="inputList"/>
+            <result column="sort" jdbcType="INTEGER" property="sort"/>
+            <result column="filterType" jdbcType="INTEGER" property="filterType"/>
+            <result column="searchType" jdbcType="INTEGER" property="searchType"/>
+            <result column="relatedStatus" jdbcType="INTEGER" property="relatedStatus"/>
+            <result column="handAddStatus" jdbcType="INTEGER" property="handAddStatus"/>
+            <result column="type" jdbcType="INTEGER" property="type"/>
         </collection>
     </resultMap>
     <select id="getListWithAttr" resultMap="getListWithAttrMap">

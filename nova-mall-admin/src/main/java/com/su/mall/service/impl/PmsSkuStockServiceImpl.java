@@ -1,10 +1,10 @@
 package com.su.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.su.mall.dao.PmsSkuStockDao;
 import com.su.mall.mapper.PmsSkuStockMapper;
 import com.su.mall.model.PmsSkuStock;
-import com.su.mall.model.PmsSkuStockExample;
 import com.su.mall.service.PmsSkuStockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,12 +25,13 @@ public class PmsSkuStockServiceImpl implements PmsSkuStockService {
 
     @Override
     public List<PmsSkuStock> getList(Long pid, String keyword) {
-        PmsSkuStockExample example = new PmsSkuStockExample();
-        PmsSkuStockExample.Criteria criteria = example.createCriteria().andProductIdEqualTo(pid);
+        // ✅ 改造：selectByExample → selectList
+        LambdaQueryWrapper<PmsSkuStock> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(PmsSkuStock::getProductId, pid);
         if (!StrUtil.isEmpty(keyword)) {
-            criteria.andSkuCodeLike("%" + keyword + "%");
+            wrapper.like(PmsSkuStock::getSkuCode, keyword);
         }
-        return skuStockMapper.selectByExample(example);
+        return skuStockMapper.selectList(wrapper);
     }
 
     @Override

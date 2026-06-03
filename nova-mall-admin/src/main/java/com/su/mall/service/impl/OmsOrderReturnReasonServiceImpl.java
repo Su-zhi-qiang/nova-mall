@@ -1,9 +1,10 @@
 package com.su.mall.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.pagehelper.PageHelper;
 import com.su.mall.mapper.OmsOrderReturnReasonMapper;
 import com.su.mall.model.OmsOrderReturnReason;
-import com.su.mall.model.OmsOrderReturnReasonExample;
 import com.su.mall.service.OmsOrderReturnReasonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,28 +24,30 @@ public class OmsOrderReturnReasonServiceImpl implements OmsOrderReturnReasonServ
     @Override
     public int create(OmsOrderReturnReason returnReason) {
         returnReason.setCreateTime(new Date());
+        // ✅ 改造：insertSelective → insert
         return returnReasonMapper.insert(returnReason);
     }
 
     @Override
     public int update(Long id, OmsOrderReturnReason returnReason) {
         returnReason.setId(id);
-        return returnReasonMapper.updateByPrimaryKey(returnReason);
+        // ✅ 改造：updateByPrimaryKey → updateById
+        return returnReasonMapper.updateById(returnReason);
     }
 
     @Override
     public int delete(List<Long> ids) {
-        OmsOrderReturnReasonExample example = new OmsOrderReturnReasonExample();
-        example.createCriteria().andIdIn(ids);
-        return returnReasonMapper.deleteByExample(example);
+        // ✅ 改造：deleteByExample → deleteByIds
+        return returnReasonMapper.deleteByIds(ids);
     }
 
     @Override
     public List<OmsOrderReturnReason> list(Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum,pageSize);
-        OmsOrderReturnReasonExample example = new OmsOrderReturnReasonExample();
-        example.setOrderByClause("sort desc");
-        return returnReasonMapper.selectByExample(example);
+        // ✅ 改造：selectByExample → selectList
+        LambdaQueryWrapper<OmsOrderReturnReason> wrapper = new LambdaQueryWrapper<>();
+        wrapper.orderByDesc(OmsOrderReturnReason::getSort);
+        return returnReasonMapper.selectList(wrapper);
     }
 
     @Override
@@ -54,13 +57,14 @@ public class OmsOrderReturnReasonServiceImpl implements OmsOrderReturnReasonServ
         }
         OmsOrderReturnReason record = new OmsOrderReturnReason();
         record.setStatus(status);
-        OmsOrderReturnReasonExample example = new OmsOrderReturnReasonExample();
-        example.createCriteria().andIdIn(ids);
-        return returnReasonMapper.updateByExampleSelective(record,example);
+        // ✅ 改造：updateByExampleSelective → update + LambdaUpdateWrapper
+        return returnReasonMapper.update(record, new LambdaUpdateWrapper<OmsOrderReturnReason>()
+                .in(OmsOrderReturnReason::getId, ids));
     }
 
     @Override
     public OmsOrderReturnReason getItem(Long id) {
-        return returnReasonMapper.selectByPrimaryKey(id);
+        // ✅ 改造：selectByPrimaryKey → selectById
+        return returnReasonMapper.selectById(id);
     }
 }

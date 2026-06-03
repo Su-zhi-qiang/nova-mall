@@ -1,8 +1,8 @@
 package com.su.mall.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.su.mall.mapper.UmsResourceCategoryMapper;
 import com.su.mall.model.UmsResourceCategory;
-import com.su.mall.model.UmsResourceCategoryExample;
 import com.su.mall.service.UmsResourceCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,9 +21,8 @@ public class UmsResourceCategoryServiceImpl implements UmsResourceCategoryServic
 
     @Override
     public List<UmsResourceCategory> listAll() {
-        UmsResourceCategoryExample example = new UmsResourceCategoryExample();
-        example.setOrderByClause("sort desc");
-        return resourceCategoryMapper.selectByExample(example);
+        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
+        return resourceCategoryMapper.selectList(new LambdaQueryWrapper<UmsResourceCategory>().orderByDesc(UmsResourceCategory::getSort));
     }
 
     @Override
@@ -35,11 +34,13 @@ public class UmsResourceCategoryServiceImpl implements UmsResourceCategoryServic
     @Override
     public int update(Long id, UmsResourceCategory umsResourceCategory) {
         umsResourceCategory.setId(id);
-        return resourceCategoryMapper.updateByPrimaryKeySelective(umsResourceCategory);
+        // ✅ 改造：updateByPrimaryKeySelective → updateById
+        return resourceCategoryMapper.updateById(umsResourceCategory);
     }
 
     @Override
     public int delete(Long id) {
-        return resourceCategoryMapper.deleteByPrimaryKey(id);
+        // ✅ 改造：deleteByPrimaryKey → deleteById
+        return resourceCategoryMapper.deleteById(id);
     }
 }

@@ -1,45 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.su.mall.dao.PmsProductDao">
-    <resultMap id="updateInfoMap" type="com.su.mall.dto.PmsProductResult" extends="com.su.mall.mapper.PmsProductMapper.ResultMapWithBLOBs">
-        <result column="cateParentId" jdbcType="BIGINT" property="cateParentId" />
-        <collection property="productLadderList" columnPrefix="ladder_" resultMap="com.su.mall.mapper.PmsProductLadderMapper.BaseResultMap">
-        </collection>
-        <collection property="productFullReductionList" columnPrefix="full_" resultMap="com.su.mall.mapper.PmsProductFullReductionMapper.BaseResultMap">
-        </collection>
-        <collection property="memberPriceList" columnPrefix="member_" resultMap="com.su.mall.mapper.PmsMemberPriceMapper.BaseResultMap">
-        </collection>
-        <collection property="skuStockList" columnPrefix="sku_" resultMap="com.su.mall.mapper.PmsSkuStockMapper.BaseResultMap">
-        </collection>
-        <collection property="productAttributeValueList" columnPrefix="attribute_" resultMap="com.su.mall.mapper.PmsProductAttributeValueMapper.BaseResultMap">
-        </collection>
-        <collection property="subjectProductRelationList" column="{productId=id}" select="selectSubjectProductRelationByProductId"/>
-        <collection property="prefrenceAreaProductRelationList" column="{productId=id}" select="selectPrefrenceAreaProductRelationByProductId"/>
-
+    <resultMap id="updateInfoMap" type="com.su.mall.dto.PmsProductResult">
+        <!-- PmsProduct 所有字段 -->
+        <id column="id" property="id"/>
+        <result column="brand_id" property="brandId"/>
+        <result column="product_category_id" property="productCategoryId"/>
+        <result column="name" property="name"/>
+        <result column="pic" property="pic"/>
+        <result column="product_sn" property="productSn"/>
+        <result column="price" property="price"/>
+        <result column="stock" property="stock"/>
+        <result column="sale" property="sale"/>
+        <result column="description" property="description"/>
+        <result column="related_url" property="relatedUrl"/>
+        <result column="product_attribute_category_id" property="productAttributeCategoryId"/>
+        <result column="description" property="description"/>
+        <result column="content" property="content"/>
+        <result column="coupon_id" property="couponId"/>
+        <result column="gift_point" property="giftPoint"/>
+        <result column="use_minimum_meet_price" property="useMinimumMeetPrice"/>
+        <result column="meets_condition_coupon_count" property="meetsConditionCouponCount"/>
+        <result column="publish_status" property="publishStatus"/>
+        <result column="recommend_status" property="recommendStatus"/>
+        <result column="new_status" property="newStatus"/>
+        <result column="verify_status" property="verifyStatus"/>
+        <result column="album_pics" property="albumPics"/>
+        <result column="cateParentId" property="cateParentId"/>
+        
+        <!-- 移除对旧 MBG resultMap 的引用，使用 select 查询 -->
+        <collection property="productLadderList" column="id" select="selectProductLadderByProductId"/>
+        <collection property="productFullReductionList" column="id" select="selectProductFullReductionByProductId"/>
+        <collection property="memberPriceList" column="id" select="selectMemberPriceByProductId"/>
+        <collection property="skuStockList" column="id" select="selectSkuStockByProductId"/>
+        <collection property="productAttributeValueList" column="id" select="selectProductAttributeValueByProductId"/>
+        <collection property="subjectProductRelationList" column="id" select="selectSubjectProductRelationByProductId"/>
+        <collection property="prefrenceAreaProductRelationList" column="id" select="selectPrefrenceAreaProductRelationByProductId"/>
     </resultMap>
 
     <select id="getUpdateInfo" resultMap="updateInfoMap">
-        SELECT *,
-            pc.parent_id cateParentId,
-            l.id ladder_id,l.product_id ladder_product_id,l.discount ladder_discount,l.count ladder_count,l.price ladder_price,
-            pf.id full_id,pf.product_id full_product_id,pf.full_price full_full_price,pf.reduce_price full_reduce_price,
-            m.id member_id,m.product_id member_product_id,m.member_level_id member_member_level_id,m.member_price member_member_price,m.member_level_name member_member_level_name,
-            s.id sku_id,s.product_id sku_product_id,s.price sku_price,s.promotion_price sku_promotion_price,s.low_stock sku_low_stock,s.pic sku_pic,s.sale sku_sale,s.sku_code sku_sku_code,s.stock sku_stock,s.sp_data sku_sp_data,
-            a.id attribute_id,a.product_id attribute_product_id,a.product_attribute_id attribute_product_attribute_id,a.value attribute_value
+        SELECT p.*,
+            pc.parent_id cateParentId
         FROM pms_product p
         LEFT JOIN pms_product_category pc on pc.id = p.product_category_id
-        LEFT JOIN pms_product_ladder l ON p.id = l.product_id
-        LEFT JOIN pms_product_full_reduction pf ON pf.product_id=p.id
-        LEFT JOIN pms_member_price m ON m.product_id = p.id
-        LEFT JOIN pms_sku_stock s ON s.product_id = p.id
-        LEFT JOIN pms_product_attribute_value a ON a.product_id=p.id
         WHERE p.id=#{id};
     </select>
-    <select id="selectSubjectProductRelationByProductId" resultMap="com.su.mall.mapper.CmsSubjectProductRelationMapper.BaseResultMap">
-        select * from cms_subject_product_relation where product_id=#{productId}
-    </select>
-    <select id="selectPrefrenceAreaProductRelationByProductId" resultMap="com.su.mall.mapper.CmsPrefrenceAreaProductRelationMapper.BaseResultMap">
-        select * from cms_prefrence_area_product_relation where product_id=#{productId}
-    </select>
 
+    <!-- 使用 resultType 替代 resultMap -->
+    <select id="selectProductLadderByProductId" resultType="com.su.mall.model.PmsProductLadder">
+        SELECT * FROM pms_product_ladder WHERE product_id = #{productId}
+    </select>
+    
+    <select id="selectProductFullReductionByProductId" resultType="com.su.mall.model.PmsProductFullReduction">
+        SELECT * FROM pms_product_full_reduction WHERE product_id = #{productId}
+    </select>
+    
+    <select id="selectMemberPriceByProductId" resultType="com.su.mall.model.PmsMemberPrice">
+        SELECT * FROM pms_member_price WHERE product_id = #{productId}
+    </select>
+    
+    <select id="selectSkuStockByProductId" resultType="com.su.mall.model.PmsSkuStock">
+        SELECT * FROM pms_sku_stock WHERE product_id = #{productId}
+    </select>
+    
+    <select id="selectProductAttributeValueByProductId" resultType="com.su.mall.model.PmsProductAttributeValue">
+        SELECT * FROM pms_product_attribute_value WHERE product_id = #{productId}
+    </select>
+    
+    <select id="selectSubjectProductRelationByProductId" resultType="com.su.mall.model.CmsSubjectProductRelation">
+        SELECT * FROM cms_subject_product_relation WHERE product_id = #{productId}
+    </select>
+    
+    <select id="selectPrefrenceAreaProductRelationByProductId" resultType="com.su.mall.model.CmsPrefrenceAreaProductRelation">
+        SELECT * FROM cms_prefrence_area_product_relation WHERE product_id = #{productId}
+    </select>
 </mapper>

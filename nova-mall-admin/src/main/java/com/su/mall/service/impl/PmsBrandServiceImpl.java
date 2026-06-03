@@ -1,14 +1,14 @@
 package com.su.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.pagehelper.PageHelper;
 import com.su.mall.dto.PmsBrandParam;
 import com.su.mall.mapper.PmsBrandMapper;
 import com.su.mall.mapper.PmsProductMapper;
 import com.su.mall.model.PmsBrand;
-import com.su.mall.model.PmsBrandExample;
 import com.su.mall.model.PmsProduct;
-import com.su.mall.model.PmsProductExample;
 import com.su.mall.service.PmsBrandService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,8 @@ public class PmsBrandServiceImpl implements PmsBrandService {
 
     @Override
     public List<PmsBrand> listAllBrand() {
-        return brandMapper.selectByExample(new PmsBrandExample());
+        // ✅ 改造：selectList 替代 selectByExample
+        return brandMapper.selectList(new LambdaQueryWrapper<PmsBrand>());
     }
 
     @Override
@@ -40,7 +41,8 @@ public class PmsBrandServiceImpl implements PmsBrandService {
         if (StrUtil.isEmpty(pmsBrand.getFirstLetter())) {
             pmsBrand.setFirstLetter(pmsBrand.getName().substring(0, 1));
         }
-        return brandMapper.insertSelective(pmsBrand);
+        // ✅ 改造：insert 替代 insertSelective
+        return brandMapper.insert(pmsBrand);
     }
 
     @Override
@@ -55,59 +57,57 @@ public class PmsBrandServiceImpl implements PmsBrandService {
         //更新品牌时要更新商品中的品牌名称
         PmsProduct product = new PmsProduct();
         product.setBrandName(pmsBrand.getName());
-        PmsProductExample example = new PmsProductExample();
-        example.createCriteria().andBrandIdEqualTo(id);
-        productMapper.updateByExampleSelective(product,example);
-        return brandMapper.updateByPrimaryKeySelective(pmsBrand);
+        // ✅ 改造：LambdaQueryWrapper 替代 Example
+        LambdaQueryWrapper<PmsProduct> productWrapper = new LambdaQueryWrapper<>();
+        productWrapper.eq(PmsProduct::getBrandId, id);
+        productMapper.update(product, productWrapper);
+        // ✅ 改造：updateById 替代 updateByPrimaryKeySelective
+        return brandMapper.updateById(pmsBrand);
     }
 
     @Override
     public int deleteBrand(Long id) {
-        return brandMapper.deleteByPrimaryKey(id);
+        // ✅ 改造：deleteById 替代 deleteByPrimaryKey
+        return brandMapper.deleteById(id);
     }
 
     @Override
     public int deleteBrand(List<Long> ids) {
-        PmsBrandExample pmsBrandExample = new PmsBrandExample();
-        pmsBrandExample.createCriteria().andIdIn(ids);
-        return brandMapper.deleteByExample(pmsBrandExample);
+        // ✅ 改造：delete 替代 deleteByExample
+        return brandMapper.delete(new LambdaQueryWrapper<PmsBrand>().in(PmsBrand::getId, ids));
     }
 
     @Override
     public List<PmsBrand> listBrand(String keyword, Integer showStatus, int pageNum, int pageSize) {
         PageHelper.startPage(pageNum, pageSize);
-        PmsBrandExample pmsBrandExample = new PmsBrandExample();
-        pmsBrandExample.setOrderByClause("sort desc");
-        PmsBrandExample.Criteria criteria = pmsBrandExample.createCriteria();
-        if (!StrUtil.isEmpty(keyword)) {
-            criteria.andNameLike("%" + keyword + "%");
-        }
-        if(showStatus!=null){
-            criteria.andShowStatusEqualTo(showStatus);
-        }
-        return brandMapper.selectByExample(pmsBrandExample);
+        // ✅ 改造：LambdaQueryWrapper 替代 Example
+        return brandMapper.selectList(
+            new LambdaQueryWrapper<PmsBrand>()
+                .like(!StrUtil.isEmpty(keyword), PmsBrand::getName, keyword)
+                .eq(showStatus != null, PmsBrand::getShowStatus, showStatus)
+                .orderByDesc(PmsBrand::getSort)
+        );
     }
 
     @Override
     public PmsBrand getBrand(Long id) {
-        return brandMapper.selectByPrimaryKey(id);
+        // ✅ 改造：selectById 替代 selectByPrimaryKey
+        return brandMapper.selectById(id);
     }
 
     @Override
     public int updateShowStatus(List<Long> ids, Integer showStatus) {
-        PmsBrand pmsBrand = new PmsBrand();
-        pmsBrand.setShowStatus(showStatus);
-        PmsBrandExample pmsBrandExample = new PmsBrandExample();
-        pmsBrandExample.createCriteria().andIdIn(ids);
-        return brandMapper.updateByExampleSelective(pmsBrand, pmsBrandExample);
+        // ✅ 改造：update + LambdaQueryWrapper 替代 updateByExampleSelective
+        PmsBrand brand = new PmsBrand();
+        brand.setShowStatus(showStatus);
+        return brandMapper.update(brand, new LambdaQueryWrapper<PmsBrand>().in(PmsBrand::getId, ids));
     }
 
     @Override
     public int updateFactoryStatus(List<Long> ids, Integer factoryStatus) {
-        PmsBrand pmsBrand = new PmsBrand();
-        pmsBrand.setFactoryStatus(factoryStatus);
-        PmsBrandExample pmsBrandExample = new PmsBrandExample();
-        pmsBrandExample.createCriteria().andIdIn(ids);
-        return brandMapper.updateByExampleSelective(pmsBrand, pmsBrandExample);
+        // ✅ 改造：update + LambdaQueryWrapper 替代 updateByExampleSelective
+        PmsBrand brand = new PmsBrand();
+        brand.setFactoryStatus(factoryStatus);
+        return brandMapper.update(brand, new LambdaQueryWrapper<PmsBrand>().in(PmsBrand::getId, ids));
     }
 }

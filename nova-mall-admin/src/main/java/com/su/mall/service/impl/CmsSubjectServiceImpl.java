@@ -1,10 +1,10 @@
 package com.su.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.su.mall.mapper.CmsSubjectMapper;
 import com.su.mall.model.CmsSubject;
-import com.su.mall.model.CmsSubjectExample;
 import com.su.mall.service.CmsSubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,17 +22,18 @@ public class CmsSubjectServiceImpl implements CmsSubjectService {
 
     @Override
     public List<CmsSubject> listAll() {
-        return subjectMapper.selectByExample(new CmsSubjectExample());
+        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
+        return subjectMapper.selectList(new LambdaQueryWrapper<>());
     }
 
     @Override
     public List<CmsSubject> list(String keyword, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
-        CmsSubjectExample example = new CmsSubjectExample();
-        CmsSubjectExample.Criteria criteria = example.createCriteria();
+        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
+        LambdaQueryWrapper<CmsSubject> wrapper = new LambdaQueryWrapper<>();
         if (!StrUtil.isEmpty(keyword)) {
-            criteria.andTitleLike("%" + keyword + "%");
+            wrapper.like(CmsSubject::getTitle, keyword);
         }
-        return subjectMapper.selectByExample(example);
+        return subjectMapper.selectList(wrapper);
     }
 }

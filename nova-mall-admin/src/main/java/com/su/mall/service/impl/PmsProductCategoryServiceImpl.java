@@ -1,5 +1,6 @@
 package com.su.mall.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.su.mall.dao.PmsProductCategoryAttributeRelationDao;
 import com.su.mall.dao.PmsProductCategoryDao;
@@ -34,6 +35,7 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
     private PmsProductCategoryAttributeRelationMapper productCategoryAttributeRelationMapper;
     @Autowired
     private PmsProductCategoryDao productCategoryDao;
+    
     @Override
     public int create(PmsProductCategoryParam pmsProductCategoryParam) {
         PmsProductCategory productCategory = new PmsProductCategory();
@@ -41,7 +43,8 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
         BeanUtils.copyProperties(pmsProductCategoryParam, productCategory);
         //没有父分类时为一级分类
         setCategoryLevel(productCategory);
-        int count = productCategoryMapper.insertSelective(productCategory);
+        // ✅ 改造：insert 替代 insertSelective
+        int count = productCategoryMapper.insert(productCategory);
         //创建筛选属性关联
         List<Long> productAttributeIdList = pmsProductCategoryParam.getProductAttributeIdList();
         if(!CollUtil.isEmpty(productAttributeIdList)){
@@ -75,58 +78,72 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
         //更新商品分类时要更新商品中的名称
         PmsProduct product = new PmsProduct();
         product.setProductCategoryName(productCategory.getName());
-        PmsProductExample example = new PmsProductExample();
-        example.createCriteria().andProductCategoryIdEqualTo(id);
-        productMapper.updateByExampleSelective(product,example);
+        // ✅ 改造：LambdaQueryWrapper 替代 Example
+        LambdaQueryWrapper<PmsProduct> productWrapper = new LambdaQueryWrapper<>();
+        productWrapper.eq(PmsProduct::getProductCategoryId, id);
+        productMapper.update(product, productWrapper);
         //同时更新筛选属性的信息
         if(!CollUtil.isEmpty(pmsProductCategoryParam.getProductAttributeIdList())){
-            PmsProductCategoryAttributeRelationExample relationExample = new PmsProductCategoryAttributeRelationExample();
-            relationExample.createCriteria().andProductCategoryIdEqualTo(id);
-            productCategoryAttributeRelationMapper.deleteByExample(relationExample);
+            // ✅ 改造：delete + LambdaQueryWrapper 替代 deleteByExample
+            productCategoryAttributeRelationMapper.delete(
+                new LambdaQueryWrapper<PmsProductCategoryAttributeRelation>()
+                    .eq(PmsProductCategoryAttributeRelation::getProductCategoryId, id)
+            );
             insertRelationList(id,pmsProductCategoryParam.getProductAttributeIdList());
         }else{
-            PmsProductCategoryAttributeRelationExample relationExample = new PmsProductCategoryAttributeRelationExample();
-            relationExample.createCriteria().andProductCategoryIdEqualTo(id);
-            productCategoryAttributeRelationMapper.deleteByExample(relationExample);
+            // ✅ 改造：delete + LambdaQueryWrapper 替代 deleteByExample
+            productCategoryAttributeRelationMapper.delete(
+                new LambdaQueryWrapper<PmsProductCategoryAttributeRelation>()
+                    .eq(PmsProductCategoryAttributeRelation::getProductCategoryId, id)
+            );
         }
-        return productCategoryMapper.updateByPrimaryKeySelective(productCategory);
+        // ✅ 改造：updateById 替代 updateByPrimaryKeySelective
+        return productCategoryMapper.updateById(productCategory);
     }
 
     @Override
     public List<PmsProductCategory> getList(Long parentId, Integer pageSize, Integer pageNum) {
         PageHelper.startPage(pageNum, pageSize);
-        PmsProductCategoryExample example = new PmsProductCategoryExample();
-        example.setOrderByClause("sort desc");
-        example.createCriteria().andParentIdEqualTo(parentId);
-        return productCategoryMapper.selectByExample(example);
+        // ✅ 改造：LambdaQueryWrapper 替代 Example
+        return productCategoryMapper.selectList(
+            new LambdaQueryWrapper<PmsProductCategory>()
+                .eq(PmsProductCategory::getParentId, parentId)
+                .orderByDesc(PmsProductCategory::getSort)
+        );
     }
 
     @Override
     public int delete(Long id) {
-        return productCategoryMapper.deleteByPrimaryKey(id);
+        // ✅ 改造：deleteById 替代 deleteByPrimaryKey
+        return productCategoryMapper.deleteById(id);
     }
 
     @Override
     public PmsProductCategory getItem(Long id) {
-        return productCategoryMapper.selectByPrimaryKey(id);
+        // ✅ 改造：selectById 替代 selectByPrimaryKey
+        return productCategoryMapper.selectById(id);
     }
 
     @Override
     public int updateNavStatus(List<Long> ids, Integer navStatus) {
+        // ✅ 改造：update + LambdaQueryWrapper 替代 updateByExampleSelective
         PmsProductCategory productCategory = new PmsProductCategory();
         productCategory.setNavStatus(navStatus);
-        PmsProductCategoryExample example = new PmsProductCategoryExample();
-        example.createCriteria().andIdIn(ids);
-        return productCategoryMapper.updateByExampleSelective(productCategory, example);
+        return productCategoryMapper.update(
+            productCategory,
+            new LambdaQueryWrapper<PmsProductCategory>().in(PmsProductCategory::getId, ids)
+        );
     }
 
     @Override
     public int updateShowStatus(List<Long> ids, Integer showStatus) {
+        // ✅ 改造：update + LambdaQueryWrapper 替代 updateByExampleSelective
         PmsProductCategory productCategory = new PmsProductCategory();
         productCategory.setShowStatus(showStatus);
-        PmsProductCategoryExample example = new PmsProductCategoryExample();
-        example.createCriteria().andIdIn(ids);
-        return productCategoryMapper.updateByExampleSelective(productCategory, example);
+        return productCategoryMapper.update(
+            productCategory,
+            new LambdaQueryWrapper<PmsProductCategory>().in(PmsProductCategory::getId, ids)
+        );
     }
 
     @Override
@@ -143,7 +160,8 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
             productCategory.setLevel(0);
         } else {
             //有父分类时选择根据父分类level设置
-            PmsProductCategory parentCategory = productCategoryMapper.selectByPrimaryKey(productCategory.getParentId());
+            // ✅ 改造：selectById 替代 selectByPrimaryKey
+            PmsProductCategory parentCategory = productCategoryMapper.selectById(productCategory.getParentId());
             if (parentCategory != null) {
                 productCategory.setLevel(parentCategory.getLevel() + 1);
             } else {

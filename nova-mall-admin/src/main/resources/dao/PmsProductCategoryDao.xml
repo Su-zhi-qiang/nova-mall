@@ -1,10 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.su.mall.dao.PmsProductCategoryDao">
-    <resultMap id="listWithChildrenMap" type="com.su.mall.dto.PmsProductCategoryWithChildrenItem"
-               extends="com.su.mall.mapper.PmsProductCategoryMapper.BaseResultMap">
-        <collection property="children" resultMap="com.su.mall.mapper.PmsProductCategoryMapper.BaseResultMap"
-                    columnPrefix="child_"></collection>
+    <resultMap id="listWithChildrenMap" type="com.su.mall.dto.PmsProductCategoryWithChildrenItem">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="parentId" jdbcType="BIGINT" property="parentId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="level" jdbcType="INTEGER" property="level"/>
+        <result column="productCount" jdbcType="INTEGER" property="productCount"/>
+        <result column="productUnit" jdbcType="VARCHAR" property="productUnit"/>
+        <result column="navStatus" jdbcType="INTEGER" property="navStatus"/>
+        <result column="showStatus" jdbcType="INTEGER" property="showStatus"/>
+        <result column="sort" jdbcType="INTEGER" property="sort"/>
+        <result column="icon" jdbcType="VARCHAR" property="icon"/>
+        <result column="keywords" jdbcType="VARCHAR" property="keywords"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <collection property="children" columnPrefix="child_" ofType="com.su.mall.model.PmsProductCategory">
+            <id column="id" jdbcType="BIGINT" property="id"/>
+            <result column="parentId" jdbcType="BIGINT" property="parentId"/>
+            <result column="name" jdbcType="VARCHAR" property="name"/>
+            <result column="level" jdbcType="INTEGER" property="level"/>
+            <result column="productCount" jdbcType="INTEGER" property="productCount"/>
+            <result column="productUnit" jdbcType="VARCHAR" property="productUnit"/>
+            <result column="navStatus" jdbcType="INTEGER" property="navStatus"/>
+            <result column="showStatus" jdbcType="INTEGER" property="showStatus"/>
+            <result column="sort" jdbcType="INTEGER" property="sort"/>
+            <result column="icon" jdbcType="VARCHAR" property="icon"/>
+            <result column="keywords" jdbcType="VARCHAR" property="keywords"/>
+            <result column="description" jdbcType="VARCHAR" property="description"/>
+        </collection>
     </resultMap>
     <select id="listWithChildren" resultMap="listWithChildrenMap">
         select

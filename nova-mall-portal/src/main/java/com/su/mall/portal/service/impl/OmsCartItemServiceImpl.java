@@ -1,9 +1,9 @@
 package com.su.mall.portal.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.su.mall.mapper.OmsCartItemMapper;
 import com.su.mall.model.OmsCartItem;
-import com.su.mall.model.OmsCartItemExample;
 import com.su.mall.model.UmsMember;
 import com.su.mall.portal.dao.PortalProductDao;
 import com.su.mall.portal.domain.CartProduct;
@@ -49,7 +49,8 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
         } else {
             cartItem.setModifyDate(new Date());
             existCartItem.setQuantity(existCartItem.getQuantity() + cartItem.getQuantity());
-            count = cartItemMapper.updateByPrimaryKey(existCartItem);
+            // ✅ 改造：updateByPrimaryKey → updateById
+            count = cartItemMapper.updateById(existCartItem);
         }
         return count;
     }
@@ -59,25 +60,27 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
  *
  * @author Su
  */
-    private OmsCartItem getCartItem(OmsCartItem cartItem) {
-        OmsCartItemExample example = new OmsCartItemExample();
-        OmsCartItemExample.Criteria criteria = example.createCriteria().andMemberIdEqualTo(cartItem.getMemberId())
-                .andProductIdEqualTo(cartItem.getProductId()).andDeleteStatusEqualTo(0);
-        if (cartItem.getProductSkuId()!=null) {
-            criteria.andProductSkuIdEqualTo(cartItem.getProductSkuId());
-        }
-        List<OmsCartItem> cartItemList = cartItemMapper.selectByExample(example);
-        if (!CollectionUtils.isEmpty(cartItemList)) {
-            return cartItemList.get(0);
-        }
-        return null;
+private OmsCartItem getCartItem(OmsCartItem cartItem) {
+    // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<OmsCartItem>())
+    List<OmsCartItem> cartItemList = cartItemMapper.selectList(
+            new LambdaQueryWrapper<OmsCartItem>()
+                    .eq(OmsCartItem::getMemberId, cartItem.getMemberId())
+                    .eq(OmsCartItem::getProductId, cartItem.getProductId())
+                    .eq(OmsCartItem::getDeleteStatus, 0)
+                    .eq(cartItem.getProductSkuId() != null, OmsCartItem::getProductSkuId, cartItem.getProductSkuId()));
+    if (!CollectionUtils.isEmpty(cartItemList)) {
+        return cartItemList.get(0);
     }
+    return null;
+}
 
     @Override
     public List<OmsCartItem> list(Long memberId) {
-        OmsCartItemExample example = new OmsCartItemExample();
-        example.createCriteria().andDeleteStatusEqualTo(0).andMemberIdEqualTo(memberId);
-        return cartItemMapper.selectByExample(example);
+        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<OmsCartItem>())
+        return cartItemMapper.selectList(
+                new LambdaQueryWrapper<OmsCartItem>()
+                        .eq(OmsCartItem::getDeleteStatus, 0)
+                        .eq(OmsCartItem::getMemberId, memberId));
     }
 
     @Override
@@ -97,19 +100,23 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
     public int updateQuantity(Long id, Long memberId, Integer quantity) {
         OmsCartItem cartItem = new OmsCartItem();
         cartItem.setQuantity(quantity);
-        OmsCartItemExample example = new OmsCartItemExample();
-        example.createCriteria().andDeleteStatusEqualTo(0)
-                .andIdEqualTo(id).andMemberIdEqualTo(memberId);
-        return cartItemMapper.updateByExampleSelective(cartItem, example);
+        // ✅ 改造：updateByExampleSelective → update(new LambdaQueryWrapper<OmsCartItem>())
+        return cartItemMapper.update(cartItem,
+                new LambdaQueryWrapper<OmsCartItem>()
+                        .eq(OmsCartItem::getDeleteStatus, 0)
+                        .eq(OmsCartItem::getId, id)
+                        .eq(OmsCartItem::getMemberId, memberId));
     }
 
     @Override
     public int delete(Long memberId, List<Long> ids) {
         OmsCartItem record = new OmsCartItem();
         record.setDeleteStatus(1);
-        OmsCartItemExample example = new OmsCartItemExample();
-        example.createCriteria().andIdIn(ids).andMemberIdEqualTo(memberId);
-        return cartItemMapper.updateByExampleSelective(record, example);
+        // ✅ 改造：updateByExampleSelective → update(new LambdaQueryWrapper<OmsCartItem>())
+        return cartItemMapper.update(record,
+                new LambdaQueryWrapper<OmsCartItem>()
+                        .in(OmsCartItem::getId, ids)
+                        .eq(OmsCartItem::getMemberId, memberId));
     }
 
     @Override
@@ -124,7 +131,8 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
         updateCart.setId(cartItem.getId());
         updateCart.setModifyDate(new Date());
         updateCart.setDeleteStatus(1);
-        cartItemMapper.updateByPrimaryKeySelective(updateCart);
+        // ✅ 改造：updateByPrimaryKeySelective → updateById
+        cartItemMapper.updateById(updateCart);
         cartItem.setId(null);
         add(cartItem);
         return 1;
@@ -134,8 +142,9 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
     public int clear(Long memberId) {
         OmsCartItem record = new OmsCartItem();
         record.setDeleteStatus(1);
-        OmsCartItemExample example = new OmsCartItemExample();
-        example.createCriteria().andMemberIdEqualTo(memberId);
-        return cartItemMapper.updateByExampleSelective(record,example);
+        // ✅ 改造：updateByExampleSelective → update(new LambdaQueryWrapper<OmsCartItem>())
+        return cartItemMapper.update(record,
+                new LambdaQueryWrapper<OmsCartItem>()
+                        .eq(OmsCartItem::getMemberId, memberId));
     }
 }
