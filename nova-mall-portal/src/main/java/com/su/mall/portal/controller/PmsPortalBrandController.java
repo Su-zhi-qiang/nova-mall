@@ -1,5 +1,6 @@
 package com.su.mall.portal.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
 import com.su.mall.model.PmsBrand;
@@ -28,10 +29,10 @@ public class PmsPortalBrandController {
     @Operation(summary = "分页获取推荐品牌")
     @RequestMapping(value = "/recommendList", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult<List<PmsBrand>> recommendList(@RequestParam(value = "pageSize", defaultValue = "6") Integer pageSize,
+    public CommonResult<CommonPage<PmsBrand>> recommendList(@RequestParam(value = "pageSize", defaultValue = "6") Integer pageSize,
                                                       @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<PmsBrand> brandList = portalBrandService.recommendList(pageNum, pageSize);
-        return CommonResult.success(brandList);
+        Page<PmsBrand> brandPage = portalBrandService.list(pageSize, pageNum);
+        return CommonResult.success(CommonPage.restPage(brandPage));
     }
 
     @Operation(summary = "获取品牌详情")
@@ -48,7 +49,7 @@ public class PmsPortalBrandController {
     public CommonResult<CommonPage<PmsProduct>> productList(@RequestParam Long brandId,
                                                             @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                                             @RequestParam(value = "pageSize", defaultValue = "6") Integer pageSize) {
-        CommonPage<PmsProduct> result = portalBrandService.productList(brandId,pageNum, pageSize);
-        return CommonResult.success(result);
+        Page<PmsProduct> page = portalBrandService.productList(brandId, pageNum, pageSize);
+        return CommonResult.success(CommonPage.restPage(page));
     }
 }

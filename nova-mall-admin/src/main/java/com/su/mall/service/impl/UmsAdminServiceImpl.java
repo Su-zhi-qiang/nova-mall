@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.bo.AdminUserDetails;
 import com.su.mall.common.exception.Asserts;
 import com.su.mall.common.util.RequestUtil;
@@ -165,16 +165,16 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     }
 
     @Override
-    public List<UmsAdmin> list(String keyword, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
-        // ✅ 改造：LambdaQueryWrapper 替代 Example
+    public Page<UmsAdmin> list(String keyword, Integer pageSize, Integer pageNum) {
+        // ✅ 改造：使用 MyBatis-Plus 分页
         LambdaQueryWrapper<UmsAdmin> wrapper = new LambdaQueryWrapper<>();
         if (!StrUtil.isEmpty(keyword)) {
             wrapper.like(UmsAdmin::getUsername, keyword)
                 .or()
                 .like(UmsAdmin::getNickName, keyword);
         }
-        return adminMapper.selectList(wrapper);
+        Page<UmsAdmin> page = new Page<>(pageNum, pageSize);
+        return adminMapper.selectPage(page, wrapper);
     }
 
     @Override

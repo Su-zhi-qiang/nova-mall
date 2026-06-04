@@ -1,5 +1,6 @@
 package com.su.mall.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dto.PmsProductAttributeParam;
 import com.su.mall.dto.ProductAttrInfo;
 import com.su.mall.model.PmsProductAttribute;
@@ -17,7 +18,7 @@ public interface PmsProductAttributeService {
      * @param cid 分类id
      * @param type 0->规格；1->参数
      */
-    List<PmsProductAttribute> getList(Long cid, Integer type, Integer pageSize, Integer pageNum);
+    Page<PmsProductAttribute> getList(Long cid, Integer type, Integer pageSize, Integer pageNum);
 
     /**
      * 添加商品属性

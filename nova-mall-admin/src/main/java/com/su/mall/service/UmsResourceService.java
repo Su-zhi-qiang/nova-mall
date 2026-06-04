@@ -1,5 +1,6 @@
 package com.su.mall.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.model.UmsResource;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public interface UmsResourceService {
     /**
      * 分页查询资源
      */
-    List<UmsResource> list(Long categoryId, String nameKeyword, String urlKeyword, Integer pageSize, Integer pageNum);
+    Page<UmsResource> list(Long categoryId, String nameKeyword, String urlKeyword, Integer pageSize, Integer pageNum);
 
     /**
      * 查询全部资源

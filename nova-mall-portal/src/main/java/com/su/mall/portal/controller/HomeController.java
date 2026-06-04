@@ -1,5 +1,7 @@
 package com.su.mall.portal.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
 import com.su.mall.model.CmsSubject;
 import com.su.mall.model.PmsProduct;
@@ -36,10 +38,10 @@ public class HomeController {
     @Operation(summary = "分页获取推荐商品")
     @RequestMapping(value = "/recommendProductList", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult<List<PmsProduct>> recommendProductList(@RequestParam(value = "pageSize", defaultValue = "4") Integer pageSize,
+    public CommonResult<CommonPage<PmsProduct>> recommendProductList(@RequestParam(value = "pageSize", defaultValue = "4") Integer pageSize,
                                                                @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<PmsProduct> productList = homeService.recommendProductList(pageSize, pageNum);
-        return CommonResult.success(productList);
+        Page<PmsProduct> page = homeService.recommendProductList(pageSize, pageNum);
+        return CommonResult.success(CommonPage.restPage(page));
     }
 
     @Operation(summary = "获取首页商品分类")
@@ -53,28 +55,28 @@ public class HomeController {
     @Operation(summary = "根据分类获取专题")
     @RequestMapping(value = "/subjectList", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult<List<CmsSubject>> getSubjectList(@RequestParam(required = false) Long cateId,
-                                                         @RequestParam(value = "pageSize", defaultValue = "4") Integer pageSize,
-                                                         @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<CmsSubject> subjectList = homeService.getSubjectList(cateId,pageSize,pageNum);
-        return CommonResult.success(subjectList);
+    public CommonResult<CommonPage<CmsSubject>> getSubjectList(@RequestParam(required = false) Long cateId,
+                                                              @RequestParam(value = "pageSize", defaultValue = "4") Integer pageSize,
+                                                              @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
+        Page<CmsSubject> page = homeService.getSubjectList(cateId, pageSize, pageNum);
+        return CommonResult.success(CommonPage.restPage(page));
     }
 
     @Operation(summary = "分页获取人气推荐商品")
     @RequestMapping(value = "/hotProductList", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult<List<PmsProduct>> hotProductList(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
-                                                         @RequestParam(value = "pageSize", defaultValue = "6") Integer pageSize) {
-        List<PmsProduct> productList = homeService.hotProductList(pageNum,pageSize);
-        return CommonResult.success(productList);
+    public CommonResult<CommonPage<PmsProduct>> hotProductList(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
+                                                                @RequestParam(value = "pageSize", defaultValue = "6") Integer pageSize) {
+        Page<PmsProduct> page = homeService.hotProductList(pageNum, pageSize);
+        return CommonResult.success(CommonPage.restPage(page));
     }
 
     @Operation(summary = "分页获取新品推荐商品")
     @RequestMapping(value = "/newProductList", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult<List<PmsProduct>> newProductList(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
-                                                         @RequestParam(value = "pageSize", defaultValue = "6") Integer pageSize) {
-        List<PmsProduct> productList = homeService.newProductList(pageNum,pageSize);
-        return CommonResult.success(productList);
+    public CommonResult<CommonPage<PmsProduct>> newProductList(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
+                                                                @RequestParam(value = "pageSize", defaultValue = "6") Integer pageSize) {
+        Page<PmsProduct> page = homeService.newProductList(pageNum, pageSize);
+        return CommonResult.success(CommonPage.restPage(page));
     }
 }

@@ -1,5 +1,6 @@
 package com.su.mall.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dto.UmsMenuNode;
 import com.su.mall.model.UmsMenu;
 
@@ -33,7 +34,7 @@ public interface UmsMenuService {
     /**
      * 分页查询后台菜单
      */
-    List<UmsMenu> list(Long parentId, Integer pageSize, Integer pageNum);
+    Page<UmsMenu> list(Long parentId, Integer pageSize, Integer pageNum);
 
     /**
      * 树形结构返回所有菜单列表

@@ -1,7 +1,9 @@
 package com.su.mall.common.api;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.pagehelper.PageInfo;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -46,15 +48,28 @@ public class CommonPage<T> {
     }
 
     /**
-     * 将SpringData分页后的list转为分页信息
+     * 将MyBatis-Plus分页后的Page转为分页信息
      */
-    public static <T> CommonPage<T> restPage(Page<T> pageInfo) {
+    public static <T> CommonPage<T> restPage(Page<T> page) {
         CommonPage<T> result = new CommonPage<T>();
-        result.setTotalPage(pageInfo.getTotalPages());
-        result.setPageNum(pageInfo.getNumber());
-        result.setPageSize(pageInfo.getSize());
-        result.setTotal(pageInfo.getTotalElements());
-        result.setList(pageInfo.getContent());
+        result.setTotalPage((int) page.getPages());
+        result.setPageNum((int) page.getCurrent());
+        result.setPageSize((int) page.getSize());
+        result.setTotal(page.getTotal());
+        result.setList(page.getRecords());
+        return result;
+    }
+
+    /**
+     * 将Spring Data分页后的Page转为分页信息
+     */
+    public static <T> CommonPage<T> restPage(org.springframework.data.domain.Page<T> page) {
+        CommonPage<T> result = new CommonPage<T>();
+        result.setTotalPage(page.getTotalPages());
+        result.setPageNum(page.getNumber() + 1);
+        result.setPageSize(page.getSize());
+        result.setTotal(page.getTotalElements());
+        result.setList(page.getContent());
         return result;
     }
 

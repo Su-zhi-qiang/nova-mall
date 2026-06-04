@@ -1,5 +1,6 @@
 package com.su.mall.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
 import com.su.mall.model.SmsHomeNewProduct;
@@ -74,7 +75,7 @@ public class SmsHomeNewProductController {
                                                             @RequestParam(value = "recommendStatus", required = false) Integer recommendStatus,
                                                             @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                                                             @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<SmsHomeNewProduct> homeNewProductList = homeNewProductService.list(productName, recommendStatus, pageSize, pageNum);
-        return CommonResult.success(CommonPage.restPage(homeNewProductList));
+        Page<SmsHomeNewProduct> newProductPage = homeNewProductService.list(productName, recommendStatus, pageSize, pageNum);
+        return CommonResult.success(CommonPage.restPage(newProductPage));
     }
 }

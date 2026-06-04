@@ -1,5 +1,6 @@
 package com.su.mall.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
 import com.su.mall.dto.PmsBrandParam;
@@ -80,8 +81,8 @@ public class PmsBrandController {
                                                       @RequestParam(value = "showStatus",required = false) Integer showStatus,
                                                       @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                                       @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize) {
-        List<PmsBrand> brandList = brandService.listBrand(keyword,showStatus,pageNum, pageSize);
-        return CommonResult.success(CommonPage.restPage(brandList));
+        Page<PmsBrand> brandPage = brandService.listBrand(keyword,showStatus,pageNum, pageSize);
+        return CommonResult.success(CommonPage.restPage(brandPage));
     }
 
     @Operation(summary =  "根据编号查询品牌信息")

@@ -3,7 +3,7 @@ package com.su.mall.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dao.SmsCouponDao;
 import com.su.mall.dao.SmsCouponProductCategoryRelationDao;
 import com.su.mall.dao.SmsCouponProductRelationDao;
@@ -107,8 +107,8 @@ public class SmsCouponServiceImpl implements SmsCouponService {
     }
 
     @Override
-    public List<SmsCoupon> list(String name, Integer type, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum,pageSize);
+    public Page<SmsCoupon> list(String name, Integer type, Integer pageSize, Integer pageNum) {
+        Page<SmsCoupon> page = new Page<>(pageNum, pageSize);
         // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<>())
         LambdaQueryWrapper<SmsCoupon> wrapper = new LambdaQueryWrapper<>();
         if(!StrUtil.isEmpty(name)){
@@ -117,7 +117,7 @@ public class SmsCouponServiceImpl implements SmsCouponService {
         if(type!=null){
             wrapper.eq(SmsCoupon::getType, type);
         }
-        return couponMapper.selectList(wrapper);
+        return couponMapper.selectPage(page, wrapper);
     }
 
     @Override

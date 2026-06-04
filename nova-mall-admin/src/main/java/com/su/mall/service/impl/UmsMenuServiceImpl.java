@@ -1,7 +1,7 @@
 package com.su.mall.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dto.UmsMenuNode;
 import com.su.mall.mapper.UmsMenuMapper;
 import com.su.mall.model.*;
@@ -70,10 +70,10 @@ public class UmsMenuServiceImpl implements UmsMenuService {
     }
 
     @Override
-    public List<UmsMenu> list(Long parentId, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
+    public Page<UmsMenu> list(Long parentId, Integer pageSize, Integer pageNum) {
+        Page<UmsMenu> page = new Page<>(pageNum, pageSize);
         // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
-        return menuMapper.selectList(new LambdaQueryWrapper<UmsMenu>()
+        return menuMapper.selectPage(page, new LambdaQueryWrapper<UmsMenu>()
                 .eq(UmsMenu::getParentId, parentId)
                 .orderByDesc(UmsMenu::getSort));
     }

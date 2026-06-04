@@ -1,7 +1,7 @@
 package com.su.mall.portal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonPage;
 import com.su.mall.mapper.PmsBrandMapper;
 import com.su.mall.mapper.PmsProductMapper;
@@ -28,11 +28,11 @@ public class PmsPortalBrandServiceImpl implements PmsPortalBrandService {
     private PmsProductMapper productMapper;
 
     @Override
-    public List<PmsBrand> recommendList(Integer pageNum, Integer pageSize) {
-        // 确保 pageNum 至少为 1
+    public Page<PmsBrand> list(Integer pageNum, Integer pageSize) {
         pageNum = pageNum == null || pageNum < 1 ? 1 : pageNum;
-        int offset = (pageNum - 1) * pageSize;
-        return homeDao.getRecommendBrandList(offset, pageSize);
+        Page<PmsBrand> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<PmsBrand> wrapper = new LambdaQueryWrapper<>();
+        return brandMapper.selectPage(page, wrapper);
     }
 
     @Override
@@ -42,15 +42,14 @@ public class PmsPortalBrandServiceImpl implements PmsPortalBrandService {
     }
 
     @Override
-    public CommonPage<PmsProduct> productList(Long brandId, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum,pageSize);
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<PmsProduct>())
-        List<PmsProduct> productList = productMapper.selectList(
+    public Page<PmsProduct> productList(Long brandId, Integer pageNum, Integer pageSize) {
+        pageNum = pageNum == null || pageNum < 1 ? 1 : pageNum;
+        Page<PmsProduct> page = new Page<>(pageNum, pageSize);
+        return productMapper.selectPage(page,
                 new LambdaQueryWrapper<PmsProduct>()
                         .eq(PmsProduct::getDeleteStatus, 0)
                         .eq(PmsProduct::getPublishStatus, 1)
                         .eq(PmsProduct::getBrandId, brandId)
                         .orderByDesc(PmsProduct::getId));
-        return CommonPage.restPage(productList);
     }
 }

@@ -1,5 +1,6 @@
 package com.su.mall.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
 import com.su.mall.dto.OmsOrderReturnApplyResult;
@@ -32,8 +33,8 @@ public class OmsOrderReturnApplyController {
     public CommonResult<CommonPage<OmsOrderReturnApply>> list(OmsReturnApplyQueryParam queryParam,
                                                               @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                                                               @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<OmsOrderReturnApply> returnApplyList = returnApplyService.list(queryParam, pageSize, pageNum);
-        return CommonResult.success(CommonPage.restPage(returnApplyList));
+        Page<OmsOrderReturnApply> returnApplyPage = returnApplyService.list(queryParam, pageSize, pageNum);
+        return CommonResult.success(CommonPage.restPage(returnApplyPage));
     }
 
     @Operation(summary = "批量删除退货申请")

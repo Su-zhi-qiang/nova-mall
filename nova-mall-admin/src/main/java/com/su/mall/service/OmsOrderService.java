@@ -1,5 +1,6 @@
 package com.su.mall.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dto.*;
 import com.su.mall.model.OmsOrder;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +15,7 @@ public interface OmsOrderService {
     /**
      * 分页查询订单
      */
-    List<OmsOrder> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum);
+    Page<OmsOrder> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum);
 
     /**
      * 批量发货

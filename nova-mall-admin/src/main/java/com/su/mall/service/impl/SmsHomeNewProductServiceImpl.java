@@ -2,7 +2,7 @@ package com.su.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.mapper.SmsHomeNewProductMapper;
 import com.su.mall.model.SmsHomeNewProduct;
 import com.su.mall.service.SmsHomeNewProductService;
@@ -56,8 +56,8 @@ public class SmsHomeNewProductServiceImpl implements SmsHomeNewProductService {
     }
 
     @Override
-    public List<SmsHomeNewProduct> list(String productName, Integer recommendStatus, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum,pageSize);
+    public Page<SmsHomeNewProduct> list(String productName, Integer recommendStatus, Integer pageSize, Integer pageNum) {
+        Page<SmsHomeNewProduct> page = new Page<>(pageNum, pageSize);
         // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<>())
         LambdaQueryWrapper<SmsHomeNewProduct> wrapper = new LambdaQueryWrapper<>();
         if(!StrUtil.isEmpty(productName)){
@@ -67,6 +67,6 @@ public class SmsHomeNewProductServiceImpl implements SmsHomeNewProductService {
             wrapper.eq(SmsHomeNewProduct::getRecommendStatus, recommendStatus);
         }
         wrapper.orderByDesc(SmsHomeNewProduct::getSort);
-        return homeNewProductMapper.selectList(wrapper);
+        return homeNewProductMapper.selectPage(page, wrapper);
     }
 }

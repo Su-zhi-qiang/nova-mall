@@ -3,6 +3,7 @@ package com.su.mall.service;
 import com.su.mall.dto.PmsProductCategoryParam;
 import com.su.mall.dto.PmsProductCategoryWithChildrenItem;
 import com.su.mall.model.PmsProductCategory;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public interface PmsProductCategoryService {
     /**
      * 分页获取商品分类
      */
-    List<PmsProductCategory> getList(Long parentId, Integer pageSize, Integer pageNum);
+    Page<PmsProductCategory> getList(Long parentId, Integer pageSize, Integer pageNum);
 
     /**
      * 删除商品分类

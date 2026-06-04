@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dao.*;
 import com.su.mall.dto.PmsProductParam;
 import com.su.mall.dto.PmsProductQueryParam;
@@ -202,12 +202,50 @@ public class PmsProductServiceImpl implements PmsProductService {
 
     }
 
+
+
     @Override
-    public List<PmsProduct> list(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
-        // ✅ 改造：LambdaQueryWrapper 替代 Example
+    public Page<PmsProduct> listPage(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum) {
+        LOGGER.info("查询商品列表（MyBatis-Plus） - pageNum: {}, pageSize: {}, 查询条件: {}", pageNum, pageSize, productQueryParam);
+        
+        // 先统计总数，用于调试
+        LambdaQueryWrapper<PmsProduct> countWrapper = new LambdaQueryWrapper<>();
+        // 查询未删除的商品，同时处理 deleteStatus 为 null 的情况
+        countWrapper.and(w -> w.eq(PmsProduct::getDeleteStatus, 0).or().isNull(PmsProduct::getDeleteStatus));
+        if (productQueryParam.getPublishStatus() != null) {
+            countWrapper.eq(PmsProduct::getPublishStatus, productQueryParam.getPublishStatus());
+        }
+        if (productQueryParam.getVerifyStatus() != null) {
+            countWrapper.eq(PmsProduct::getVerifyStatus, productQueryParam.getVerifyStatus());
+        }
+        if (!StrUtil.isEmpty(productQueryParam.getKeyword())) {
+            countWrapper.like(PmsProduct::getName, productQueryParam.getKeyword());
+        }
+        if (!StrUtil.isEmpty(productQueryParam.getProductSn())) {
+            countWrapper.eq(PmsProduct::getProductSn, productQueryParam.getProductSn());
+        }
+        if (productQueryParam.getBrandId() != null) {
+            countWrapper.eq(PmsProduct::getBrandId, productQueryParam.getBrandId());
+        }
+        if (productQueryParam.getProductCategoryId() != null) {
+            countWrapper.eq(PmsProduct::getProductCategoryId, productQueryParam.getProductCategoryId());
+        }
+        long totalCount = productMapper.selectCount(countWrapper);
+        LOGGER.info("符合条件的商品总数: {}", totalCount);
+        
+        // 统计所有商品的分布情况（调试用）
+        LambdaQueryWrapper<PmsProduct> allWrapper = new LambdaQueryWrapper<>();
+        List<PmsProduct> allProducts = productMapper.selectList(allWrapper);
+        LOGGER.info("数据库中所有商品总数: {}", allProducts.size());
+        long deletedCount = allProducts.stream().filter(p -> p.getDeleteStatus() != null && p.getDeleteStatus() == 1).count();
+        LOGGER.info("已删除商品数量: {}", deletedCount);
+        long activeCount = allProducts.stream().filter(p -> p.getDeleteStatus() == null || p.getDeleteStatus() == 0).count();
+        LOGGER.info("未删除商品数量: {}", activeCount);
+        
+        // 构建查询条件
         LambdaQueryWrapper<PmsProduct> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(PmsProduct::getDeleteStatus, 0);
+        // 查询未删除的商品，同时处理 deleteStatus 为 null 的情况
+        wrapper.and(w -> w.eq(PmsProduct::getDeleteStatus, 0).or().isNull(PmsProduct::getDeleteStatus));
         if (productQueryParam.getPublishStatus() != null) {
             wrapper.eq(PmsProduct::getPublishStatus, productQueryParam.getPublishStatus());
         }
@@ -226,7 +264,13 @@ public class PmsProductServiceImpl implements PmsProductService {
         if (productQueryParam.getProductCategoryId() != null) {
             wrapper.eq(PmsProduct::getProductCategoryId, productQueryParam.getProductCategoryId());
         }
-        return productMapper.selectList(wrapper);
+        
+        // 创建分页对象并执行查询
+        Page<PmsProduct> page = new Page<>(pageNum, pageSize);
+        Page<PmsProduct> result = productMapper.selectPage(page, wrapper);
+        LOGGER.info("本次查询返回商品数量: {}, 总数: {}", result.getRecords().size(), result.getTotal());
+        
+        return result;
     }
 
     @Override

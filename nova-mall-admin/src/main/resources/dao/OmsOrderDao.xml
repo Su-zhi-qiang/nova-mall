@@ -3,79 +3,79 @@
 <mapper namespace="com.su.mall.dao.OmsOrderDao">
     <resultMap id="orderDetailResultMap" type="com.su.mall.dto.OmsOrderDetail">
         <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="memberId" jdbcType="BIGINT" property="memberId"/>
-        <result column="couponId" jdbcType="BIGINT" property="couponId"/>
-        <result column="orderSn" jdbcType="VARCHAR" property="orderSn"/>
-        <result column="createTime" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="memberUsername" jdbcType="VARCHAR" property="memberUsername"/>
-        <result column="totalAmount" jdbcType="DECIMAL" property="totalAmount"/>
-        <result column="payAmount" jdbcType="DECIMAL" property="payAmount"/>
-        <result column="freightAmount" jdbcType="DECIMAL" property="freightAmount"/>
-        <result column="promotionAmount" jdbcType="DECIMAL" property="promotionAmount"/>
-        <result column="integrationAmount" jdbcType="DECIMAL" property="integrationAmount"/>
-        <result column="couponAmount" jdbcType="DECIMAL" property="couponAmount"/>
-        <result column="discountAmount" jdbcType="DECIMAL" property="discountAmount"/>
-        <result column="payType" jdbcType="INTEGER" property="payType"/>
-        <result column="sourceType" jdbcType="INTEGER" property="sourceType"/>
+        <result column="member_id" jdbcType="BIGINT" property="memberId"/>
+        <result column="coupon_id" jdbcType="BIGINT" property="couponId"/>
+        <result column="order_sn" jdbcType="VARCHAR" property="orderSn"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="member_username" jdbcType="VARCHAR" property="memberUsername"/>
+        <result column="total_amount" jdbcType="DECIMAL" property="totalAmount"/>
+        <result column="pay_amount" jdbcType="DECIMAL" property="payAmount"/>
+        <result column="freight_amount" jdbcType="DECIMAL" property="freightAmount"/>
+        <result column="promotion_amount" jdbcType="DECIMAL" property="promotionAmount"/>
+        <result column="integration_amount" jdbcType="DECIMAL" property="integrationAmount"/>
+        <result column="coupon_amount" jdbcType="DECIMAL" property="couponAmount"/>
+        <result column="discount_amount" jdbcType="DECIMAL" property="discountAmount"/>
+        <result column="pay_type" jdbcType="INTEGER" property="payType"/>
+        <result column="source_type" jdbcType="INTEGER" property="sourceType"/>
         <result column="status" jdbcType="INTEGER" property="status"/>
-        <result column="orderType" jdbcType="INTEGER" property="orderType"/>
-        <result column="deliveryCompany" jdbcType="VARCHAR" property="deliveryCompany"/>
-        <result column="deliverySn" jdbcType="VARCHAR" property="deliverySn"/>
-        <result column="autoConfirmDay" jdbcType="INTEGER" property="autoConfirmDay"/>
+        <result column="order_type" jdbcType="INTEGER" property="orderType"/>
+        <result column="delivery_company" jdbcType="VARCHAR" property="deliveryCompany"/>
+        <result column="delivery_sn" jdbcType="VARCHAR" property="deliverySn"/>
+        <result column="auto_confirm_day" jdbcType="INTEGER" property="autoConfirmDay"/>
         <result column="integration" jdbcType="INTEGER" property="integration"/>
         <result column="growth" jdbcType="INTEGER" property="growth"/>
-        <result column="promotionInfo" jdbcType="VARCHAR" property="promotionInfo"/>
-        <result column="billType" jdbcType="INTEGER" property="billType"/>
-        <result column="billHeader" jdbcType="VARCHAR" property="billHeader"/>
-        <result column="billContent" jdbcType="VARCHAR" property="billContent"/>
-        <result column="billReceiverPhone" jdbcType="VARCHAR" property="billReceiverPhone"/>
-        <result column="billReceiverEmail" jdbcType="VARCHAR" property="billReceiverEmail"/>
-        <result column="receiverName" jdbcType="VARCHAR" property="receiverName"/>
-        <result column="receiverPhone" jdbcType="VARCHAR" property="receiverPhone"/>
-        <result column="receiverPostCode" jdbcType="VARCHAR" property="receiverPostCode"/>
-        <result column="receiverProvince" jdbcType="VARCHAR" property="receiverProvince"/>
-        <result column="receiverCity" jdbcType="VARCHAR" property="receiverCity"/>
-        <result column="receiverRegion" jdbcType="VARCHAR" property="receiverRegion"/>
-        <result column="receiverDetailAddress" jdbcType="VARCHAR" property="receiverDetailAddress"/>
+        <result column="promotion_info" jdbcType="VARCHAR" property="promotionInfo"/>
+        <result column="bill_type" jdbcType="INTEGER" property="billType"/>
+        <result column="bill_header" jdbcType="VARCHAR" property="billHeader"/>
+        <result column="bill_content" jdbcType="VARCHAR" property="billContent"/>
+        <result column="bill_receiver_phone" jdbcType="VARCHAR" property="billReceiverPhone"/>
+        <result column="bill_receiver_email" jdbcType="VARCHAR" property="billReceiverEmail"/>
+        <result column="receiver_name" jdbcType="VARCHAR" property="receiverName"/>
+        <result column="receiver_phone" jdbcType="VARCHAR" property="receiverPhone"/>
+        <result column="receiver_post_code" jdbcType="VARCHAR" property="receiverPostCode"/>
+        <result column="receiver_province" jdbcType="VARCHAR" property="receiverProvince"/>
+        <result column="receiver_city" jdbcType="VARCHAR" property="receiverCity"/>
+        <result column="receiver_region" jdbcType="VARCHAR" property="receiverRegion"/>
+        <result column="receiver_detail_address" jdbcType="VARCHAR" property="receiverDetailAddress"/>
         <result column="note" jdbcType="VARCHAR" property="note"/>
-        <result column="confirmStatus" jdbcType="INTEGER" property="confirmStatus"/>
-        <result column="deleteStatus" jdbcType="INTEGER" property="deleteStatus"/>
-        <result column="useIntegration" jdbcType="INTEGER" property="useIntegration"/>
-        <result column="paymentTime" jdbcType="TIMESTAMP" property="paymentTime"/>
-        <result column="deliveryTime" jdbcType="TIMESTAMP" property="deliveryTime"/>
-        <result column="receiveTime" jdbcType="TIMESTAMP" property="receiveTime"/>
-        <result column="commentTime" jdbcType="TIMESTAMP" property="commentTime"/>
-        <result column="modifyTime" jdbcType="TIMESTAMP" property="modifyTime"/>
-        <collection property="orderItemList" columnPrefix="item_" ofType="com.su.mall.model.OmsOrderItem">
-            <id column="id" jdbcType="BIGINT" property="id"/>
-            <result column="orderId" jdbcType="BIGINT" property="orderId"/>
-            <result column="orderSn" jdbcType="VARCHAR" property="orderSn"/>
-            <result column="productId" jdbcType="BIGINT" property="productId"/>
-            <result column="productPic" jdbcType="VARCHAR" property="productPic"/>
-            <result column="productName" jdbcType="VARCHAR" property="productName"/>
-            <result column="productBrand" jdbcType="VARCHAR" property="productBrand"/>
-            <result column="productSn" jdbcType="VARCHAR" property="productSn"/>
-            <result column="productPrice" jdbcType="DECIMAL" property="productPrice"/>
-            <result column="productQuantity" jdbcType="INTEGER" property="productQuantity"/>
-            <result column="productSkuId" jdbcType="BIGINT" property="productSkuId"/>
-            <result column="productSkuCode" jdbcType="VARCHAR" property="productSkuCode"/>
-            <result column="productCategoryId" jdbcType="BIGINT" property="productCategoryId"/>
-            <result column="promotionName" jdbcType="VARCHAR" property="promotionName"/>
-            <result column="promotionAmount" jdbcType="DECIMAL" property="promotionAmount"/>
-            <result column="couponAmount" jdbcType="DECIMAL" property="couponAmount"/>
-            <result column="integrationAmount" jdbcType="DECIMAL" property="integrationAmount"/>
-            <result column="realAmount" jdbcType="DECIMAL" property="realAmount"/>
-            <result column="giftIntegration" jdbcType="INTEGER" property="giftIntegration"/>
-            <result column="giftGrowth" jdbcType="INTEGER" property="giftGrowth"/>
-            <result column="productAttr" jdbcType="VARCHAR" property="productAttr"/>
+        <result column="confirm_status" jdbcType="INTEGER" property="confirmStatus"/>
+        <result column="delete_status" jdbcType="INTEGER" property="deleteStatus"/>
+        <result column="use_integration" jdbcType="INTEGER" property="useIntegration"/>
+        <result column="payment_time" jdbcType="TIMESTAMP" property="paymentTime"/>
+        <result column="delivery_time" jdbcType="TIMESTAMP" property="deliveryTime"/>
+        <result column="receive_time" jdbcType="TIMESTAMP" property="receiveTime"/>
+        <result column="comment_time" jdbcType="TIMESTAMP" property="commentTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <collection property="orderItemList" ofType="com.su.mall.model.OmsOrderItem">
+            <id column="item_id" jdbcType="BIGINT" property="id"/>
+            <result column="item_order_id" jdbcType="BIGINT" property="orderId"/>
+            <result column="item_order_sn" jdbcType="VARCHAR" property="orderSn"/>
+            <result column="item_product_id" jdbcType="BIGINT" property="productId"/>
+            <result column="item_product_pic" jdbcType="VARCHAR" property="productPic"/>
+            <result column="item_product_name" jdbcType="VARCHAR" property="productName"/>
+            <result column="item_product_brand" jdbcType="VARCHAR" property="productBrand"/>
+            <result column="item_product_sn" jdbcType="VARCHAR" property="productSn"/>
+            <result column="item_product_price" jdbcType="DECIMAL" property="productPrice"/>
+            <result column="item_product_quantity" jdbcType="INTEGER" property="productQuantity"/>
+            <result column="item_product_sku_id" jdbcType="BIGINT" property="productSkuId"/>
+            <result column="item_product_sku_code" jdbcType="VARCHAR" property="productSkuCode"/>
+            <result column="item_product_category_id" jdbcType="BIGINT" property="productCategoryId"/>
+            <result column="item_promotion_name" jdbcType="VARCHAR" property="promotionName"/>
+            <result column="item_promotion_amount" jdbcType="DECIMAL" property="promotionAmount"/>
+            <result column="item_coupon_amount" jdbcType="DECIMAL" property="couponAmount"/>
+            <result column="item_integration_amount" jdbcType="DECIMAL" property="integrationAmount"/>
+            <result column="item_real_amount" jdbcType="DECIMAL" property="realAmount"/>
+            <result column="item_gift_integration" jdbcType="INTEGER" property="giftIntegration"/>
+            <result column="item_gift_growth" jdbcType="INTEGER" property="giftGrowth"/>
+            <result column="item_product_attr" jdbcType="VARCHAR" property="productAttr"/>
         </collection>
-        <collection property="historyList" columnPrefix="history_" ofType="com.su.mall.model.OmsOrderOperateHistory">
-            <id column="id" jdbcType="BIGINT" property="id"/>
-            <result column="orderId" jdbcType="BIGINT" property="orderId"/>
-            <result column="operateMan" jdbcType="VARCHAR" property="operateMan"/>
-            <result column="createTime" jdbcType="TIMESTAMP" property="createTime"/>
-            <result column="orderStatus" jdbcType="INTEGER" property="orderStatus"/>
-            <result column="note" jdbcType="VARCHAR" property="note"/>
+        <collection property="historyList" ofType="com.su.mall.model.OmsOrderOperateHistory">
+            <id column="history_id" jdbcType="BIGINT" property="id"/>
+            <result column="history_order_id" jdbcType="BIGINT" property="orderId"/>
+            <result column="history_operate_man" jdbcType="VARCHAR" property="operateMan"/>
+            <result column="history_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+            <result column="history_order_status" jdbcType="INTEGER" property="orderStatus"/>
+            <result column="history_note" jdbcType="VARCHAR" property="note"/>
         </collection>
     </resultMap>
     <!-- 改为使用 resultType -->
@@ -140,15 +140,28 @@
     <select id="getDetail" resultMap="orderDetailResultMap">
         SELECT o.*,
             oi.id item_id,
+            oi.order_id item_order_id,
+            oi.order_sn item_order_sn,
             oi.product_id item_product_id,
-            oi.product_sn item_product_sn,
             oi.product_pic item_product_pic,
             oi.product_name item_product_name,
             oi.product_brand item_product_brand,
+            oi.product_sn item_product_sn,
             oi.product_price item_product_price,
             oi.product_quantity item_product_quantity,
+            oi.product_sku_id item_product_sku_id,
+            oi.product_sku_code item_product_sku_code,
+            oi.product_category_id item_product_category_id,
+            oi.promotion_name item_promotion_name,
+            oi.promotion_amount item_promotion_amount,
+            oi.coupon_amount item_coupon_amount,
+            oi.integration_amount item_integration_amount,
+            oi.real_amount item_real_amount,
+            oi.gift_integration item_gift_integration,
+            oi.gift_growth item_gift_growth,
             oi.product_attr item_product_attr,
             oh.id history_id,
+            oh.order_id history_order_id,
             oh.operate_man history_operate_man,
             oh.create_time history_create_time,
             oh.order_status history_order_status,

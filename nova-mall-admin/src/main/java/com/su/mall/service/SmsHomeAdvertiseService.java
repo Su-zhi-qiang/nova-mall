@@ -1,5 +1,6 @@
 package com.su.mall.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.model.SmsHomeAdvertise;
 
 import java.util.List;
@@ -37,5 +38,5 @@ public interface SmsHomeAdvertiseService {
     /**
      * 分页查询广告
      */
-    List<SmsHomeAdvertise> list(String name, Integer type, String endTime, Integer pageSize, Integer pageNum);
+    Page<SmsHomeAdvertise> list(String name, Integer type, String endTime, Integer pageSize, Integer pageNum);
 }

@@ -1,6 +1,7 @@
 package com.su.mall.controller;
 
 import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
 import com.su.mall.dto.UmsAdminLoginParam;
@@ -118,8 +119,8 @@ public class UmsAdminController {
     public CommonResult<CommonPage<UmsAdmin>> list(@RequestParam(value = "keyword", required = false) String keyword,
                                                    @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                                                    @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<UmsAdmin> adminList = adminService.list(keyword, pageSize, pageNum);
-        return CommonResult.success(CommonPage.restPage(adminList));
+        Page<UmsAdmin> adminPage = adminService.list(keyword, pageSize, pageNum);
+        return CommonResult.success(CommonPage.restPage(adminPage));
     }
 
     @Operation(summary = "获取指定用户信息")

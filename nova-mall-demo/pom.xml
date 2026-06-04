@@ -42,6 +42,12 @@
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
         </dependency>
+        <!-- Common 通用返回结果 -->
+        <dependency>
+            <groupId>com.su.mall</groupId>
+            <artifactId>nova-mall-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

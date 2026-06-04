@@ -1,8 +1,11 @@
 package com.su.mall.portal;
 
 import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.su.mall.common.api.CommonPage;
 import com.su.mall.mapper.PmsBrandMapper;
 import com.su.mall.model.PmsBrand;
+import com.su.mall.model.PmsProduct;
 import com.su.mall.portal.service.PmsPortalBrandService;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -41,14 +44,21 @@ public class MyBatisPlusPortalTests {
         LOGGER.info("========== 测试1：Portal 查询推荐品牌 ==========");
         
         // pageNum 应该从 1 开始，而不是 0
-        List<PmsBrand> brandList = portalBrandService.recommendList(1, 10);
+        Page<PmsBrand> brandPage = portalBrandService.list(1, 10);
         
-        assertNotNull(brandList, "品牌列表不应为 null");
+        assertNotNull(brandPage, "品牌分页对象不应为 null");
         
-        LOGGER.info("查询到品牌数量: {}", brandList.size());
-        if (CollUtil.isNotEmpty(brandList)) {
-            LOGGER.info("第一个品牌: {}", brandList.get(0).getName());
+        LOGGER.info("查询到品牌数量: {}", brandPage.getRecords().size());
+        LOGGER.info("总记录数: {}", brandPage.getTotal());
+        
+        if (CollUtil.isNotEmpty(brandPage.getRecords())) {
+            LOGGER.info("第一个品牌: {}", brandPage.getRecords().get(0).getName());
         }
+        
+        // 测试 CommonPage 转换
+        CommonPage<PmsBrand> commonPage = CommonPage.restPage(brandPage);
+        assertNotNull(commonPage);
+        LOGGER.info("CommonPage 转换成功，总页数: {}, 当前页: {}", commonPage.getTotalPage(), commonPage.getPageNum());
     }
 
     /**
@@ -94,6 +104,31 @@ public class MyBatisPlusPortalTests {
             PmsBrand brand = brandMapper.selectById(id);
             assertNotNull(brand);
             LOGGER.info("selectById 查询成功: {}", brand.getName());
+        }
+    }
+
+    /**
+     * 测试4：查询品牌关联商品
+     * 验证分页查询品牌关联商品
+     */
+    @Test
+    @Order(4)
+    @DisplayName("测试 Portal 查询品牌关联商品")
+    public void testProductList() {
+        LOGGER.info("========== 测试4：Portal 查询品牌关联商品 ==========");
+        
+        // 先查询一个存在的品牌 ID
+        List<PmsBrand> brandList = brandMapper.selectList(null);
+        if (CollUtil.isNotEmpty(brandList)) {
+            Long brandId = brandList.get(0).getId();
+            
+            Page<PmsProduct> productPage = portalBrandService.productList(brandId, 1, 10);
+            assertNotNull(productPage);
+            LOGGER.info("品牌 ID {} 关联商品数量: {}, 总记录数: {}", brandId, productPage.getRecords().size(), productPage.getTotal());
+            
+            if (CollUtil.isNotEmpty(productPage.getRecords())) {
+                LOGGER.info("第一个商品: {}", productPage.getRecords().get(0).getName());
+            }
         }
     }
 

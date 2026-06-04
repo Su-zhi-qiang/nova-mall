@@ -1,5 +1,6 @@
 package com.su.mall.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
 import com.su.mall.model.SmsHomeAdvertise;
@@ -79,7 +80,7 @@ public class SmsHomeAdvertiseController {
                                                            @RequestParam(value = "endTime", required = false) String endTime,
                                                            @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                                                            @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<SmsHomeAdvertise> advertiseList = advertiseService.list(name, type, endTime, pageSize, pageNum);
-        return CommonResult.success(CommonPage.restPage(advertiseList));
+        Page<SmsHomeAdvertise> advertisePage = advertiseService.list(name, type, endTime, pageSize, pageNum);
+        return CommonResult.success(CommonPage.restPage(advertisePage));
     }
 }

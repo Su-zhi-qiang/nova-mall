@@ -2,7 +2,7 @@ package com.su.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dao.UmsRoleDao;
 import com.su.mall.mapper.UmsRoleMapper;
 import com.su.mall.mapper.UmsRoleMenuRelationMapper;
@@ -62,14 +62,14 @@ public class UmsRoleServiceImpl implements UmsRoleService {
     }
 
     @Override
-    public List<UmsRole> list(String keyword, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
+    public Page<UmsRole> list(String keyword, Integer pageSize, Integer pageNum) {
+        Page<UmsRole> page = new Page<>(pageNum, pageSize);
         // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         LambdaQueryWrapper<UmsRole> wrapper = new LambdaQueryWrapper<>();
         if (!StrUtil.isEmpty(keyword)) {
             wrapper.like(UmsRole::getName, keyword);
         }
-        return roleMapper.selectList(wrapper);
+        return roleMapper.selectPage(page, wrapper);
     }
 
     @Override

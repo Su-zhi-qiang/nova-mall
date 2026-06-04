@@ -1,5 +1,6 @@
 package com.su.mall.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.model.SmsHomeNewProduct;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,5 +35,5 @@ public interface SmsHomeNewProductService {
     /**
      * 分页查询推荐
      */
-    List<SmsHomeNewProduct> list(String productName, Integer recommendStatus, Integer pageSize, Integer pageNum);
+    Page<SmsHomeNewProduct> list(String productName, Integer recommendStatus, Integer pageSize, Integer pageNum);
 }

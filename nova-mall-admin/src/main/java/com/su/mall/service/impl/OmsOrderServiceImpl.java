@@ -2,7 +2,7 @@ package com.su.mall.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dao.OmsOrderDao;
 import com.su.mall.dao.OmsOrderOperateHistoryDao;
 import com.su.mall.dto.*;
@@ -35,9 +35,10 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     private OmsOrderOperateHistoryMapper orderOperateHistoryMapper;
 
     @Override
-    public List<OmsOrder> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
-        return orderDao.getList(queryParam);
+    public Page<OmsOrder> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
+        Page<OmsOrder> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<OmsOrder> wrapper = new LambdaQueryWrapper<>();
+        return orderMapper.selectPage(page, wrapper);
     }
 
     @Override

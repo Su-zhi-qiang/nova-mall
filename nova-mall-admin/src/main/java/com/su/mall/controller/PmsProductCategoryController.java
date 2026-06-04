@@ -6,6 +6,7 @@ import com.su.mall.dto.PmsProductCategoryParam;
 import com.su.mall.dto.PmsProductCategoryWithChildrenItem;
 import com.su.mall.model.PmsProductCategory;
 import com.su.mall.service.PmsProductCategoryService;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,8 +59,8 @@ public class PmsProductCategoryController {
     public CommonResult<CommonPage<PmsProductCategory>> getList(@PathVariable Long parentId,
                                                                 @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                                                                 @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<PmsProductCategory> productCategoryList = productCategoryService.getList(parentId, pageSize, pageNum);
-        return CommonResult.success(CommonPage.restPage(productCategoryList));
+        Page<PmsProductCategory> categoryPage = productCategoryService.getList(parentId, pageSize, pageNum);
+        return CommonResult.success(CommonPage.restPage(categoryPage));
     }
 
     @Operation(summary = "根据id获取商品分类")

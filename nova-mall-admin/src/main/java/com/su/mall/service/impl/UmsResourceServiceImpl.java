@@ -2,7 +2,7 @@ package com.su.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.mapper.UmsResourceMapper;
 import com.su.mall.model.UmsResource;
 import com.su.mall.service.UmsAdminCacheService;
@@ -53,8 +53,8 @@ public class UmsResourceServiceImpl implements UmsResourceService {
     }
 
     @Override
-    public List<UmsResource> list(Long categoryId, String nameKeyword, String urlKeyword, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum,pageSize);
+    public Page<UmsResource> list(Long categoryId, String nameKeyword, String urlKeyword, Integer pageSize, Integer pageNum) {
+        Page<UmsResource> page = new Page<>(pageNum, pageSize);
         // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         LambdaQueryWrapper<UmsResource> wrapper = new LambdaQueryWrapper<>();
         if(categoryId!=null){
@@ -66,7 +66,7 @@ public class UmsResourceServiceImpl implements UmsResourceService {
         if(StrUtil.isNotEmpty(urlKeyword)){
             wrapper.like(UmsResource::getUrl, urlKeyword);
         }
-        return resourceMapper.selectList(wrapper);
+        return resourceMapper.selectPage(page, wrapper);
     }
 
     @Override

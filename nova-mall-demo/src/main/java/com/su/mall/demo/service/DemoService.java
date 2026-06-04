@@ -1,5 +1,6 @@
 package com.su.mall.demo.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.demo.dto.PmsBrandDto;
 import com.su.mall.model.PmsBrand;
 
@@ -18,7 +19,7 @@ public interface DemoService {
 
     int deleteBrand(Long id);
 
-    List<PmsBrand> listBrand(int pageNum, int pageSize);
+    Page<PmsBrand> listBrand(int pageNum, int pageSize);
 
     PmsBrand getBrand(Long id);
 }

@@ -1,5 +1,6 @@
 package com.su.mall.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dto.OmsOrderReturnApplyResult;
 import com.su.mall.dto.OmsReturnApplyQueryParam;
 import com.su.mall.dto.OmsUpdateStatusParam;
@@ -15,7 +16,7 @@ public interface OmsOrderReturnApplyService {
     /**
      * 分页查询申请
      */
-    List<OmsOrderReturnApply> list(OmsReturnApplyQueryParam queryParam, Integer pageSize, Integer pageNum);
+    Page<OmsOrderReturnApply> list(OmsReturnApplyQueryParam queryParam, Integer pageSize, Integer pageNum);
 
     /**
      * 批量删除申请

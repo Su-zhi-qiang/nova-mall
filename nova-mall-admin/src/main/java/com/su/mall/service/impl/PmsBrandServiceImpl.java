@@ -3,7 +3,7 @@ package com.su.mall.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dto.PmsBrandParam;
 import com.su.mall.mapper.PmsBrandMapper;
 import com.su.mall.mapper.PmsProductMapper;
@@ -78,10 +78,10 @@ public class PmsBrandServiceImpl implements PmsBrandService {
     }
 
     @Override
-    public List<PmsBrand> listBrand(String keyword, Integer showStatus, int pageNum, int pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
+    public Page<PmsBrand> listBrand(String keyword, Integer showStatus, int pageNum, int pageSize) {
+        Page<PmsBrand> page = new Page<>(pageNum, pageSize);
         // ✅ 改造：LambdaQueryWrapper 替代 Example
-        return brandMapper.selectList(
+        return brandMapper.selectPage(page,
             new LambdaQueryWrapper<PmsBrand>()
                 .like(!StrUtil.isEmpty(keyword), PmsBrand::getName, keyword)
                 .eq(showStatus != null, PmsBrand::getShowStatus, showStatus)

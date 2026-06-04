@@ -2,7 +2,7 @@ package com.su.mall.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.mapper.OmsOrderReturnReasonMapper;
 import com.su.mall.model.OmsOrderReturnReason;
 import com.su.mall.service.OmsOrderReturnReasonService;
@@ -42,12 +42,12 @@ public class OmsOrderReturnReasonServiceImpl implements OmsOrderReturnReasonServ
     }
 
     @Override
-    public List<OmsOrderReturnReason> list(Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum,pageSize);
+    public Page<OmsOrderReturnReason> list(Integer pageSize, Integer pageNum) {
+        Page<OmsOrderReturnReason> page = new Page<>(pageNum, pageSize);
         // ✅ 改造：selectByExample → selectList
         LambdaQueryWrapper<OmsOrderReturnReason> wrapper = new LambdaQueryWrapper<>();
         wrapper.orderByDesc(OmsOrderReturnReason::getSort);
-        return returnReasonMapper.selectList(wrapper);
+        return returnReasonMapper.selectPage(page, wrapper);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.su.mall.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
 import com.su.mall.model.SmsFlashPromotion;
@@ -81,7 +82,7 @@ public class SmsFlashPromotionController {
     public CommonResult<CommonPage<SmsFlashPromotion>> getItem(@RequestParam(value = "keyword", required = false) String keyword,
                           @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                           @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<SmsFlashPromotion> flashPromotionList = flashPromotionService.list(keyword, pageSize, pageNum);
-        return CommonResult.success(CommonPage.restPage(flashPromotionList));
+        Page<SmsFlashPromotion> flashPromotionPage = flashPromotionService.list(keyword, pageSize, pageNum);
+        return CommonResult.success(CommonPage.restPage(flashPromotionPage));
     }
 }

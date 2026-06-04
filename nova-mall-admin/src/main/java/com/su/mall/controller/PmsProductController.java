@@ -1,5 +1,6 @@
 package com.su.mall.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
 import com.su.mall.dto.PmsProductParam;
@@ -62,10 +63,10 @@ public class PmsProductController {
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     public CommonResult<CommonPage<PmsProduct>> getList(PmsProductQueryParam productQueryParam,
-                                                        @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
+                                                        @RequestParam(value = "pageSize", defaultValue = "50") Integer pageSize,
                                                         @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<PmsProduct> productList = productService.list(productQueryParam, pageSize, pageNum);
-        return CommonResult.success(CommonPage.restPage(productList));
+        Page<PmsProduct> productPage = productService.listPage(productQueryParam, pageSize, pageNum);
+        return CommonResult.success(CommonPage.restPage(productPage));
     }
 
     @Operation(summary = "根据商品名称或货号模糊查询")

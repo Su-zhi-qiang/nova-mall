@@ -2,7 +2,7 @@ package com.su.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.mapper.CmsSubjectMapper;
 import com.su.mall.model.CmsSubject;
 import com.su.mall.service.CmsSubjectService;
@@ -27,13 +27,13 @@ public class CmsSubjectServiceImpl implements CmsSubjectService {
     }
 
     @Override
-    public List<CmsSubject> list(String keyword, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
+    public Page<CmsSubject> list(String keyword, Integer pageNum, Integer pageSize) {
+        Page<CmsSubject> page = new Page<>(pageNum, pageSize);
         // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         LambdaQueryWrapper<CmsSubject> wrapper = new LambdaQueryWrapper<>();
         if (!StrUtil.isEmpty(keyword)) {
             wrapper.like(CmsSubject::getTitle, keyword);
         }
-        return subjectMapper.selectList(wrapper);
+        return subjectMapper.selectPage(page, wrapper);
     }
 }

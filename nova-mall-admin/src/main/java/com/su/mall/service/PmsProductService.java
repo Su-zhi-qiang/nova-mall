@@ -1,5 +1,6 @@
 package com.su.mall.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dto.PmsProductParam;
 import com.su.mall.dto.PmsProductQueryParam;
 import com.su.mall.dto.PmsProductResult;
@@ -33,9 +34,9 @@ public interface PmsProductService {
     int update(Long id, PmsProductParam productParam);
 
     /**
-     * 分页查询商品
+     * 分页查询商品（使用 MyBatis-Plus）
      */
-    List<PmsProduct> list(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum);
+    Page<PmsProduct> listPage(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum);
 
     /**
      * 批量修改审核状态
@@ -67,7 +68,7 @@ public interface PmsProductService {
     int updateDeleteStatus(List<Long> ids, Integer deleteStatus);
 
     /**
-     * 根据商品名称或者货号模糊查询
+     * 根据商品名称或货号模糊查询
      */
     List<PmsProduct> list(String keyword);
 }

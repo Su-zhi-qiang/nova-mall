@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
 /**
  * 退货原因管理Controller
  * @author Su
@@ -61,8 +63,8 @@ public class OmsOrderReturnReasonController {
     @ResponseBody
     public CommonResult<CommonPage<OmsOrderReturnReason>> list(@RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                                                                @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<OmsOrderReturnReason> reasonList = orderReturnReasonService.list(pageSize, pageNum);
-        return CommonResult.success(CommonPage.restPage(reasonList));
+        Page<OmsOrderReturnReason> reasonPage = orderReturnReasonService.list(pageSize, pageNum);
+        return CommonResult.success(CommonPage.restPage(reasonPage));
     }
 
     @Operation(summary = "获取单个退货原因详情信息")

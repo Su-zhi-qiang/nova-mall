@@ -1,5 +1,6 @@
 package com.su.mall.portal.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonPage;
 import com.su.mall.model.PmsBrand;
 import com.su.mall.model.PmsProduct;
@@ -14,7 +15,7 @@ public interface PmsPortalBrandService {
     /**
      * 分页获取推荐品牌
      */
-    List<PmsBrand> recommendList(Integer pageNum, Integer pageSize);
+    Page<PmsBrand> list(Integer pageNum, Integer pageSize);
 
     /**
      * 获取品牌详情
@@ -24,5 +25,5 @@ public interface PmsPortalBrandService {
     /**
      * 分页获取品牌关联商品
      */
-    CommonPage<PmsProduct> productList(Long brandId, Integer pageNum, Integer pageSize);
+    Page<PmsProduct> productList(Long brandId, Integer pageNum, Integer pageSize);
 }

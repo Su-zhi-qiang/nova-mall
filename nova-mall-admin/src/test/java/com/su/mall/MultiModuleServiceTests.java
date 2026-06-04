@@ -1,6 +1,8 @@
 package com.su.mall;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.su.mall.common.api.CommonPage;
 import com.su.mall.mapper.PmsProductCategoryMapper;
 import com.su.mall.mapper.PmsBrandMapper;
 import com.su.mall.mapper.PmsProductMapper;
@@ -65,10 +67,11 @@ public class MultiModuleServiceTests {
         LOGGER.info("========== 测试 PmsProductCategoryService ==========");
         
         // 测试查询顶级分类
-        List<PmsProductCategory> list = categoryService.getList(0L, 1, 10);
+        Page<PmsProductCategory> categoryPage = categoryService.getList(0L, 10, 1);
+        assertNotNull(categoryPage, "分类分页对象不应为 null");
         
-        assertNotNull(list, "分类列表不应为 null");
-        LOGGER.info("查询到 {} 个顶级分类", list.size());
+        List<PmsProductCategory> list = categoryPage.getRecords();
+        LOGGER.info("查询到 {} 个顶级分类，总记录数: {}", list.size(), categoryPage.getTotal());
         
         // 测试根据 ID 查询单个分类
         if (!list.isEmpty()) {
@@ -96,9 +99,9 @@ public class MultiModuleServiceTests {
         LOGGER.info("查询到 {} 个品牌", allBrands.size());
         
         // 测试分页查询
-        List<PmsBrand> pageBrands = brandService.listBrand("小米", null, 1, 10);
-        assertNotNull(pageBrands);
-        LOGGER.info("关键词'小米'查询到 {} 个品牌", pageBrands.size());
+        Page<PmsBrand> brandPage = brandService.listBrand("小米", null, 1, 10);
+        assertNotNull(brandPage);
+        LOGGER.info("关键词'小米'查询到 {} 个品牌，总记录数: {}", brandPage.getRecords().size(), brandPage.getTotal());
         
         // 测试根据 ID 查询
         if (!allBrands.isEmpty()) {
@@ -118,16 +121,18 @@ public class MultiModuleServiceTests {
         LOGGER.info("========== 测试 SmsHomeBrandService ==========");
         
         // 测试查询所有推荐品牌
-        List<SmsHomeBrand> allBrands = homeBrandService.list(null, null, 10, 1);
-        assertNotNull(allBrands);
-        LOGGER.info("查询到 {} 个首页品牌", allBrands.size());
+        Page<SmsHomeBrand> brandPage = homeBrandService.list(null, null, 10, 1);
+        assertNotNull(brandPage);
+        LOGGER.info("查询到 {} 个首页品牌，总记录数: {}", brandPage.getRecords().size(), brandPage.getTotal());
+        
+        List<SmsHomeBrand> allBrands = brandPage.getRecords();
         
         // 测试按品牌名称查询
         if (!allBrands.isEmpty()) {
             String brandName = allBrands.get(0).getBrandName();
-            List<SmsHomeBrand> filteredBrands = homeBrandService.list(brandName, null, 10, 1);
-            assertNotNull(filteredBrands);
-            LOGGER.info("品牌名称'{}'查询到 {} 个结果", brandName, filteredBrands.size());
+            Page<SmsHomeBrand> filteredPage = homeBrandService.list(brandName, null, 10, 1);
+            assertNotNull(filteredPage);
+            LOGGER.info("品牌名称'{}'查询到 {} 个结果", brandName, filteredPage.getRecords().size());
         }
     }
 
@@ -309,15 +314,22 @@ public class MultiModuleServiceTests {
         LOGGER.info("========== 测试分页查询 ==========");
         
         // 测试商品分类分页查询
-        List<PmsProductCategory> allCategories = categoryService.getList(0L, 1, 100);
-        assertNotNull(allCategories);
-        int totalCount = allCategories.size();
+        Page<PmsProductCategory> categoryPage = categoryService.getList(0L, 100, 1);
+        assertNotNull(categoryPage);
+        
+        List<PmsProductCategory> allCategories = categoryPage.getRecords();
+        int totalCount = (int) categoryPage.getTotal();
         LOGGER.info("数据库总共有 {} 个一级分类", totalCount);
         
         // 测试首页品牌分页
-        List<SmsHomeBrand> brandPage1 = homeBrandService.list(null, null, 3, 1);
-        assertNotNull(brandPage1);
-        LOGGER.info("首页品牌第1页查询到 {} 个", brandPage1.size());
+        Page<SmsHomeBrand> brandPage = homeBrandService.list(null, null, 3, 1);
+        assertNotNull(brandPage);
+        LOGGER.info("首页品牌第1页查询到 {} 个，总记录数: {}", brandPage.getRecords().size(), brandPage.getTotal());
+        
+        // 测试 CommonPage 转换
+        CommonPage<SmsHomeBrand> commonPage = CommonPage.restPage(brandPage);
+        assertNotNull(commonPage);
+        LOGGER.info("CommonPage 转换成功，总页数: {}, 当前页: {}", commonPage.getTotalPage(), commonPage.getPageNum());
     }
 
     /**

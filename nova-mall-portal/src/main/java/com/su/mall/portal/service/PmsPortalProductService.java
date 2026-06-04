@@ -1,5 +1,6 @@
 package com.su.mall.portal.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.model.PmsProduct;
 import com.su.mall.portal.domain.PmsPortalProductDetail;
 import com.su.mall.portal.domain.PmsProductCategoryNode;
@@ -14,7 +15,7 @@ public interface PmsPortalProductService {
     /**
      * 综合搜索商品
      */
-    List<PmsProduct> search(String keyword, Long brandId, Long productCategoryId, Integer pageNum, Integer pageSize, Integer sort);
+    Page<PmsProduct> search(String keyword, Long brandId, Long productCategoryId, Integer pageNum, Integer pageSize, Integer sort);
 
     /**
      * 以树形结构获取所有商品分类

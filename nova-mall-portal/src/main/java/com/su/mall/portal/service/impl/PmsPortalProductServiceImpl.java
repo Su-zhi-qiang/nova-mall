@@ -3,7 +3,7 @@ package com.su.mall.portal.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.mapper.*;
 import com.su.mall.model.*;
 import com.su.mall.portal.dao.PortalProductDao;
@@ -43,10 +43,10 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
     private PortalProductDao portalProductDao;
 
     @Override
-    public List<PmsProduct> search(String keyword, Long brandId, Long productCategoryId, Integer pageNum, Integer pageSize, Integer sort) {
-        PageHelper.startPage(pageNum, pageSize);
+    public Page<PmsProduct> search(String keyword, Long brandId, Long productCategoryId, Integer pageNum, Integer pageSize, Integer sort) {
+        Page<PmsProduct> page = new Page<>(pageNum, pageSize);
         // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<PmsProduct>())
-        return productMapper.selectList(new LambdaQueryWrapper<PmsProduct>()
+        LambdaQueryWrapper<PmsProduct> wrapper = new LambdaQueryWrapper<PmsProduct>()
                 .eq(PmsProduct::getDeleteStatus, 0)
                 .eq(PmsProduct::getPublishStatus, 1)
                 .like(StrUtil.isNotEmpty(keyword), PmsProduct::getName, keyword)
@@ -55,7 +55,8 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
                 .orderByDesc(sort == 1 ? PmsProduct::getId : null)
                 .orderByDesc(sort == 2 ? PmsProduct::getSale : null)
                 .orderByAsc(sort == 3 ? PmsProduct::getPrice : null)
-                .orderByDesc(sort == 4 ? PmsProduct::getPrice : null));
+                .orderByDesc(sort == 4 ? PmsProduct::getPrice : null);
+        return productMapper.selectPage(page, wrapper);
     }
 
     @Override

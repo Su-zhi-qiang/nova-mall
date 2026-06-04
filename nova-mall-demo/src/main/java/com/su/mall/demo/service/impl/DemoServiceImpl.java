@@ -1,7 +1,7 @@
 package com.su.mall.demo.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.demo.dto.PmsBrandDto;
 import com.su.mall.demo.service.DemoService;
 import com.su.mall.mapper.PmsBrandMapper;
@@ -47,9 +47,9 @@ public class DemoServiceImpl implements DemoService {
     }
 
     @Override
-    public List<PmsBrand> listBrand(int pageNum, int pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
-        return brandMapper.selectList(new LambdaQueryWrapper<>());
+    public Page<PmsBrand> listBrand(int pageNum, int pageSize) {
+        Page<PmsBrand> page = new Page<>(pageNum, pageSize);
+        return brandMapper.selectPage(page, new LambdaQueryWrapper<>());
     }
 
     @Override

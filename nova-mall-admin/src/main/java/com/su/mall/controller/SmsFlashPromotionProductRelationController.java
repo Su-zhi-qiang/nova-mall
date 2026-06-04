@@ -1,5 +1,6 @@
 package com.su.mall.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
 import com.su.mall.dto.SmsFlashPromotionProduct;
@@ -68,11 +69,10 @@ public class SmsFlashPromotionProductRelationController {
     @Operation(summary = "分页查询不同场次关联及商品信息")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult<CommonPage<SmsFlashPromotionProduct>> list(@RequestParam(value = "flashPromotionId") Long flashPromotionId,
-                                                                   @RequestParam(value = "flashPromotionSessionId") Long flashPromotionSessionId,
-                                                                   @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
-                                                                   @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<SmsFlashPromotionProduct> flashPromotionProductList = relationService.list(flashPromotionId, flashPromotionSessionId, pageSize, pageNum);
-        return CommonResult.success(CommonPage.restPage(flashPromotionProductList));
+    public CommonResult<CommonPage<SmsFlashPromotionProductRelation>> list(@RequestParam(value = "flashPromotionSessionId") Long sessionId,
+                                                                           @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
+                                                                           @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
+        Page<SmsFlashPromotionProductRelation> relationPage = relationService.list(sessionId, pageSize, pageNum);
+        return CommonResult.success(CommonPage.restPage(relationPage));
     }
 }

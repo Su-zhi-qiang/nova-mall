@@ -1,6 +1,8 @@
 package com.su.mall;
 
 import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.su.mall.common.api.CommonPage;
 import com.su.mall.dto.PmsBrandParam;
 import com.su.mall.mapper.PmsBrandMapper;
 import com.su.mall.model.PmsBrand;
@@ -66,18 +68,24 @@ public class MyBatisPlusTests {
         LOGGER.info("========== 测试2：分页查询品牌 ==========");
         
         // 测试空条件查询
-        List<PmsBrand> brandList1 = brandService.listBrand(null, null, 1, 10);
-        assertNotNull(brandList1);
+        Page<PmsBrand> brandPage1 = brandService.listBrand(null, null, 1, 10);
+        assertNotNull(brandPage1);
+        LOGGER.info("空条件查询到 {} 条记录，总记录数: {}", brandPage1.getRecords().size(), brandPage1.getTotal());
         
         // 测试关键词查询
-        List<PmsBrand> brandList2 = brandService.listBrand("小米", null, 1, 10);
-        assertNotNull(brandList2);
-        LOGGER.info("关键词'小米'查询结果数量: {}", brandList2.size());
+        Page<PmsBrand> brandPage2 = brandService.listBrand("小米", null, 1, 10);
+        assertNotNull(brandPage2);
+        LOGGER.info("关键词'小米'查询结果数量: {}", brandPage2.getRecords().size());
         
         // 测试状态查询
-        List<PmsBrand> brandList3 = brandService.listBrand(null, 1, 1, 10);
-        assertNotNull(brandList3);
-        LOGGER.info("显示状态为1的品牌数量: {}", brandList3.size());
+        Page<PmsBrand> brandPage3 = brandService.listBrand(null, 1, 1, 10);
+        assertNotNull(brandPage3);
+        LOGGER.info("显示状态为1的品牌数量: {}", brandPage3.getRecords().size());
+        
+        // 测试 CommonPage 转换
+        CommonPage<PmsBrand> commonPage = CommonPage.restPage(brandPage1);
+        assertNotNull(commonPage);
+        LOGGER.info("CommonPage 转换成功，总页数: {}, 总记录数: {}", commonPage.getTotalPage(), commonPage.getTotal());
     }
 
     /**
@@ -240,7 +248,8 @@ public class MyBatisPlusTests {
         LOGGER.info("========== 测试7：批量更新显示状态 ==========");
         
         // 先查询几个品牌
-        List<PmsBrand> brandList = brandService.listBrand(null, null, 1, 5);
+        Page<PmsBrand> brandPage = brandService.listBrand(null, null, 1, 5);
+        List<PmsBrand> brandList = brandPage.getRecords();
         if (CollUtil.isNotEmpty(brandList)) {
             List<Long> ids = CollUtil.map(brandList, PmsBrand::getId, true);
             
@@ -271,7 +280,8 @@ public class MyBatisPlusTests {
     public void testUpdateFactoryStatus() {
         LOGGER.info("========== 测试8：批量更新厂家状态 ==========");
         
-        List<PmsBrand> brandList = brandService.listBrand(null, null, 1, 5);
+        Page<PmsBrand> brandPage = brandService.listBrand(null, null, 1, 5);
+        List<PmsBrand> brandList = brandPage.getRecords();
         if (CollUtil.isNotEmpty(brandList)) {
             List<Long> ids = CollUtil.map(brandList, PmsBrand::getId, true);
             

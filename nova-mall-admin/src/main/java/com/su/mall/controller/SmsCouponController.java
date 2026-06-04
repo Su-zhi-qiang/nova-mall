@@ -1,5 +1,6 @@
 package com.su.mall.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
 import com.su.mall.dto.SmsCouponParam;
@@ -64,8 +65,8 @@ public class SmsCouponController {
             @RequestParam(value = "type",required = false) Integer type,
             @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
             @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<SmsCoupon> couponList = couponService.list(name,type,pageSize,pageNum);
-        return CommonResult.success(CommonPage.restPage(couponList));
+        Page<SmsCoupon> couponPage = couponService.list(name,type,pageSize,pageNum);
+        return CommonResult.success(CommonPage.restPage(couponPage));
     }
 
     @Operation(summary = "获取单个优惠券的详细信息")

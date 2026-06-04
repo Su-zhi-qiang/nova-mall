@@ -1,7 +1,7 @@
 package com.su.mall.portal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.mapper.*;
 import com.su.mall.model.*;
 import com.su.mall.portal.dao.HomeDao;
@@ -57,11 +57,11 @@ public class HomeServiceImpl implements HomeService {
     }
 
     @Override
-    public List<PmsProduct> recommendProductList(Integer pageSize, Integer pageNum) {
+    public Page<PmsProduct> recommendProductList(Integer pageSize, Integer pageNum) {
         // TODO: 2019/1/29 暂时默认推荐所有商品
-        PageHelper.startPage(pageNum,pageSize);
+        Page<PmsProduct> page = new Page<>(pageNum, pageSize);
         // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<PmsProduct>())
-        return productMapper.selectList(
+        return productMapper.selectPage(page,
                 new LambdaQueryWrapper<PmsProduct>()
                         .eq(PmsProduct::getDeleteStatus, 0)
                         .eq(PmsProduct::getPublishStatus, 1));
@@ -78,25 +78,34 @@ public class HomeServiceImpl implements HomeService {
     }
 
     @Override
-    public List<CmsSubject> getSubjectList(Long cateId, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum,pageSize);
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<CmsSubject>())
-        return subjectMapper.selectList(
+    public Page<CmsSubject> getSubjectList(Long cateId, Integer pageSize, Integer pageNum) {
+        Page<CmsSubject> page = new Page<>(pageNum, pageSize);
+        return subjectMapper.selectPage(page,
                 new LambdaQueryWrapper<CmsSubject>()
                         .eq(CmsSubject::getShowStatus, 1)
                         .eq(cateId != null, CmsSubject::getCategoryId, cateId));
     }
 
     @Override
-    public List<PmsProduct> hotProductList(Integer pageNum, Integer pageSize) {
+    public Page<PmsProduct> hotProductList(Integer pageNum, Integer pageSize) {
         int offset = pageSize * (pageNum - 1);
-        return homeDao.getHotProductList(offset, pageSize);
+        List<PmsProduct> productList = homeDao.getHotProductList(offset, pageSize);
+        Page<PmsProduct> page = new Page<>(pageNum, pageSize);
+        page.setRecords(productList);
+        page.setTotal(productList.size());
+        page.setPages(productList.size() > 0 ? 1 : 0);
+        return page;
     }
 
     @Override
-    public List<PmsProduct> newProductList(Integer pageNum, Integer pageSize) {
+    public Page<PmsProduct> newProductList(Integer pageNum, Integer pageSize) {
         int offset = pageSize * (pageNum - 1);
-        return homeDao.getNewProductList(offset, pageSize);
+        List<PmsProduct> productList = homeDao.getNewProductList(offset, pageSize);
+        Page<PmsProduct> page = new Page<>(pageNum, pageSize);
+        page.setRecords(productList);
+        page.setTotal(productList.size());
+        page.setPages(productList.size() > 0 ? 1 : 0);
+        return page;
     }
 
     private HomeFlashPromotion getHomeFlashPromotion() {

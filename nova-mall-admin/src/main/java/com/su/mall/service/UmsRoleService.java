@@ -1,5 +1,6 @@
 package com.su.mall.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.model.UmsMenu;
 import com.su.mall.model.UmsResource;
 import com.su.mall.model.UmsRole;
@@ -35,7 +36,7 @@ public interface UmsRoleService {
     /**
      * 分页获取角色列表
      */
-    List<UmsRole> list(String keyword, Integer pageSize, Integer pageNum);
+    Page<UmsRole> list(String keyword, Integer pageSize, Integer pageNum);
 
     /**
      * 根据管理员ID获取对应菜单

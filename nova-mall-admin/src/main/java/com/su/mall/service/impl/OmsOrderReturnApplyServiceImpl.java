@@ -1,7 +1,7 @@
 package com.su.mall.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dao.OmsOrderReturnApplyDao;
 import com.su.mall.dto.OmsOrderReturnApplyResult;
 import com.su.mall.dto.OmsReturnApplyQueryParam;
@@ -26,9 +26,10 @@ public class OmsOrderReturnApplyServiceImpl implements OmsOrderReturnApplyServic
     @Autowired
     private OmsOrderReturnApplyMapper returnApplyMapper;
     @Override
-    public List<OmsOrderReturnApply> list(OmsReturnApplyQueryParam queryParam, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum,pageSize);
-        return returnApplyDao.getList(queryParam);
+    public Page<OmsOrderReturnApply> list(OmsReturnApplyQueryParam queryParam, Integer pageSize, Integer pageNum) {
+        Page<OmsOrderReturnApply> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<OmsOrderReturnApply> wrapper = new LambdaQueryWrapper<>();
+        return returnApplyMapper.selectPage(page, wrapper);
     }
 
     @Override

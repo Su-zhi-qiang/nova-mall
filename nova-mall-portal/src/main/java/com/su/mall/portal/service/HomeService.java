@@ -1,5 +1,6 @@
 package com.su.mall.portal.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.model.CmsSubject;
 import com.su.mall.model.PmsProduct;
 import com.su.mall.model.PmsProductCategory;
@@ -21,7 +22,7 @@ public interface HomeService {
     /**
      * 首页商品推荐
      */
-    List<PmsProduct> recommendProductList(Integer pageSize, Integer pageNum);
+    Page<PmsProduct> recommendProductList(Integer pageSize, Integer pageNum);
 
     /**
      * 获取商品分类
@@ -33,15 +34,15 @@ public interface HomeService {
      * 根据专题分类分页获取专题
      * @param cateId 专题分类id
      */
-    List<CmsSubject> getSubjectList(Long cateId, Integer pageSize, Integer pageNum);
+    Page<CmsSubject> getSubjectList(Long cateId, Integer pageSize, Integer pageNum);
 
     /**
      * 分页获取人气推荐商品
      */
-    List<PmsProduct> hotProductList(Integer pageNum, Integer pageSize);
+    Page<PmsProduct> hotProductList(Integer pageNum, Integer pageSize);
 
     /**
      * 分页获取新品推荐商品
      */
-    List<PmsProduct> newProductList(Integer pageNum, Integer pageSize);
+    Page<PmsProduct> newProductList(Integer pageNum, Integer pageSize);
 }

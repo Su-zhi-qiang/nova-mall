@@ -1,7 +1,7 @@
 package com.su.mall.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dao.PmsProductAttributeDao;
 import com.su.mall.dto.PmsProductAttributeParam;
 import com.su.mall.dto.ProductAttrInfo;
@@ -30,10 +30,9 @@ public class PmsProductAttributeServiceImpl implements PmsProductAttributeServic
     private PmsProductAttributeDao productAttributeDao;
 
     @Override
-    public List<PmsProductAttribute> getList(Long cid, Integer type, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
-        // ✅ 改造：LambdaQueryWrapper 替代 Example
-        return productAttributeMapper.selectList(
+    public Page<PmsProductAttribute> getList(Long cid, Integer type, Integer pageSize, Integer pageNum) {
+        Page<PmsProductAttribute> page = new Page<>(pageNum, pageSize);
+        return productAttributeMapper.selectPage(page,
             new LambdaQueryWrapper<PmsProductAttribute>()
                 .eq(PmsProductAttribute::getProductAttributeCategoryId, cid)
                 .eq(PmsProductAttribute::getType, type)

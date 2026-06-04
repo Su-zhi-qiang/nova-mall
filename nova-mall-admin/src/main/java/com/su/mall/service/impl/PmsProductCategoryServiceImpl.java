@@ -1,7 +1,7 @@
 package com.su.mall.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dao.PmsProductCategoryAttributeRelationDao;
 import com.su.mall.dao.PmsProductCategoryDao;
 import com.su.mall.dto.PmsProductCategoryParam;
@@ -102,10 +102,11 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
     }
 
     @Override
-    public List<PmsProductCategory> getList(Long parentId, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
+    public Page<PmsProductCategory> getList(Long parentId, Integer pageSize, Integer pageNum) {
+        Page<PmsProductCategory> page = new Page<>(pageNum, pageSize);
         // ✅ 改造：LambdaQueryWrapper 替代 Example
-        return productCategoryMapper.selectList(
+        return productCategoryMapper.selectPage(
+            page,
             new LambdaQueryWrapper<PmsProductCategory>()
                 .eq(PmsProductCategory::getParentId, parentId)
                 .orderByDesc(PmsProductCategory::getSort)

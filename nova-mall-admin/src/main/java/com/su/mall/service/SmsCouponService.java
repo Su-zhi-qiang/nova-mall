@@ -1,5 +1,6 @@
 package com.su.mall.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dto.SmsCouponParam;
 import com.su.mall.model.SmsCoupon;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +33,7 @@ public interface SmsCouponService {
     /**
      * 分页获取优惠券列表
      */
-    List<SmsCoupon> list(String name, Integer type, Integer pageSize, Integer pageNum);
+    Page<SmsCoupon> list(String name, Integer type, Integer pageSize, Integer pageNum);
 
     /**
      * 获取优惠券详情

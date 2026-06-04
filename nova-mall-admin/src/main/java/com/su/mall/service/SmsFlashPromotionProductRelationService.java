@@ -1,5 +1,6 @@
 package com.su.mall.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dto.SmsFlashPromotionProduct;
 import com.su.mall.model.SmsFlashPromotionProductRelation;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,10 +36,11 @@ public interface SmsFlashPromotionProductRelationService {
     /**
      * 分页查询相关商品及限时购促销信息
      *
-     * @param flashPromotionId        限时购id
-     * @param flashPromotionSessionId 限时购场次id
+     * @param sessionId 限时购场次id
+     * @param pageSize  每页数量
+     * @param pageNum   页码
      */
-    List<SmsFlashPromotionProduct> list(Long flashPromotionId, Long flashPromotionSessionId, Integer pageSize, Integer pageNum);
+    Page<SmsFlashPromotionProductRelation> list(Long sessionId, Integer pageSize, Integer pageNum);
 
     /**
      * 根据活动和场次id获取商品关系数量

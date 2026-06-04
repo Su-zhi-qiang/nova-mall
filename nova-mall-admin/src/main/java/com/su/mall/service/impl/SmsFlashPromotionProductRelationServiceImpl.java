@@ -1,7 +1,7 @@
 package com.su.mall.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dao.SmsFlashPromotionProductRelationDao;
 import com.su.mall.dto.SmsFlashPromotionProduct;
 import com.su.mall.mapper.SmsFlashPromotionProductRelationMapper;
@@ -49,10 +49,10 @@ public class SmsFlashPromotionProductRelationServiceImpl implements SmsFlashProm
     }
 
     @Override
-    public List<SmsFlashPromotionProduct> list(Long flashPromotionId, Long flashPromotionSessionId, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum,pageSize);
-        // ✅ 改造：保留手写的 DAO（getList）不动
-        return relationDao.getList(flashPromotionId,flashPromotionSessionId);
+    public Page<SmsFlashPromotionProductRelation> list(Long sessionId, Integer pageSize, Integer pageNum) {
+        Page<SmsFlashPromotionProductRelation> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<SmsFlashPromotionProductRelation> wrapper = new LambdaQueryWrapper<>();
+        return relationMapper.selectPage(page, wrapper);
     }
 
     @Override
