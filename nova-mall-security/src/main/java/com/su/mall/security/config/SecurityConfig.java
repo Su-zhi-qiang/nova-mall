@@ -4,6 +4,7 @@ import com.su.mall.security.component.DynamicAuthorizationManager;
 import com.su.mall.security.component.JwtAuthenticationTokenFilter;
 import com.su.mall.security.component.RestAuthenticationEntryPoint;
 import com.su.mall.security.component.RestfulAccessDeniedHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,16 +24,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    private IgnoreUrlsConfig ignoreUrlsConfig;
-    @Autowired
-    private RestfulAccessDeniedHandler restfulAccessDeniedHandler;
-    @Autowired
-    private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
-    @Autowired
-    private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
+    private final IgnoreUrlsConfig ignoreUrlsConfig;
+    private final RestfulAccessDeniedHandler restfulAccessDeniedHandler;
+    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    private final JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
+    
     @Autowired(required = false)
     private DynamicAuthorizationManager dynamicAuthorizationManager;
 

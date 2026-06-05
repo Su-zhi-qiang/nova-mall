@@ -5,7 +5,7 @@ import com.su.mall.model.UmsMemberReceiveAddress;
 import com.su.mall.portal.service.UmsMemberReceiveAddressService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,9 +18,9 @@ import java.util.List;
 @Controller
 @Tag(name = "UmsMemberReceiveAddressController", description = "会员收货地址管理")
 @RequestMapping("/member/address")
+@RequiredArgsConstructor
 public class UmsMemberReceiveAddressController {
-    @Autowired
-    private UmsMemberReceiveAddressService memberReceiveAddressService;
+    private final UmsMemberReceiveAddressService memberReceiveAddressService;
 
     @Operation(summary = "添加收货地址")
     @RequestMapping(value = "/add", method = RequestMethod.POST)

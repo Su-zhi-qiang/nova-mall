@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.mapper.SmsCouponHistoryMapper;
 import com.su.mall.model.SmsCouponHistory;
 import com.su.mall.service.SmsCouponHistoryService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,9 +14,9 @@ import org.springframework.stereotype.Service;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class SmsCouponHistoryServiceImpl implements SmsCouponHistoryService {
-    @Autowired
-    private SmsCouponHistoryMapper historyMapper;
+    private final SmsCouponHistoryMapper historyMapper;
     @Override
     public Page<SmsCouponHistory> list(Long couponId, Integer useStatus, String orderSn, Integer pageSize, Integer pageNum) {
         Page<SmsCouponHistory> page = new Page<>(pageNum, pageSize);

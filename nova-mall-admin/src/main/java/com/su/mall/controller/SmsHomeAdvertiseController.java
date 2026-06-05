@@ -7,7 +7,7 @@ import com.su.mall.model.SmsHomeAdvertise;
 import com.su.mall.service.SmsHomeAdvertiseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +20,9 @@ import java.util.List;
 @Controller
 @Tag(name = "SmsHomeAdvertiseController", description = "首页轮播广告管理")
 @RequestMapping("/home/advertise")
+@RequiredArgsConstructor
 public class SmsHomeAdvertiseController {
-    @Autowired
-    private SmsHomeAdvertiseService advertiseService;
+    private final SmsHomeAdvertiseService advertiseService;
 
     @Operation(summary = "添加广告")
     @RequestMapping(value = "/create", method = RequestMethod.POST)

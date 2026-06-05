@@ -9,7 +9,7 @@ import com.su.mall.model.PmsBrand;
 import com.su.mall.model.PmsProduct;
 import com.su.mall.portal.dao.HomeDao;
 import com.su.mall.portal.service.PmsPortalBrandService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,13 +19,11 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class PmsPortalBrandServiceImpl implements PmsPortalBrandService {
-    @Autowired
-    private HomeDao homeDao;
-    @Autowired
-    private PmsBrandMapper brandMapper;
-    @Autowired
-    private PmsProductMapper productMapper;
+    private final HomeDao homeDao;
+    private final PmsBrandMapper brandMapper;
+    private final PmsProductMapper productMapper;
 
     @Override
     public Page<PmsBrand> list(Integer pageNum, Integer pageSize) {

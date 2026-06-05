@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +24,9 @@ import java.util.List;
 @Controller
 @Tag(name = "EsProductController",description = "搜索商品管理")
 @RequestMapping("/esProduct")
+@RequiredArgsConstructor
 public class EsProductController {
-    @Autowired
-    private EsProductService esProductService;
+    private final EsProductService esProductService;
 
     @Operation(summary = "导入所有数据库中商品到ES")
     @RequestMapping(value = "/importAll", method = RequestMethod.POST)

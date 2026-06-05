@@ -5,7 +5,7 @@ import com.su.mall.model.UmsMemberLevel;
 import com.su.mall.service.UmsMemberLevelService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -21,9 +21,9 @@ import java.util.List;
 @Controller
 @Tag(name = "UmsMemberLevelController", description = "会员等级管理")
 @RequestMapping("/memberLevel")
+@RequiredArgsConstructor
 public class UmsMemberLevelController {
-    @Autowired
-    private UmsMemberLevelService memberLevelService;
+    private final UmsMemberLevelService memberLevelService;
 
     @Operation(summary = "查询所有会员等级")
     @RequestMapping(value = "/list", method = RequestMethod.GET)

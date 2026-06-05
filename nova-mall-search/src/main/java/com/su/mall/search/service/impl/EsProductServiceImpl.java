@@ -5,11 +5,11 @@ import com.su.mall.search.dao.EsProductDao;
 import com.su.mall.search.domain.EsProduct;
 import com.su.mall.search.domain.EsProductRelatedInfo;
 import com.su.mall.search.service.EsProductService;
+import lombok.RequiredArgsConstructor;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -28,14 +28,13 @@ import java.util.stream.Collectors;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class EsProductServiceImpl implements EsProductService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EsProductServiceImpl.class);
 
-    @Autowired
-    private EsProductDao productDao;
+    private final EsProductDao productDao;
 
-    @Autowired
-    private EsClientService esClientService;
+    private final EsClientService esClientService;
 
     @Override
     public int importAll() {

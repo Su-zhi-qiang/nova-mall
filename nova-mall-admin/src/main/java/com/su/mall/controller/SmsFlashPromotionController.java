@@ -7,7 +7,7 @@ import com.su.mall.model.SmsFlashPromotion;
 import com.su.mall.service.SmsFlashPromotionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +20,9 @@ import java.util.List;
 @Controller
 @Tag(name = "SmsFlashPromotionController", description = "限时购活动管理")
 @RequestMapping("/flash")
+@RequiredArgsConstructor
 public class SmsFlashPromotionController {
-    @Autowired
-    private SmsFlashPromotionService flashPromotionService;
+    private final SmsFlashPromotionService flashPromotionService;
 
     @Operation(summary = "添加活动")
     @RequestMapping(value = "/create", method = RequestMethod.POST)

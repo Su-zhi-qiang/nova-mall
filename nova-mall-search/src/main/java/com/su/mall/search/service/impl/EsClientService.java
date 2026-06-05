@@ -3,6 +3,7 @@ package com.su.mall.search.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -20,20 +21,19 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.xcontent.XContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class EsClientService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EsClientService.class);
     private static final String INDEX_NAME = "pms";
 
-    @Autowired
-    private RestHighLevelClient restHighLevelClient;
+    private final RestHighLevelClient restHighLevelClient;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 

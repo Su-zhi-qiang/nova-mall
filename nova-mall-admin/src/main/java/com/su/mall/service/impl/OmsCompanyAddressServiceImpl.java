@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.su.mall.mapper.OmsCompanyAddressMapper;
 import com.su.mall.model.OmsCompanyAddress;
 import com.su.mall.service.OmsCompanyAddressService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,9 +14,9 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class OmsCompanyAddressServiceImpl implements OmsCompanyAddressService {
-    @Autowired
-    private OmsCompanyAddressMapper companyAddressMapper;
+    private final OmsCompanyAddressMapper companyAddressMapper;
     
     @Override
     public List<OmsCompanyAddress> list() {

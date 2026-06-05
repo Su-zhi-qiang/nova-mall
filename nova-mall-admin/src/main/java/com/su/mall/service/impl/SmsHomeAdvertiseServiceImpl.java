@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.mapper.SmsHomeAdvertiseMapper;
 import com.su.mall.model.SmsHomeAdvertise;
 import com.su.mall.service.SmsHomeAdvertiseService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
@@ -20,9 +20,9 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class SmsHomeAdvertiseServiceImpl implements SmsHomeAdvertiseService {
-    @Autowired
-    private SmsHomeAdvertiseMapper advertiseMapper;
+    private final SmsHomeAdvertiseMapper advertiseMapper;
 
     @Override
     public int create(SmsHomeAdvertise advertise) {

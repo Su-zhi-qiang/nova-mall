@@ -6,8 +6,8 @@ import com.su.mall.mapper.SmsFlashPromotionSessionMapper;
 import com.su.mall.model.SmsFlashPromotionSession;
 import com.su.mall.service.SmsFlashPromotionProductRelationService;
 import com.su.mall.service.SmsFlashPromotionSessionService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,11 +19,10 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class SmsFlashPromotionSessionServiceImpl implements SmsFlashPromotionSessionService {
-    @Autowired
-    private SmsFlashPromotionSessionMapper promotionSessionMapper;
-    @Autowired
-    private SmsFlashPromotionProductRelationService relationService;
+    private final SmsFlashPromotionSessionMapper promotionSessionMapper;
+    private final SmsFlashPromotionProductRelationService relationService;
 
     @Override
     public int create(SmsFlashPromotionSession promotionSession) {

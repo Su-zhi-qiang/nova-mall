@@ -5,7 +5,7 @@ import com.su.mall.model.UmsResourceCategory;
 import com.su.mall.service.UmsResourceCategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,9 +18,9 @@ import java.util.List;
 @Controller
 @Tag(name = "UmsResourceCategoryController", description = "后台资源分类管理")
 @RequestMapping("/resourceCategory")
+@RequiredArgsConstructor
 public class UmsResourceCategoryController {
-    @Autowired
-    private UmsResourceCategoryService resourceCategoryService;
+    private final UmsResourceCategoryService resourceCategoryService;
 
     @Operation(summary = "查询所有后台资源分类")
     @RequestMapping(value = "/listAll", method = RequestMethod.GET)

@@ -22,7 +22,6 @@ import com.su.mall.service.UmsAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import lombok.RequiredArgsConstructor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -44,20 +44,15 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class UmsAdminServiceImpl implements UmsAdminService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UmsAdminServiceImpl.class);
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private UmsAdminMapper adminMapper;
-    @Autowired
-    private UmsAdminRoleRelationMapper adminRoleRelationMapper;
-    @Autowired
-    private UmsAdminRoleRelationDao adminRoleRelationDao;
-    @Autowired
-    private UmsAdminLoginLogMapper loginLogMapper;
+    private final JwtTokenUtil jwtTokenUtil;
+    private final PasswordEncoder passwordEncoder;
+    private final UmsAdminMapper adminMapper;
+    private final UmsAdminRoleRelationMapper adminRoleRelationMapper;
+    private final UmsAdminRoleRelationDao adminRoleRelationDao;
+    private final UmsAdminLoginLogMapper loginLogMapper;
 
     @Override
     public UmsAdmin getAdminByUsername(String username) {

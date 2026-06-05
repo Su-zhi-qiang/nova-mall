@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.mapper.SmsFlashPromotionMapper;
 import com.su.mall.model.SmsFlashPromotion;
 import com.su.mall.service.SmsFlashPromotionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -17,9 +17,9 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class SmsFlashPromotionServiceImpl implements SmsFlashPromotionService {
-    @Autowired
-    private SmsFlashPromotionMapper flashPromotionMapper;
+    private final SmsFlashPromotionMapper flashPromotionMapper;
 
     @Override
     public int create(SmsFlashPromotion flashPromotion) {

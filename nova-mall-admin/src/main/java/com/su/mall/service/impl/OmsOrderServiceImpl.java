@@ -11,7 +11,7 @@ import com.su.mall.mapper.OmsOrderOperateHistoryMapper;
 import com.su.mall.model.OmsOrder;
 import com.su.mall.model.OmsOrderOperateHistory;
 import com.su.mall.service.OmsOrderService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -24,15 +24,12 @@ import java.util.stream.Collectors;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class OmsOrderServiceImpl implements OmsOrderService {
-    @Autowired
-    private OmsOrderMapper orderMapper;
-    @Autowired
-    private OmsOrderDao orderDao;
-    @Autowired
-    private OmsOrderOperateHistoryDao orderOperateHistoryDao;
-    @Autowired
-    private OmsOrderOperateHistoryMapper orderOperateHistoryMapper;
+    private final OmsOrderMapper orderMapper;
+    private final OmsOrderDao orderDao;
+    private final OmsOrderOperateHistoryDao orderOperateHistoryDao;
+    private final OmsOrderOperateHistoryMapper orderOperateHistoryMapper;
 
     @Override
     public Page<OmsOrder> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {

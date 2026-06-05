@@ -6,7 +6,7 @@ import com.su.mall.portal.domain.MemberProductCollection;
 import com.su.mall.portal.service.MemberCollectionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @Tag(name = "MemberCollectionController",description = "会员收藏管理")
 @RequestMapping("/member/productCollection")
+@RequiredArgsConstructor
 public class MemberProductCollectionController {
-    @Autowired
-    private MemberCollectionService memberCollectionService;
+    private final MemberCollectionService memberCollectionService;
 
     @Operation(summary = "添加商品收藏")
     @RequestMapping(value = "/add", method = RequestMethod.POST)

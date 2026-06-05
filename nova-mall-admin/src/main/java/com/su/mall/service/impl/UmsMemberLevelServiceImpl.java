@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.su.mall.mapper.UmsMemberLevelMapper;
 import com.su.mall.model.UmsMemberLevel;
 import com.su.mall.service.UmsMemberLevelService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,9 +14,9 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class UmsMemberLevelServiceImpl implements UmsMemberLevelService {
-    @Autowired
-    private UmsMemberLevelMapper memberLevelMapper;
+    private final UmsMemberLevelMapper memberLevelMapper;
     
     @Override
     public List<UmsMemberLevel> list(Integer defaultStatus) {

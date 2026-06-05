@@ -4,7 +4,7 @@ import com.su.mall.model.UmsResource;
 import com.su.mall.security.component.DynamicSecurityService;
 import com.su.mall.service.UmsAdminService;
 import com.su.mall.service.UmsResourceService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.ConfigAttribute;
@@ -19,12 +19,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Su
  */
 @Configuration
+@RequiredArgsConstructor
 public class MallSecurityConfig {
 
-    @Autowired
-    private UmsAdminService adminService;
-    @Autowired
-    private UmsResourceService resourceService;
+    private final UmsAdminService adminService;
+    private final UmsResourceService resourceService;
 
     @Bean
     public UserDetailsService userDetailsService() {

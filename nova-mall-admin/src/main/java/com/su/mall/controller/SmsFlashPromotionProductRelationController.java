@@ -8,7 +8,7 @@ import com.su.mall.model.SmsFlashPromotionProductRelation;
 import com.su.mall.service.SmsFlashPromotionProductRelationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +21,9 @@ import java.util.List;
 @Controller
 @Tag(name = "SmsFlashPromotionProductRelationController", description = "限时购和商品关系管理")
 @RequestMapping("/flashProductRelation")
+@RequiredArgsConstructor
 public class SmsFlashPromotionProductRelationController {
-    @Autowired
-    private SmsFlashPromotionProductRelationService relationService;
+    private final SmsFlashPromotionProductRelationService relationService;
 
     @Operation(summary = "批量选择商品添加关联")
     @RequestMapping(value = "/create", method = RequestMethod.POST)

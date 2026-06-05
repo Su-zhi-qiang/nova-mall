@@ -8,9 +8,9 @@ import com.su.mall.demo.service.DemoService;
 import com.su.mall.model.PmsBrand;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +23,9 @@ import java.util.List;
  */
 @Tag(name = "DemoController",description = "品牌管理示例接口")
 @Controller
+@RequiredArgsConstructor
 public class DemoController {
-    @Autowired
-    private DemoService demoService;
+    private final DemoService demoService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DemoController.class);
 

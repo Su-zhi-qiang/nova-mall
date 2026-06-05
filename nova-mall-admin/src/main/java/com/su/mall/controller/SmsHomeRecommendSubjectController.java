@@ -7,7 +7,7 @@ import com.su.mall.model.SmsHomeRecommendSubject;
 import com.su.mall.service.SmsHomeRecommendSubjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +20,9 @@ import java.util.List;
 @Controller
 @Tag(name = "SmsHomeRecommendSubjectController", description = "首页专题推荐管理")
 @RequestMapping("/home/recommendSubject")
+@RequiredArgsConstructor
 public class SmsHomeRecommendSubjectController {
-    @Autowired
-    private SmsHomeRecommendSubjectService recommendSubjectService;
+    private final SmsHomeRecommendSubjectService recommendSubjectService;
 
     @Operation(summary = "添加首页推荐专题")
     @RequestMapping(value = "/create", method = RequestMethod.POST)

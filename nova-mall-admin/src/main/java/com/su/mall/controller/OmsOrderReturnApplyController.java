@@ -10,7 +10,7 @@ import com.su.mall.model.OmsOrderReturnApply;
 import com.su.mall.service.OmsOrderReturnApplyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,9 +23,9 @@ import java.util.List;
 @Controller
 @Tag(name = "OmsOrderReturnApplyController", description = "订单退货申请管理")
 @RequestMapping("/returnApply")
+@RequiredArgsConstructor
 public class OmsOrderReturnApplyController {
-    @Autowired
-    private OmsOrderReturnApplyService returnApplyService;
+    private final OmsOrderReturnApplyService returnApplyService;
 
     @Operation(summary = "分页查询退货申请")
     @RequestMapping(value = "/list", method = RequestMethod.GET)

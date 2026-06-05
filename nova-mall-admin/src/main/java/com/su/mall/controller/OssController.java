@@ -7,7 +7,7 @@ import com.su.mall.dto.OssPolicyResult;
 import com.su.mall.service.OssService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,9 +22,9 @@ import jakarta.servlet.http.HttpServletRequest;
 @Controller
 @Tag(name = "OssController", description = "Oss对象存储管理")
 @RequestMapping("/aliyun/oss")
+@RequiredArgsConstructor
 public class OssController {
-    @Autowired
-    private OssService ossService;
+    private final OssService ossService;
 
     @Operation(summary = "Oss上传签名生成")
     @RequestMapping(value = "/policy", method = RequestMethod.GET)

@@ -6,8 +6,8 @@ import com.su.mall.dto.UmsMenuNode;
 import com.su.mall.mapper.UmsMenuMapper;
 import com.su.mall.model.*;
 import com.su.mall.service.UmsMenuService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class UmsMenuServiceImpl implements UmsMenuService {
-    @Autowired
-    private UmsMenuMapper menuMapper;
+    private final UmsMenuMapper menuMapper;
 
     @Override
     public int create(UmsMenu umsMenu) {

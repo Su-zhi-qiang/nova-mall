@@ -10,7 +10,7 @@ import com.su.mall.mapper.UmsRoleResourceRelationMapper;
 import com.su.mall.model.*;
 import com.su.mall.service.UmsAdminCacheService;
 import com.su.mall.service.UmsRoleService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -21,17 +21,13 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class UmsRoleServiceImpl implements UmsRoleService {
-    @Autowired
-    private UmsRoleMapper roleMapper;
-    @Autowired
-    private UmsRoleMenuRelationMapper roleMenuRelationMapper;
-    @Autowired
-    private UmsRoleResourceRelationMapper roleResourceRelationMapper;
-    @Autowired
-    private UmsRoleDao roleDao;
-    @Autowired
-    private UmsAdminCacheService adminCacheService;
+    private final UmsRoleMapper roleMapper;
+    private final UmsRoleMenuRelationMapper roleMenuRelationMapper;
+    private final UmsRoleResourceRelationMapper roleResourceRelationMapper;
+    private final UmsRoleDao roleDao;
+    private final UmsAdminCacheService adminCacheService;
     @Override
     public int create(UmsRole role) {
         role.setCreateTime(new Date());

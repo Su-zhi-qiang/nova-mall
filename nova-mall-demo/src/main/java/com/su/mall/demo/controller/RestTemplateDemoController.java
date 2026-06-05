@@ -4,7 +4,7 @@ import com.su.mall.common.api.CommonResult;
 import com.su.mall.model.PmsBrand;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -28,9 +28,9 @@ import java.util.Map;
 @Tag(name = "RestTemplateDemoController",description = "RestTemplate示例")
 @Controller
 @RequestMapping("/template")
+@RequiredArgsConstructor
 public class RestTemplateDemoController {
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
     @Value("${host.mall.admin}")
     private String HOST_MALL_ADMIN;
 

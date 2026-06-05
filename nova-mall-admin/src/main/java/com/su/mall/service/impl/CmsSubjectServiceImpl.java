@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.mapper.CmsSubjectMapper;
 import com.su.mall.model.CmsSubject;
 import com.su.mall.service.CmsSubjectService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,9 +16,9 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class CmsSubjectServiceImpl implements CmsSubjectService {
-    @Autowired
-    private CmsSubjectMapper subjectMapper;
+    private final CmsSubjectMapper subjectMapper;
 
     @Override
     public List<CmsSubject> listAll() {

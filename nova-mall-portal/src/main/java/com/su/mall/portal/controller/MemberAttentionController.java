@@ -6,7 +6,7 @@ import com.su.mall.portal.domain.MemberBrandAttention;
 import com.su.mall.portal.service.MemberAttentionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @Tag(name = "MemberAttentionController",description = "会员关注品牌管理")
 @RequestMapping("/member/attention")
+@RequiredArgsConstructor
 public class MemberAttentionController {
-    @Autowired
-    private MemberAttentionService memberAttentionService;
+    private final MemberAttentionService memberAttentionService;
     @Operation(summary = "添加品牌关注")
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     @ResponseBody

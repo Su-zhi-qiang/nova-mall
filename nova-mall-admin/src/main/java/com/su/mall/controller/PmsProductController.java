@@ -10,7 +10,7 @@ import com.su.mall.model.PmsProduct;
 import com.su.mall.service.PmsProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,9 +23,9 @@ import java.util.List;
 @Controller
 @Tag(name = "PmsProductController", description = "商品管理")
 @RequestMapping("/product")
+@RequiredArgsConstructor
 public class PmsProductController {
-    @Autowired
-    private PmsProductService productService;
+    private final PmsProductService productService;
 
     @Operation(summary = "创建商品")
     @RequestMapping(value = "/create", method = RequestMethod.POST)

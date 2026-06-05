@@ -12,9 +12,9 @@ import com.su.mall.dto.PmsProductResult;
 import com.su.mall.mapper.*;
 import com.su.mall.model.*;
 import com.su.mall.service.PmsProductService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -31,42 +31,26 @@ import java.util.stream.Collectors;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class PmsProductServiceImpl implements PmsProductService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PmsProductServiceImpl.class);
-    @Autowired
-    private PmsProductMapper productMapper;
-    @Autowired
-    private PmsMemberPriceDao memberPriceDao;
-    @Autowired
-    private PmsMemberPriceMapper memberPriceMapper;
-    @Autowired
-    private PmsProductLadderDao productLadderDao;
-    @Autowired
-    private PmsProductLadderMapper productLadderMapper;
-    @Autowired
-    private PmsProductFullReductionDao productFullReductionDao;
-    @Autowired
-    private PmsProductFullReductionMapper productFullReductionMapper;
-    @Autowired
-    private PmsSkuStockDao skuStockDao;
-    @Autowired
-    private PmsSkuStockMapper skuStockMapper;
-    @Autowired
-    private PmsProductAttributeValueDao productAttributeValueDao;
-    @Autowired
-    private PmsProductAttributeValueMapper productAttributeValueMapper;
-    @Autowired
-    private CmsSubjectProductRelationDao subjectProductRelationDao;
-    @Autowired
-    private CmsSubjectProductRelationMapper subjectProductRelationMapper;
-    @Autowired
-    private CmsPrefrenceAreaProductRelationDao prefrenceAreaProductRelationDao;
-    @Autowired
-    private CmsPrefrenceAreaProductRelationMapper prefrenceAreaProductRelationMapper;
-    @Autowired
-    private PmsProductDao productDao;
-    @Autowired
-    private PmsProductVertifyRecordDao productVertifyRecordDao;
+    private final PmsProductMapper productMapper;
+    private final PmsMemberPriceDao memberPriceDao;
+    private final PmsMemberPriceMapper memberPriceMapper;
+    private final PmsProductLadderDao productLadderDao;
+    private final PmsProductLadderMapper productLadderMapper;
+    private final PmsProductFullReductionDao productFullReductionDao;
+    private final PmsProductFullReductionMapper productFullReductionMapper;
+    private final PmsSkuStockDao skuStockDao;
+    private final PmsSkuStockMapper skuStockMapper;
+    private final PmsProductAttributeValueDao productAttributeValueDao;
+    private final PmsProductAttributeValueMapper productAttributeValueMapper;
+    private final CmsSubjectProductRelationDao subjectProductRelationDao;
+    private final CmsSubjectProductRelationMapper subjectProductRelationMapper;
+    private final CmsPrefrenceAreaProductRelationDao prefrenceAreaProductRelationDao;
+    private final CmsPrefrenceAreaProductRelationMapper prefrenceAreaProductRelationMapper;
+    private final PmsProductDao productDao;
+    private final PmsProductVertifyRecordDao productVertifyRecordDao;
 
     @Override
     public int create(PmsProductParam productParam) {

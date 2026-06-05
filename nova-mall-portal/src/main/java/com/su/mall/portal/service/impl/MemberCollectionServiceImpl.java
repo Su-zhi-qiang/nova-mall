@@ -7,7 +7,7 @@ import com.su.mall.portal.domain.MemberProductCollection;
 import com.su.mall.portal.repository.MemberProductCollectionRepository;
 import com.su.mall.portal.service.MemberCollectionService;
 import com.su.mall.portal.service.UmsMemberService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,15 +19,13 @@ import org.springframework.stereotype.Service;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class MemberCollectionServiceImpl implements MemberCollectionService {
     @Value("${mongo.insert.sqlEnable}")
     private Boolean sqlEnable;
-    @Autowired
-    private PmsProductMapper productMapper;
-    @Autowired
-    private MemberProductCollectionRepository productCollectionRepository;
-    @Autowired
-    private UmsMemberService memberService;
+    private final PmsProductMapper productMapper;
+    private final MemberProductCollectionRepository productCollectionRepository;
+    private final UmsMemberService memberService;
 
     @Override
     public int add(MemberProductCollection productCollection) {

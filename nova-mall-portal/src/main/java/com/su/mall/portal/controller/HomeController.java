@@ -10,7 +10,7 @@ import com.su.mall.portal.domain.HomeContentResult;
 import com.su.mall.portal.service.HomeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,9 +23,9 @@ import java.util.List;
 @Controller
 @Tag(name = "HomeController", description = "首页内容管理")
 @RequestMapping("/home")
+@RequiredArgsConstructor
 public class HomeController {
-    @Autowired
-    private HomeService homeService;
+    private final HomeService homeService;
 
     @Operation(summary = "首页内容信息展示")
     @RequestMapping(value = "/content", method = RequestMethod.GET)

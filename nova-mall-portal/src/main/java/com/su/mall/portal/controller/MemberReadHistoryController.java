@@ -6,7 +6,7 @@ import com.su.mall.portal.domain.MemberReadHistory;
 import com.su.mall.portal.service.MemberReadHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +20,9 @@ import java.util.List;
 @Controller
 @Tag(name = "MemberReadHistoryController", description = "会员商品浏览记录管理")
 @RequestMapping("/member/readHistory")
+@RequiredArgsConstructor
 public class MemberReadHistoryController {
-    @Autowired
-    private MemberReadHistoryService memberReadHistoryService;
+    private final MemberReadHistoryService memberReadHistoryService;
 
     @Operation(summary = "创建浏览记录")
     @RequestMapping(value = "/create", method = RequestMethod.POST)

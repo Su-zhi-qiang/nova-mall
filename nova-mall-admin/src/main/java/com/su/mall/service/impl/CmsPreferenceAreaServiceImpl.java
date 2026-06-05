@@ -3,8 +3,8 @@ package com.su.mall.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.su.mall.mapper.CmsPrefrenceAreaMapper;
 import com.su.mall.model.CmsPrefrenceArea;
-import com.su.mall.service.CmsPrefrenceAreaService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.su.mall.service.CmsPreferenceAreaService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,13 +14,13 @@ import java.util.List;
  * @author Su
  */
 @Service
-public class CmsPrefrenceAreaServiceImpl implements CmsPrefrenceAreaService {
-    @Autowired
-    private CmsPrefrenceAreaMapper prefrenceAreaMapper;
+@RequiredArgsConstructor
+public class CmsPreferenceAreaServiceImpl implements CmsPreferenceAreaService {
+    private final CmsPrefrenceAreaMapper preferenceAreaMapper;
 
     @Override
     public List<CmsPrefrenceArea> listAll() {
         // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
-        return prefrenceAreaMapper.selectList(new LambdaQueryWrapper<>());
+        return preferenceAreaMapper.selectList(new LambdaQueryWrapper<>());
     }
 }

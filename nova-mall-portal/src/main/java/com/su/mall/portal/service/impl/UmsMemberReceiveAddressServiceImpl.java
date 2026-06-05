@@ -6,7 +6,7 @@ import com.su.mall.model.UmsMember;
 import com.su.mall.model.UmsMemberReceiveAddress;
 import com.su.mall.portal.service.UmsMemberReceiveAddressService;
 import com.su.mall.portal.service.UmsMemberService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -18,11 +18,10 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class UmsMemberReceiveAddressServiceImpl implements UmsMemberReceiveAddressService {
-    @Autowired
-    private UmsMemberService memberService;
-    @Autowired
-    private UmsMemberReceiveAddressMapper addressMapper;
+    private final UmsMemberService memberService;
+    private final UmsMemberReceiveAddressMapper addressMapper;
     @Override
     public int add(UmsMemberReceiveAddress address) {
         UmsMember currentMember = memberService.getCurrentMember();

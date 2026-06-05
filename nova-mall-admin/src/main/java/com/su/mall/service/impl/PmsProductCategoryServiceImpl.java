@@ -13,7 +13,7 @@ import com.su.mall.model.*;
 import com.su.mall.service.PmsProductCategoryService;
 import cn.hutool.core.collection.CollUtil;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,17 +24,13 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class PmsProductCategoryServiceImpl implements PmsProductCategoryService {
-    @Autowired
-    private PmsProductCategoryMapper productCategoryMapper;
-    @Autowired
-    private PmsProductMapper productMapper;
-    @Autowired
-    private PmsProductCategoryAttributeRelationDao productCategoryAttributeRelationDao;
-    @Autowired
-    private PmsProductCategoryAttributeRelationMapper productCategoryAttributeRelationMapper;
-    @Autowired
-    private PmsProductCategoryDao productCategoryDao;
+    private final PmsProductCategoryMapper productCategoryMapper;
+    private final PmsProductMapper productMapper;
+    private final PmsProductCategoryAttributeRelationDao productCategoryAttributeRelationDao;
+    private final PmsProductCategoryAttributeRelationMapper productCategoryAttributeRelationMapper;
+    private final PmsProductCategoryDao productCategoryDao;
     
     @Override
     public int create(PmsProductCategoryParam pmsProductCategoryParam) {

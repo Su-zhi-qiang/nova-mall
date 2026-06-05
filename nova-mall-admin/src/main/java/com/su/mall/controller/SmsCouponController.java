@@ -8,7 +8,7 @@ import com.su.mall.model.SmsCoupon;
 import com.su.mall.service.SmsCouponService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +21,9 @@ import java.util.List;
 @Controller
 @Tag(name = "SmsCouponController", description = "优惠券管理")
 @RequestMapping("/coupon")
+@RequiredArgsConstructor
 public class SmsCouponController {
-    @Autowired
-    private SmsCouponService couponService;
+    private final SmsCouponService couponService;
     @Operation(summary = "添加优惠券")
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     @ResponseBody

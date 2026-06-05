@@ -7,7 +7,7 @@ import com.su.mall.model.SmsHomeBrand;
 import com.su.mall.service.SmsHomeBrandService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +20,9 @@ import java.util.List;
 @Controller
 @Tag(name = "SmsHomeBrandController", description = "首页品牌管理")
 @RequestMapping("/home/brand")
+@RequiredArgsConstructor
 public class SmsHomeBrandController {
-    @Autowired
-    private SmsHomeBrandService homeBrandService;
+    private final SmsHomeBrandService homeBrandService;
 
     @Operation(summary = "添加首页推荐品牌")
     @RequestMapping(value = "/create", method = RequestMethod.POST)

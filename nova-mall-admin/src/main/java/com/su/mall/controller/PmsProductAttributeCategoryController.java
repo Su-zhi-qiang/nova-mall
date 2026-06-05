@@ -8,7 +8,7 @@ import com.su.mall.model.PmsProductAttributeCategory;
 import com.su.mall.service.PmsProductAttributeCategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +21,9 @@ import java.util.List;
 @Controller
 @Tag(name = "PmsProductAttributeCategoryController", description = "商品属性分类管理")
 @RequestMapping("/productAttribute/category")
+@RequiredArgsConstructor
 public class PmsProductAttributeCategoryController {
-    @Autowired
-    private PmsProductAttributeCategoryService productAttributeCategoryService;
+    private final PmsProductAttributeCategoryService productAttributeCategoryService;
 
     @Operation(summary = "添加商品属性分类")
     @RequestMapping(value = "/create", method = RequestMethod.POST)

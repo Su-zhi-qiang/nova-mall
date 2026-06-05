@@ -1,7 +1,7 @@
 package com.su.mall.security.component;
 
 import cn.hutool.core.util.URLUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
@@ -15,11 +15,11 @@ import java.util.*;
  * 动态权限数据源，用于获取动态权限规则
  * @author Su
  */
+@RequiredArgsConstructor
 public class DynamicSecurityMetadataSource implements FilterInvocationSecurityMetadataSource {
 
     private static Map<String, ConfigAttribute> configAttributeMap = null;
-    @Autowired
-    private DynamicSecurityService dynamicSecurityService;
+    private final DynamicSecurityService dynamicSecurityService;
 
     @PostConstruct
     public void loadDataSource() {

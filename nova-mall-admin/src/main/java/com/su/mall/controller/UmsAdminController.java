@@ -14,7 +14,7 @@ import com.su.mall.service.UmsRoleService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -34,15 +34,14 @@ import java.util.stream.Collectors;
 @Controller
 @Tag(name = "UmsAdminController", description = "后台用户管理")
 @RequestMapping("/admin")
+@RequiredArgsConstructor
 public class UmsAdminController {
     @Value("${jwt.tokenHeader}")
     private String tokenHeader;
     @Value("${jwt.tokenHead}")
     private String tokenHead;
-    @Autowired
-    private UmsAdminService adminService;
-    @Autowired
-    private UmsRoleService roleService;
+    private final UmsAdminService adminService;
+    private final UmsRoleService roleService;
 
     @Operation(summary = "用户注册")
     @RequestMapping(value = "/register", method = RequestMethod.POST)

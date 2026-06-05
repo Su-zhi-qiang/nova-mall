@@ -8,7 +8,7 @@ import com.su.mall.model.PmsBrand;
 import com.su.mall.service.PmsBrandService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +22,9 @@ import java.util.List;
 @Controller
 @Tag(name = "PmsBrandController", description = "商品品牌管理")
 @RequestMapping("/brand")
+@RequiredArgsConstructor
 public class PmsBrandController {
-    @Autowired
-    private PmsBrandService brandService;
+    private final PmsBrandService brandService;
 
     @Operation(summary =  "获取全部品牌列表")
     @RequestMapping(value = "/listAll", method = RequestMethod.GET)

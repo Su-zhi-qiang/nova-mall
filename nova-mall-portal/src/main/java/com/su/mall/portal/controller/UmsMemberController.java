@@ -5,7 +5,7 @@ import com.su.mall.model.UmsMember;
 import com.su.mall.portal.service.UmsMemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,13 +25,13 @@ import java.util.Map;
 @Controller
 @Tag(name = "UmsMemberController", description = "会员登录注册管理")
 @RequestMapping("/sso")
+@RequiredArgsConstructor
 public class UmsMemberController {
     @Value("${jwt.tokenHeader}")
     private String tokenHeader;
     @Value("${jwt.tokenHead}")
     private String tokenHead;
-    @Autowired
-    private UmsMemberService memberService;
+    private final UmsMemberService memberService;
 
     @Operation(summary = "会员注册")
     @RequestMapping(value = "/register", method = RequestMethod.POST)

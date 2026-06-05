@@ -11,7 +11,7 @@ import com.su.mall.model.PmsProductAttribute;
 import com.su.mall.model.PmsProductAttributeCategory;
 import com.su.mall.service.PmsProductAttributeService;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,13 +21,11 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class PmsProductAttributeServiceImpl implements PmsProductAttributeService {
-    @Autowired
-    private PmsProductAttributeMapper productAttributeMapper;
-    @Autowired
-    private PmsProductAttributeCategoryMapper productAttributeCategoryMapper;
-    @Autowired
-    private PmsProductAttributeDao productAttributeDao;
+    private final PmsProductAttributeMapper productAttributeMapper;
+    private final PmsProductAttributeCategoryMapper productAttributeCategoryMapper;
+    private final PmsProductAttributeDao productAttributeDao;
 
     @Override
     public Page<PmsProductAttribute> getList(Long cid, Integer type, Integer pageSize, Integer pageNum) {

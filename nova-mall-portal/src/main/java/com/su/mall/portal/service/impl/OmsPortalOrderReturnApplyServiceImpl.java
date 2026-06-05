@@ -4,8 +4,8 @@ import com.su.mall.mapper.OmsOrderReturnApplyMapper;
 import com.su.mall.model.OmsOrderReturnApply;
 import com.su.mall.portal.domain.OmsOrderReturnApplyParam;
 import com.su.mall.portal.service.OmsPortalOrderReturnApplyService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -15,9 +15,9 @@ import java.util.Date;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class OmsPortalOrderReturnApplyServiceImpl implements OmsPortalOrderReturnApplyService {
-    @Autowired
-    private OmsOrderReturnApplyMapper returnApplyMapper;
+    private final OmsOrderReturnApplyMapper returnApplyMapper;
     @Override
     public int create(OmsOrderReturnApplyParam returnApply) {
         OmsOrderReturnApply realApply = new OmsOrderReturnApply();

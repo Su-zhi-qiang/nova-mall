@@ -58,8 +58,8 @@ public class BaseRedisConfig {
 
 
     @Bean
-    public RedisService redisService(){
-        return new RedisServiceImpl();
+    public RedisService redisService(RedisTemplate<String, Object> redisTemplate){
+        return new RedisServiceImpl(redisTemplate);
     }
 
 }

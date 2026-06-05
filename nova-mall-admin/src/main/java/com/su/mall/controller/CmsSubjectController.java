@@ -7,7 +7,7 @@ import com.su.mall.model.CmsSubject;
 import com.su.mall.service.CmsSubjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -23,9 +23,9 @@ import java.util.List;
 @Controller
 @Tag(name = "CmsSubjectController", description = "商品专题管理")
 @RequestMapping("/subject")
+@RequiredArgsConstructor
 public class CmsSubjectController {
-    @Autowired
-    private CmsSubjectService subjectService;
+    private final CmsSubjectService subjectService;
 
     @Operation(summary = "获取全部商品专题")
     @RequestMapping(value = "/listAll", method = RequestMethod.GET)

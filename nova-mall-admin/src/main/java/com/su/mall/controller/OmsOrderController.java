@@ -8,7 +8,7 @@ import com.su.mall.model.OmsOrder;
 import com.su.mall.service.OmsOrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +21,9 @@ import java.util.List;
 @Controller
 @Tag(name = "OmsOrderController", description = "订单管理")
 @RequestMapping("/order")
+@RequiredArgsConstructor
 public class OmsOrderController {
-    @Autowired
-    private OmsOrderService orderService;
+    private final OmsOrderService orderService;
 
     @Operation(summary = "查询订单")
     @RequestMapping(value = "/list", method = RequestMethod.GET)

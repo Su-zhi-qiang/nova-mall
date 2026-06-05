@@ -9,9 +9,9 @@ import com.su.mall.dto.OssCallbackParam;
 import com.su.mall.dto.OssCallbackResult;
 import com.su.mall.dto.OssPolicyResult;
 import com.su.mall.service.OssService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +24,7 @@ import java.util.Date;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class OssServiceImpl implements OssService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OssServiceImpl.class);
@@ -40,8 +41,7 @@ public class OssServiceImpl implements OssService {
 	@Value("${aliyun.oss.dir.prefix}")
 	private String ALIYUN_OSS_DIR_PREFIX;
 
-	@Autowired
-	private OSSClient ossClient;
+	private final OSSClient ossClient;
 
 	/**
 	 * 签名生成

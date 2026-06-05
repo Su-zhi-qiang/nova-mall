@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.mapper.OmsOrderReturnReasonMapper;
 import com.su.mall.model.OmsOrderReturnReason;
 import com.su.mall.service.OmsOrderReturnReasonService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -18,9 +18,9 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class OmsOrderReturnReasonServiceImpl implements OmsOrderReturnReasonService {
-    @Autowired
-    private OmsOrderReturnReasonMapper returnReasonMapper;
+    private final OmsOrderReturnReasonMapper returnReasonMapper;
     @Override
     public int create(OmsOrderReturnReason returnReason) {
         returnReason.setCreateTime(new Date());

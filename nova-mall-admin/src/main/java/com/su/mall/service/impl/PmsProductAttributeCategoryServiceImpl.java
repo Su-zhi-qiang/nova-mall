@@ -8,7 +8,7 @@ import com.su.mall.dto.PmsProductAttributeCategoryItem;
 import com.su.mall.mapper.PmsProductAttributeCategoryMapper;
 import com.su.mall.model.PmsProductAttributeCategory;
 import com.su.mall.service.PmsProductAttributeCategoryService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,11 +18,10 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class PmsProductAttributeCategoryServiceImpl implements PmsProductAttributeCategoryService {
-    @Autowired
-    private PmsProductAttributeCategoryMapper productAttributeCategoryMapper;
-    @Autowired
-    private PmsProductAttributeCategoryDao productAttributeCategoryDao;
+    private final PmsProductAttributeCategoryMapper productAttributeCategoryMapper;
+    private final PmsProductAttributeCategoryDao productAttributeCategoryDao;
 
     @Override
     public int create(String name) {

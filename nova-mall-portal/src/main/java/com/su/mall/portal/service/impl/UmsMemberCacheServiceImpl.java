@@ -5,7 +5,7 @@ import com.su.mall.mapper.UmsMemberMapper;
 import com.su.mall.model.UmsMember;
 import com.su.mall.portal.service.UmsMemberCacheService;
 import com.su.mall.security.annotation.CacheException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +14,10 @@ import org.springframework.stereotype.Service;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class UmsMemberCacheServiceImpl implements UmsMemberCacheService {
-    @Autowired
-    private RedisService redisService;
-    @Autowired
-    private UmsMemberMapper memberMapper;
+    private final RedisService redisService;
+    private final UmsMemberMapper memberMapper;
     @Value("${redis.database}")
     private String REDIS_DATABASE;
     @Value("${redis.expire.common}")

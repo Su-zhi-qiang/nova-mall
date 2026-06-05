@@ -8,8 +8,8 @@ import com.su.mall.portal.dao.PortalProductDao;
 import com.su.mall.portal.domain.CartPromotionItem;
 import com.su.mall.portal.domain.PromotionProduct;
 import com.su.mall.portal.service.OmsPromotionService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,9 +21,9 @@ import java.util.*;
  * 促销管理Service实现类
  */
 @Service
+@RequiredArgsConstructor
 public class OmsPromotionServiceImpl implements OmsPromotionService {
-    @Autowired
-    private PortalProductDao portalProductDao;
+    private final PortalProductDao portalProductDao;
 
     @Override
     public List<CartPromotionItem> calcCartPromotion(List<OmsCartItem> cartItemList) {

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.su.mall.mapper.UmsResourceCategoryMapper;
 import com.su.mall.model.UmsResourceCategory;
 import com.su.mall.service.UmsResourceCategoryService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -15,9 +15,9 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class UmsResourceCategoryServiceImpl implements UmsResourceCategoryService {
-    @Autowired
-    private UmsResourceCategoryMapper resourceCategoryMapper;
+    private final UmsResourceCategoryMapper resourceCategoryMapper;
 
     @Override
     public List<UmsResourceCategory> listAll() {

@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,13 +26,11 @@ import java.util.List;
 @Controller
 @Tag(name = "UmsMemberCouponController", description = "用户优惠券管理")
 @RequestMapping("/member/coupon")
+@RequiredArgsConstructor
 public class UmsMemberCouponController {
-    @Autowired
-    private UmsMemberCouponService memberCouponService;
-    @Autowired
-    private OmsCartItemService cartItemService;
-    @Autowired
-    private UmsMemberService memberService;
+    private final UmsMemberCouponService memberCouponService;
+    private final OmsCartItemService cartItemService;
+    private final UmsMemberService memberService;
 
     @Operation(summary = "领取指定优惠券")
     @RequestMapping(value = "/add/{couponId}", method = RequestMethod.POST)

@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,9 +26,9 @@ import java.util.List;
 @Controller
 @Tag(name = "PmsProductAttributeController", description = "商品属性管理")
 @RequestMapping("/productAttribute")
+@RequiredArgsConstructor
 public class PmsProductAttributeController {
-    @Autowired
-    private PmsProductAttributeService productAttributeService;
+    private final PmsProductAttributeService productAttributeService;
 
     @Operation(summary = "根据分类查询属性列表或参数列表")
     @Parameters({@Parameter(name = "type", description = "0表示属性，1表示参数", required = true,in = ParameterIn.QUERY, schema = @Schema(type = "integer"))})

@@ -1,7 +1,7 @@
 package com.su.mall.common.service.impl;
 
 import com.su.mall.common.service.RedisService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.List;
@@ -13,9 +13,9 @@ import java.util.concurrent.TimeUnit;
  * Redis操作Service实现类
  * @author Su
  */
+@RequiredArgsConstructor
 public class RedisServiceImpl implements RedisService {
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public void set(String key, Object value, long time) {

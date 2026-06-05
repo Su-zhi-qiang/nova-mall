@@ -7,7 +7,7 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessagePostProcessor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,10 +15,10 @@ import org.springframework.stereotype.Component;
  * @author Su
  */
 @Component
+@RequiredArgsConstructor
 public class CancelOrderSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(CancelOrderSender.class);
-    @Autowired
-    private AmqpTemplate amqpTemplate;
+    private final AmqpTemplate amqpTemplate;
 
     public void sendMessage(Long orderId,final long delayTimes){
         //给延迟队列发送消息

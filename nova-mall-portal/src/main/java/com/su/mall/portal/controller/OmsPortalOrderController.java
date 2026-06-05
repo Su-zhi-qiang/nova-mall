@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,9 +26,9 @@ import java.util.Map;
 @Controller
 @Tag(name = "OmsPortalOrderController", description = "订单管理")
 @RequestMapping("/order")
+@RequiredArgsConstructor
 public class OmsPortalOrderController {
-    @Autowired
-    private OmsPortalOrderService portalOrderService;
+    private final OmsPortalOrderService portalOrderService;
 
     @Operation(summary = "根据购物车信息生成确认单")
     @RequestMapping(value = "/generateConfirmOrder", method = RequestMethod.POST)

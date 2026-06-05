@@ -3,7 +3,7 @@ package com.su.mall.security.component;
 import cn.hutool.core.collection.CollUtil;
 import com.su.mall.security.config.IgnoreUrlsConfig;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.authorization.AuthorizationDecision;
@@ -23,12 +23,11 @@ import java.util.stream.Collectors;
  * 动态鉴权管理器，用于判断是否有资源的访问权限
  * @author Su
  */
+@RequiredArgsConstructor
 public class DynamicAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
 
-    @Autowired
-    private DynamicSecurityMetadataSource securityDataSource;
-    @Autowired
-    private IgnoreUrlsConfig ignoreUrlsConfig;
+    private final DynamicSecurityMetadataSource securityDataSource;
+    private final IgnoreUrlsConfig ignoreUrlsConfig;
 
     @Override
     public void verify(Supplier<Authentication> authentication, RequestAuthorizationContext object) {

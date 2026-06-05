@@ -10,7 +10,7 @@ import com.su.mall.portal.domain.CartPromotionItem;
 import com.su.mall.portal.domain.SmsCouponHistoryDetail;
 import com.su.mall.portal.service.UmsMemberCouponService;
 import com.su.mall.portal.service.UmsMemberService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,21 +25,15 @@ import java.util.stream.Collectors;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
-    @Autowired
-    private UmsMemberService memberService;
-    @Autowired
-    private SmsCouponMapper couponMapper;
-    @Autowired
-    private SmsCouponHistoryMapper couponHistoryMapper;
-    @Autowired
-    private SmsCouponHistoryDao couponHistoryDao;
-    @Autowired
-    private SmsCouponProductRelationMapper couponProductRelationMapper;
-    @Autowired
-    private SmsCouponProductCategoryRelationMapper couponProductCategoryRelationMapper;
-    @Autowired
-    private PmsProductMapper productMapper;
+    private final UmsMemberService memberService;
+    private final SmsCouponMapper couponMapper;
+    private final SmsCouponHistoryMapper couponHistoryMapper;
+    private final SmsCouponHistoryDao couponHistoryDao;
+    private final SmsCouponProductRelationMapper couponProductRelationMapper;
+    private final SmsCouponProductCategoryRelationMapper couponProductCategoryRelationMapper;
+    private final PmsProductMapper productMapper;
     @Override
     public void add(Long couponId) {
         UmsMember currentMember = memberService.getCurrentMember();

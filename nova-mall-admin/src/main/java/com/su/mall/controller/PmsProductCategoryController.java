@@ -9,7 +9,7 @@ import com.su.mall.service.PmsProductCategoryService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +23,9 @@ import java.util.List;
 @Controller
 @Tag(name = "PmsProductCategoryController", description = "商品分类管理")
 @RequestMapping("/productCategory")
+@RequiredArgsConstructor
 public class PmsProductCategoryController {
-    @Autowired
-    private PmsProductCategoryService productCategoryService;
+    private final PmsProductCategoryService productCategoryService;
 
     @Operation(summary = "添加商品分类")
     @RequestMapping(value = "/create", method = RequestMethod.POST)

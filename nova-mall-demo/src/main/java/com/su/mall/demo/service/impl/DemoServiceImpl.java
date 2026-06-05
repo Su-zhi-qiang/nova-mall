@@ -6,8 +6,8 @@ import com.su.mall.demo.dto.PmsBrandDto;
 import com.su.mall.demo.service.DemoService;
 import com.su.mall.mapper.PmsBrandMapper;
 import com.su.mall.model.PmsBrand;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,9 +17,9 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class DemoServiceImpl implements DemoService {
-    @Autowired
-    private PmsBrandMapper brandMapper;
+    private final PmsBrandMapper brandMapper;
 
     @Override
     public List<PmsBrand> listAllBrand() {

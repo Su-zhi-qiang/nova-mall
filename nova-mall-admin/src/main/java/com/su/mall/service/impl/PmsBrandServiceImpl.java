@@ -10,8 +10,8 @@ import com.su.mall.mapper.PmsProductMapper;
 import com.su.mall.model.PmsBrand;
 import com.su.mall.model.PmsProduct;
 import com.su.mall.service.PmsBrandService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,11 +21,10 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class PmsBrandServiceImpl implements PmsBrandService {
-    @Autowired
-    private PmsBrandMapper brandMapper;
-    @Autowired
-    private PmsProductMapper productMapper;
+    private final PmsBrandMapper brandMapper;
+    private final PmsProductMapper productMapper;
 
     @Override
     public List<PmsBrand> listAllBrand() {

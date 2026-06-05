@@ -6,7 +6,7 @@ import com.su.mall.portal.domain.AliPayParam;
 import com.su.mall.portal.service.AlipayService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,12 +25,11 @@ import java.util.Map;
 @Controller
 @Tag(name = "AlipayController", description = "支付宝支付相关接口")
 @RequestMapping("/alipay")
+@RequiredArgsConstructor
 public class AlipayController {
 
-    @Autowired
-    private AlipayConfig alipayConfig;
-    @Autowired
-    private AlipayService alipayService;
+    private final AlipayConfig alipayConfig;
+    private final AlipayService alipayService;
 
     @Operation(summary = "支付宝电脑网站支付")
     @RequestMapping(value = "/pay", method = RequestMethod.GET)

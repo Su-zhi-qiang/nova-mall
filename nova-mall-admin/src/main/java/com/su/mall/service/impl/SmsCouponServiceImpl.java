@@ -13,7 +13,7 @@ import com.su.mall.mapper.SmsCouponProductCategoryRelationMapper;
 import com.su.mall.mapper.SmsCouponProductRelationMapper;
 import com.su.mall.model.*;
 import com.su.mall.service.SmsCouponService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,19 +23,14 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class SmsCouponServiceImpl implements SmsCouponService {
-    @Autowired
-    private SmsCouponMapper couponMapper;
-    @Autowired
-    private SmsCouponProductRelationMapper productRelationMapper;
-    @Autowired
-    private SmsCouponProductCategoryRelationMapper productCategoryRelationMapper;
-    @Autowired
-    private SmsCouponProductRelationDao productRelationDao;
-    @Autowired
-    private SmsCouponProductCategoryRelationDao productCategoryRelationDao;
-    @Autowired
-    private SmsCouponDao couponDao;
+    private final SmsCouponMapper couponMapper;
+    private final SmsCouponProductRelationMapper productRelationMapper;
+    private final SmsCouponProductCategoryRelationMapper productCategoryRelationMapper;
+    private final SmsCouponProductRelationDao productRelationDao;
+    private final SmsCouponProductCategoryRelationDao productCategoryRelationDao;
+    private final SmsCouponDao couponDao;
     @Override
     public int create(SmsCouponParam couponParam) {
         couponParam.setCount(couponParam.getPublishCount());

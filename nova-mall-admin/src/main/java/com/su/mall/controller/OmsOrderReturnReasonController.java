@@ -6,7 +6,7 @@ import com.su.mall.model.OmsOrderReturnReason;
 import com.su.mall.service.OmsOrderReturnReasonService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +21,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 @Controller
 @Tag(name = "OmsOrderReturnReasonController", description = "退货原因管理")
 @RequestMapping("/returnReason")
+@RequiredArgsConstructor
 public class OmsOrderReturnReasonController {
-    @Autowired
-    private OmsOrderReturnReasonService orderReturnReasonService;
+    private final OmsOrderReturnReasonService orderReturnReasonService;
 
     @Operation(summary = "添加退货原因")
     @RequestMapping(value = "/create", method = RequestMethod.POST)

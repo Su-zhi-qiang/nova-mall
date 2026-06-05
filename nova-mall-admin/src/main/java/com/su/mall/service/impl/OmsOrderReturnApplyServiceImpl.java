@@ -9,7 +9,7 @@ import com.su.mall.dto.OmsUpdateStatusParam;
 import com.su.mall.mapper.OmsOrderReturnApplyMapper;
 import com.su.mall.model.OmsOrderReturnApply;
 import com.su.mall.service.OmsOrderReturnApplyService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -20,11 +20,10 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class OmsOrderReturnApplyServiceImpl implements OmsOrderReturnApplyService {
-    @Autowired
-    private OmsOrderReturnApplyDao returnApplyDao;
-    @Autowired
-    private OmsOrderReturnApplyMapper returnApplyMapper;
+    private final OmsOrderReturnApplyDao returnApplyDao;
+    private final OmsOrderReturnApplyMapper returnApplyMapper;
     @Override
     public Page<OmsOrderReturnApply> list(OmsReturnApplyQueryParam queryParam, Integer pageSize, Integer pageNum) {
         Page<OmsOrderReturnApply> page = new Page<>(pageNum, pageSize);

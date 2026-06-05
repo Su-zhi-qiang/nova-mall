@@ -5,7 +5,7 @@ import com.su.mall.portal.domain.OmsOrderReturnApplyParam;
 import com.su.mall.portal.service.OmsPortalOrderReturnApplyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @Tag(name = "OmsPortalOrderReturnApplyController",description = "退货申请管理")
 @RequestMapping("/returnApply")
+@RequiredArgsConstructor
 public class OmsPortalOrderReturnApplyController {
-    @Autowired
-    private OmsPortalOrderReturnApplyService returnApplyService;
+    private final OmsPortalOrderReturnApplyService returnApplyService;
 
     @Operation(summary = "申请退货")
     @RequestMapping(value = "/create", method = RequestMethod.POST)

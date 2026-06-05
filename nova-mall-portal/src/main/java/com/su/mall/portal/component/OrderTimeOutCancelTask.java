@@ -1,9 +1,9 @@
 package com.su.mall.portal.component;
 
 import com.su.mall.portal.service.OmsPortalOrderService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
  * 取消超时订单并解锁库存的定时器
  * @author Su
  */
-//@Component
+@Component
+@RequiredArgsConstructor
 public class OrderTimeOutCancelTask {
     private final Logger LOGGER = LoggerFactory.getLogger(OrderTimeOutCancelTask.class);
-    @Autowired
-    private OmsPortalOrderService portalOrderService;
+    private final OmsPortalOrderService portalOrderService;
 
     /**
      * cron表达式：Seconds Minutes Hours DayofMonth Month DayofWeek [Year]

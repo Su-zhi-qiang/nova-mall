@@ -8,7 +8,7 @@ import com.su.mall.model.UmsMenu;
 import com.su.mall.service.UmsMenuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,10 +21,10 @@ import java.util.List;
 @Controller
 @Tag(name = "UmsMenuController", description = "后台菜单管理")
 @RequestMapping("/menu")
+@RequiredArgsConstructor
 public class UmsMenuController {
 
-    @Autowired
-    private UmsMenuService menuService;
+    private final UmsMenuService menuService;
 
     @Operation(summary = "添加后台菜单")
     @RequestMapping(value = "/create", method = RequestMethod.POST)

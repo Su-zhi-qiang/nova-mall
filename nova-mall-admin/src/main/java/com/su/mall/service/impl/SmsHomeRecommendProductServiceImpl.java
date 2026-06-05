@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.mapper.SmsHomeRecommendProductMapper;
 import com.su.mall.model.SmsHomeRecommendProduct;
 import com.su.mall.service.SmsHomeRecommendProductService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,9 +17,9 @@ import java.util.List;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class SmsHomeRecommendProductServiceImpl implements SmsHomeRecommendProductService {
-    @Autowired
-    private SmsHomeRecommendProductMapper recommendProductMapper;
+    private final SmsHomeRecommendProductMapper recommendProductMapper;
     @Override
     public int create(List<SmsHomeRecommendProduct> homeRecommendProductList) {
         for (SmsHomeRecommendProduct recommendProduct : homeRecommendProductList) {

@@ -5,7 +5,7 @@ import com.su.mall.model.OmsCompanyAddress;
 import com.su.mall.service.OmsCompanyAddressService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,9 +20,9 @@ import java.util.List;
 @Controller
 @Tag(name = "OmsCompanyAddressController", description = "收货地址管理")
 @RequestMapping("/companyAddress")
+@RequiredArgsConstructor
 public class OmsCompanyAddressController {
-    @Autowired
-    private OmsCompanyAddressService companyAddressService;
+    private final OmsCompanyAddressService companyAddressService;
 
     @Operation(summary = "获取所有收货地址")
     @RequestMapping(value = "/list", method = RequestMethod.GET)

@@ -5,6 +5,7 @@ import com.su.mall.security.util.JwtTokenUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -42,19 +43,19 @@ public class CommonSecurityConfig {
     }
 
     @Bean
-    public JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter(){
-        return new JwtAuthenticationTokenFilter();
+    public JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter(UserDetailsService userDetailsService, JwtTokenUtil jwtTokenUtil){
+        return new JwtAuthenticationTokenFilter(userDetailsService, jwtTokenUtil);
     }
 
     @ConditionalOnBean(name = "dynamicSecurityService")
     @Bean
-    public DynamicSecurityMetadataSource dynamicSecurityMetadataSource() {
-        return new DynamicSecurityMetadataSource();
+    public DynamicSecurityMetadataSource dynamicSecurityMetadataSource(DynamicSecurityService dynamicSecurityService) {
+        return new DynamicSecurityMetadataSource(dynamicSecurityService);
     }
 
     @ConditionalOnBean(name = "dynamicSecurityService")
     @Bean
-    public DynamicAuthorizationManager dynamicAuthorizationManager() {
-        return new DynamicAuthorizationManager();
+    public DynamicAuthorizationManager dynamicAuthorizationManager(DynamicSecurityMetadataSource securityDataSource, IgnoreUrlsConfig ignoreUrlsConfig) {
+        return new DynamicAuthorizationManager(securityDataSource, ignoreUrlsConfig);
     }
 }

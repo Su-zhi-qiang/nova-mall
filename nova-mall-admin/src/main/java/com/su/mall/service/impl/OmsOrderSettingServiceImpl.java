@@ -3,7 +3,7 @@ package com.su.mall.service.impl;
 import com.su.mall.mapper.OmsOrderSettingMapper;
 import com.su.mall.model.OmsOrderSetting;
 import com.su.mall.service.OmsOrderSettingService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class OmsOrderSettingServiceImpl implements OmsOrderSettingService {
-    @Autowired
-    private OmsOrderSettingMapper orderSettingMapper;
+    private final OmsOrderSettingMapper orderSettingMapper;
 
     @Override
     public OmsOrderSetting getItem(Long id) {

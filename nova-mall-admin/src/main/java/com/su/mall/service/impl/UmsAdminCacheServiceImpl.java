@@ -10,7 +10,7 @@ import com.su.mall.model.UmsAdminRoleRelation;
 import com.su.mall.model.UmsResource;
 import com.su.mall.service.UmsAdminCacheService;
 import com.su.mall.service.UmsAdminService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,15 +22,12 @@ import java.util.stream.Collectors;
  * @author Su
  */
 @Service
+@RequiredArgsConstructor
 public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
-    @Autowired
-    private UmsAdminService adminService;
-    @Autowired
-    private RedisService redisService;
-    @Autowired
-    private UmsAdminRoleRelationMapper adminRoleRelationMapper;
-    @Autowired
-    private UmsAdminRoleRelationDao adminRoleRelationDao;
+    private final UmsAdminService adminService;
+    private final RedisService redisService;
+    private final UmsAdminRoleRelationMapper adminRoleRelationMapper;
+    private final UmsAdminRoleRelationDao adminRoleRelationDao;
     @Value("${redis.database}")
     private String REDIS_DATABASE;
     @Value("${redis.expire.common}")
