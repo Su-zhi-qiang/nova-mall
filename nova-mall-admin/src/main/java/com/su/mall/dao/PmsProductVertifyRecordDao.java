@@ -1,6 +1,6 @@
 package com.su.mall.dao;
 
-import com.su.mall.model.PmsProductVertifyRecord;
+import com.su.mall.model.PmsProductVerifyRecord;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -13,5 +13,5 @@ public interface PmsProductVertifyRecordDao {
     /**
      * 批量创建
      */
-    int insertList(@Param("list") List<PmsProductVertifyRecord> list);
+    int insertList(@Param("list") List<PmsProductVerifyRecord> list);
 }

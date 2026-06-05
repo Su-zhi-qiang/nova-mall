@@ -20,6 +20,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -267,14 +268,14 @@ public class PmsProductServiceImpl implements PmsProductService {
             new LambdaUpdateWrapper<PmsProduct>().in(PmsProduct::getId, ids)
         );
         //修改完审核状态后插入审核记录
-        List<PmsProductVertifyRecord> list = new ArrayList<>();
+        List<PmsProductVerifyRecord> list = new ArrayList<>();
         for (Long id : ids) {
-            PmsProductVertifyRecord record = new PmsProductVertifyRecord();
+            PmsProductVerifyRecord record = new PmsProductVerifyRecord();
             record.setProductId(id);
-            record.setCreateTime(new Date());
+            record.setCreateTime(LocalDateTime.now());
             record.setDetail(detail);
             record.setStatus(verifyStatus);
-            record.setVertifyMan("test");
+            record.setVerifyMan("test");
             list.add(record);
         }
         productVertifyRecordDao.insertList(list);

@@ -78,7 +78,7 @@ public class PmsProductVertifyRecord implements Serializable {
         sb.append(", id=").append(id);
         sb.append(", productId=").append(productId);
         sb.append(", createTime=").append(createTime);
-        sb.append(", vertifyMan=").append(vertifyMan);
+        sb.append(", verifyMan=").append(vertifyMan);
         sb.append(", status=").append(status);
         sb.append(", detail=").append(detail);
         sb.append(", serialVersionUID=").append(serialVersionUID);

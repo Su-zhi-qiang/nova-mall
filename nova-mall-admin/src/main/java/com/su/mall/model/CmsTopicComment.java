@@ -1,9 +1,14 @@
 package com.su.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+@Data
 public class CmsTopicComment implements Serializable {
     private Long id;
 
@@ -19,63 +24,8 @@ public class CmsTopicComment implements Serializable {
 
     private Integer showStatus;
 
+    @Serial
     private static final long serialVersionUID = 1L;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getMemberNickName() {
-        return memberNickName;
-    }
-
-    public void setMemberNickName(String memberNickName) {
-        this.memberNickName = memberNickName;
-    }
-
-    public Long getTopicId() {
-        return topicId;
-    }
-
-    public void setTopicId(Long topicId) {
-        this.topicId = topicId;
-    }
-
-    public String getMemberIcon() {
-        return memberIcon;
-    }
-
-    public void setMemberIcon(String memberIcon) {
-        this.memberIcon = memberIcon;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Integer getShowStatus() {
-        return showStatus;
-    }
-
-    public void setShowStatus(Integer showStatus) {
-        this.showStatus = showStatus;
-    }
 
     @Override
     public String toString() {
