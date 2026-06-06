@@ -37,21 +37,4 @@ public class PmsProductVerifyRecord implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", productId=").append(productId);
-        sb.append(", createTime=").append(createTime);
-        sb.append(", verifyMan=").append(verifyMan);
-        sb.append(", status=").append(status);
-        sb.append(", detail=").append(detail);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
 }

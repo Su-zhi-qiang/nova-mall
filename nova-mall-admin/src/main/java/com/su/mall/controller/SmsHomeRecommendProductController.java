@@ -27,7 +27,7 @@ public class SmsHomeRecommendProductController {
     @Operation(summary = "添加首页推荐")
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult create(@RequestBody List<SmsHomeRecommendProduct> homeRecommendProductList) {
+    public CommonResult<Integer> create(@RequestBody List<SmsHomeRecommendProduct> homeRecommendProductList) {
         int count = recommendProductService.create(homeRecommendProductList);
         if (count > 0) {
             return CommonResult.success(count);
@@ -38,7 +38,7 @@ public class SmsHomeRecommendProductController {
     @Operation(summary = "修改推荐排序")
     @RequestMapping(value = "/update/sort/{id}", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult updateSort(@PathVariable Long id, Integer sort) {
+    public CommonResult<Integer> updateSort(@PathVariable Long id, Integer sort) {
         int count = recommendProductService.updateSort(id, sort);
         if (count > 0) {
             return CommonResult.success(count);
@@ -49,7 +49,7 @@ public class SmsHomeRecommendProductController {
     @Operation(summary = "批量删除推荐")
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult delete(@RequestParam("ids") List<Long> ids) {
+    public CommonResult<Integer> delete(@RequestParam("ids") List<Long> ids) {
         int count = recommendProductService.delete(ids);
         if (count > 0) {
             return CommonResult.success(count);
@@ -60,7 +60,7 @@ public class SmsHomeRecommendProductController {
     @Operation(summary = "批量修改推荐状态")
     @RequestMapping(value = "/update/recommendStatus", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult updateRecommendStatus(@RequestParam("ids") List<Long> ids, @RequestParam Integer recommendStatus) {
+    public CommonResult<Integer> updateRecommendStatus(@RequestParam("ids") List<Long> ids, @RequestParam Integer recommendStatus) {
         int count = recommendProductService.updateRecommendStatus(ids, recommendStatus);
         if (count > 0) {
             return CommonResult.success(count);

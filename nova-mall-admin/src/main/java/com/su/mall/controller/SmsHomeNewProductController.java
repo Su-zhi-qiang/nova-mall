@@ -27,7 +27,7 @@ public class SmsHomeNewProductController {
     @Operation(summary = "添加首页新品")
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult create(@RequestBody List<SmsHomeNewProduct> homeNewProductList) {
+    public CommonResult<Integer> create(@RequestBody List<SmsHomeNewProduct> homeNewProductList) {
         int count = homeNewProductService.create(homeNewProductList);
         if (count > 0) {
             return CommonResult.success(count);
@@ -38,7 +38,7 @@ public class SmsHomeNewProductController {
     @Operation(summary = "修改首页新品排序")
     @RequestMapping(value = "/update/sort/{id}", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult updateSort(@PathVariable Long id, Integer sort) {
+    public CommonResult<Integer> updateSort(@PathVariable Long id, Integer sort) {
         int count = homeNewProductService.updateSort(id, sort);
         if (count > 0) {
             return CommonResult.success(count);
@@ -49,7 +49,7 @@ public class SmsHomeNewProductController {
     @Operation(summary = "批量删除首页新品")
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult delete(@RequestParam("ids") List<Long> ids) {
+    public CommonResult<Integer> delete(@RequestParam("ids") List<Long> ids) {
         int count = homeNewProductService.delete(ids);
         if (count > 0) {
             return CommonResult.success(count);
@@ -60,7 +60,7 @@ public class SmsHomeNewProductController {
     @Operation(summary = "批量修改首页新品状态")
     @RequestMapping(value = "/update/recommendStatus", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult updateRecommendStatus(@RequestParam("ids") List<Long> ids, @RequestParam Integer recommendStatus) {
+    public CommonResult<Integer> updateRecommendStatus(@RequestParam("ids") List<Long> ids, @RequestParam Integer recommendStatus) {
         int count = homeNewProductService.updateRecommendStatus(ids, recommendStatus);
         if (count > 0) {
             return CommonResult.success(count);

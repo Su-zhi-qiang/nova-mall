@@ -41,7 +41,7 @@ public class MinioController {
     @Operation(summary = "文件上传")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public CommonResult upload(@RequestPart("file") MultipartFile file) {
+    public CommonResult<MinioUploadDto> upload(@RequestPart("file") MultipartFile file) {
         try {
             //创建一个MinIO的Java客户端
             MinioClient minioClient =MinioClient.builder()
@@ -102,7 +102,7 @@ public class MinioController {
     @Operation(summary = "文件删除")
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult delete(@RequestParam("objectName") String objectName) {
+    public CommonResult<Void> delete(@RequestParam("objectName") String objectName) {
         try {
             MinioClient minioClient = MinioClient.builder()
                     .endpoint(ENDPOINT)

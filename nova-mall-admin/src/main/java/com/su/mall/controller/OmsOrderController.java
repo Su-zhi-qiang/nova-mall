@@ -38,7 +38,7 @@ public class OmsOrderController {
     @Operation(summary = "批量发货")
     @RequestMapping(value = "/update/delivery", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult delivery(@RequestBody List<OmsOrderDeliveryParam> deliveryParamList) {
+    public CommonResult<Integer> delivery(@RequestBody List<OmsOrderDeliveryParam> deliveryParamList) {
         int count = orderService.delivery(deliveryParamList);
         if (count > 0) {
             return CommonResult.success(count);
@@ -49,7 +49,7 @@ public class OmsOrderController {
     @Operation(summary = "批量关闭订单")
     @RequestMapping(value = "/update/close", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult close(@RequestParam("ids") List<Long> ids, @RequestParam String note) {
+    public CommonResult<Integer> close(@RequestParam("ids") List<Long> ids, @RequestParam String note) {
         int count = orderService.close(ids, note);
         if (count > 0) {
             return CommonResult.success(count);
@@ -60,7 +60,7 @@ public class OmsOrderController {
     @Operation(summary = "批量删除订单")
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult delete(@RequestParam("ids") List<Long> ids) {
+    public CommonResult<Integer> delete(@RequestParam("ids") List<Long> ids) {
         int count = orderService.delete(ids);
         if (count > 0) {
             return CommonResult.success(count);
@@ -79,7 +79,7 @@ public class OmsOrderController {
     @Operation(summary = "修改收货人信息")
     @RequestMapping(value = "/update/receiverInfo", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult updateReceiverInfo(@RequestBody OmsReceiverInfoParam receiverInfoParam) {
+    public CommonResult<Integer> updateReceiverInfo(@RequestBody OmsReceiverInfoParam receiverInfoParam) {
         int count = orderService.updateReceiverInfo(receiverInfoParam);
         if (count > 0) {
             return CommonResult.success(count);
@@ -90,7 +90,7 @@ public class OmsOrderController {
     @Operation(summary = "修改订单费用信息")
     @RequestMapping(value = "/update/moneyInfo", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult updateReceiverInfo(@RequestBody OmsMoneyInfoParam moneyInfoParam) {
+    public CommonResult<Integer> updateMoneyInfo(@RequestBody OmsMoneyInfoParam moneyInfoParam) {
         int count = orderService.updateMoneyInfo(moneyInfoParam);
         if (count > 0) {
             return CommonResult.success(count);
@@ -101,9 +101,9 @@ public class OmsOrderController {
     @Operation(summary = "备注订单")
     @RequestMapping(value = "/update/note", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult updateNote(@RequestParam("id") Long id,
-                                   @RequestParam("note") String note,
-                                   @RequestParam("status") Integer status) {
+    public CommonResult<Integer> updateNote(@RequestParam("id") Long id,
+                                           @RequestParam("note") String note,
+                                           @RequestParam("status") Integer status) {
         int count = orderService.updateNote(id, note, status);
         if (count > 0) {
             return CommonResult.success(count);

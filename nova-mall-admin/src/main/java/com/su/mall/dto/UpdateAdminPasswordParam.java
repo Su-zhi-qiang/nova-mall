@@ -1,6 +1,7 @@
 package com.su.mall.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,8 +11,7 @@ import jakarta.validation.constraints.NotEmpty;
  * 修改用户名密码参数
  * @author Su
  */
-@Getter
-@Setter
+@Data
 public class UpdateAdminPasswordParam {
     @NotEmpty
     @Schema(title =  "用户名", requiredMode = Schema.RequiredMode.REQUIRED)

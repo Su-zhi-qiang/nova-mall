@@ -24,7 +24,7 @@ public class MemberAttentionController {
     @Operation(summary = "添加品牌关注")
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult add(@RequestBody MemberBrandAttention memberBrandAttention) {
+    public CommonResult<Integer> add(@RequestBody MemberBrandAttention memberBrandAttention) {
         int count = memberAttentionService.add(memberBrandAttention);
         if(count>0){
             return CommonResult.success(count);
@@ -36,7 +36,7 @@ public class MemberAttentionController {
     @Operation(summary = "取消品牌关注")
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult delete(Long brandId) {
+    public CommonResult<Integer> delete(Long brandId) {
         int count = memberAttentionService.delete(brandId);
         if(count>0){
             return CommonResult.success(count);
@@ -65,7 +65,7 @@ public class MemberAttentionController {
     @Operation(summary = "清空当前用户品牌关注列表")
     @RequestMapping(value = "/clear", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult clear() {
+    public CommonResult<Void> clear() {
         memberAttentionService.clear();
         return CommonResult.success(null);
     }

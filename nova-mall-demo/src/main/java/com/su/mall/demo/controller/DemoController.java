@@ -39,8 +39,8 @@ public class DemoController {
     @Operation(summary = "添加品牌")
     @RequestMapping(value = "/brand/create", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult createBrand(@Validated @RequestBody PmsBrandDto pmsBrand) {
-        CommonResult commonResult;
+    public CommonResult<PmsBrandDto> createBrand(@Validated @RequestBody PmsBrandDto pmsBrand) {
+        CommonResult<PmsBrandDto> commonResult;
         int count = demoService.createBrand(pmsBrand);
         if (count == 1) {
             commonResult = CommonResult.success(pmsBrand);
@@ -55,8 +55,8 @@ public class DemoController {
     @Operation(summary = "更新品牌")
     @RequestMapping(value = "/brand/update/{id}", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult updateBrand(@PathVariable("id") Long id, @Validated @RequestBody PmsBrandDto pmsBrandDto) {
-        CommonResult commonResult;
+    public CommonResult<PmsBrandDto> updateBrand(@PathVariable("id") Long id, @Validated @RequestBody PmsBrandDto pmsBrandDto) {
+        CommonResult<PmsBrandDto> commonResult;
         int count = demoService.updateBrand(id, pmsBrandDto);
         if (count == 1) {
             commonResult = CommonResult.success(pmsBrandDto);
@@ -71,7 +71,7 @@ public class DemoController {
     @Operation(summary = "删除品牌")
     @RequestMapping(value = "/brand/delete/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult deleteBrand(@PathVariable("id") Long id) {
+    public CommonResult<Void> deleteBrand(@PathVariable("id") Long id) {
         int count = demoService.deleteBrand(id);
         if (count == 1) {
             LOGGER.debug("deleteBrand success :id={}", id);

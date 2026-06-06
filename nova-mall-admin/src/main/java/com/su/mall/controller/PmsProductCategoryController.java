@@ -30,7 +30,7 @@ public class PmsProductCategoryController {
     @Operation(summary = "添加商品分类")
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult create(@Validated @RequestBody PmsProductCategoryParam productCategoryParam) {
+    public CommonResult<Integer> create(@Validated @RequestBody PmsProductCategoryParam productCategoryParam) {
         int count = productCategoryService.create(productCategoryParam);
         if (count > 0) {
             return CommonResult.success(count);
@@ -42,7 +42,7 @@ public class PmsProductCategoryController {
     @Operation(summary = "修改商品分类")
     @RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult update(@PathVariable Long id,
+    public CommonResult<Integer> update(@PathVariable Long id,
                          @Validated
                          @RequestBody PmsProductCategoryParam productCategoryParam) {
         int count = productCategoryService.update(id, productCategoryParam);
@@ -74,7 +74,7 @@ public class PmsProductCategoryController {
     @Operation(summary = "删除商品分类")
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult delete(@PathVariable Long id) {
+    public CommonResult<Integer> delete(@PathVariable Long id) {
         int count = productCategoryService.delete(id);
         if (count > 0) {
             return CommonResult.success(count);
@@ -86,7 +86,7 @@ public class PmsProductCategoryController {
     @Operation(summary = "修改导航栏显示状态")
     @RequestMapping(value = "/update/navStatus", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult updateNavStatus(@RequestParam("ids") List<Long> ids, @RequestParam("navStatus") Integer navStatus) {
+    public CommonResult<Integer> updateNavStatus(@RequestParam("ids") List<Long> ids, @RequestParam("navStatus") Integer navStatus) {
         int count = productCategoryService.updateNavStatus(ids, navStatus);
         if (count > 0) {
             return CommonResult.success(count);
@@ -98,7 +98,7 @@ public class PmsProductCategoryController {
     @Operation(summary = "修改显示状态")
     @RequestMapping(value = "/update/showStatus", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult updateShowStatus(@RequestParam("ids") List<Long> ids, @RequestParam("showStatus") Integer showStatus) {
+    public CommonResult<Integer> updateShowStatus(@RequestParam("ids") List<Long> ids, @RequestParam("showStatus") Integer showStatus) {
         int count = productCategoryService.updateShowStatus(ids, showStatus);
         if (count > 0) {
             return CommonResult.success(count);

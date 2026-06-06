@@ -12,7 +12,7 @@ import java.util.List;
  * @author Su
  */
 @Data
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class PmsProductParam extends PmsProduct{
     @Schema(title = "商品阶梯价格设置")
     private List<PmsProductLadder> productLadderList;

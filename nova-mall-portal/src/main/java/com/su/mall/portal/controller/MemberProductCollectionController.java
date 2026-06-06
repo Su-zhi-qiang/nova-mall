@@ -25,7 +25,7 @@ public class MemberProductCollectionController {
     @Operation(summary = "添加商品收藏")
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult add(@RequestBody MemberProductCollection productCollection) {
+    public CommonResult<Integer> add(@RequestBody MemberProductCollection productCollection) {
         int count = memberCollectionService.add(productCollection);
         if (count > 0) {
             return CommonResult.success(count);
@@ -37,7 +37,7 @@ public class MemberProductCollectionController {
     @Operation(summary = "删除商品收藏")
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult delete(Long productId) {
+    public CommonResult<Integer> delete(Long productId) {
         int count = memberCollectionService.delete(productId);
         if (count > 0) {
             return CommonResult.success(count);
@@ -66,7 +66,7 @@ public class MemberProductCollectionController {
     @Operation(summary = "清空当前用户商品收藏列表")
     @RequestMapping(value = "/clear", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult clear() {
+    public CommonResult<Void> clear() {
         memberCollectionService.clear();
         return CommonResult.success(null);
     }

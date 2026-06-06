@@ -1,8 +1,7 @@
 package com.su.mall.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -11,8 +10,7 @@ import jakarta.validation.constraints.NotEmpty;
  * 用户注册参数
  * @author Su
  */
-@Getter
-@Setter
+@Data
 public class UmsAdminParam {
     @NotEmpty
     @Schema(title = "用户名", requiredMode = Schema.RequiredMode.REQUIRED)

@@ -32,7 +32,7 @@ public class PmsSkuStockController {
     @Operation(summary = "批量更新sku库存信息")
     @RequestMapping(value ="/update/{pid}",method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult update(@PathVariable Long pid,@RequestBody List<PmsSkuStock> skuStockList){
+    public CommonResult<Integer> update(@PathVariable Long pid,@RequestBody List<PmsSkuStock> skuStockList){
         int count = skuStockService.update(pid,skuStockList);
         if(count>0){
             return CommonResult.success(count);
