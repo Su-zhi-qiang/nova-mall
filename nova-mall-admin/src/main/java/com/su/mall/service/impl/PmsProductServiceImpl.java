@@ -11,6 +11,7 @@ import com.su.mall.dto.PmsProductQueryParam;
 import com.su.mall.dto.PmsProductResult;
 import com.su.mall.mapper.*;
 import com.su.mall.model.*;
+import com.su.mall.service.PmsProductOperateLogService;
 import com.su.mall.service.PmsProductService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -52,17 +53,17 @@ public class PmsProductServiceImpl implements PmsProductService {
     private final CmsPrefrenceAreaProductRelationMapper prefrenceAreaProductRelationMapper;
     private final PmsProductDao productDao;
     private final PmsProductVertifyRecordDao productVertifyRecordDao;
+    private final PmsProductOperateLogService productOperateLogService;
 
     @Override
     public int create(PmsProductParam productParam) {
         int count;
         //创建商品
-        PmsProduct product = productParam;
-        product.setId(null);
+        productParam.setId(null);
         // ✅ 改造：insert 替代 insertSelective
-        productMapper.insert(product);
+        productMapper.insert(productParam);
         //根据促销类型设置价格：会员价格、阶梯价格、满减价格
-        Long productId = product.getId();
+        Long productId = productParam.getId();
         //会员价格
         relateAndInsertList(memberPriceDao, productParam.getMemberPriceList(), productId);
         //阶梯价格
@@ -84,7 +85,9 @@ public class PmsProductServiceImpl implements PmsProductService {
     }
 
     private void handleSkuStockCode(List<PmsSkuStock> skuStockList, Long productId) {
-        if(CollectionUtils.isEmpty(skuStockList))return;
+        if(CollectionUtils.isEmpty(skuStockList)) {
+            return;
+        }
         for(int i=0;i<skuStockList.size();i++){
             PmsSkuStock skuStock = skuStockList.get(i);
             if(StrUtil.isEmpty(skuStock.getSkuCode())){
@@ -109,11 +112,36 @@ public class PmsProductServiceImpl implements PmsProductService {
     @Override
     public int update(Long id, PmsProductParam productParam) {
         int count;
+        // 查询旧商品信息用于记录日志
+        PmsProduct oldProduct = productMapper.selectById(id);
+        LOGGER.info("【商品更新】开始 - productId={}, oldProduct={}", id, oldProduct);
+        
+        if (oldProduct == null) {
+            LOGGER.warn("【商品更新】未找到商品 - productId={}", id);
+            return 0;
+        }
+        
         //更新商品信息
-        PmsProduct product = productParam;
-        product.setId(id);
+        productParam.setId(id);
         // ✅ 改造：updateById 替代 updateByPrimaryKeySelective
-        productMapper.updateById(product);
+        int updateResult = productMapper.updateById(productParam);
+        LOGGER.info("【商品更新】updateById结果: {}", updateResult);
+        
+        // 只有更新成功时才记录日志
+        if (updateResult > 0) {
+            try {
+                // 重新查询更新后的数据
+                PmsProduct newProduct = productMapper.selectById(id);
+                LOGGER.info("【商品更新】查询到更新后的数据: {}", newProduct);
+                
+                if (newProduct != null) {
+                    saveOperateLog(oldProduct, newProduct, "更新商品信息");
+                }
+            } catch (Exception e) {
+                LOGGER.error("【商品更新】记录日志失败", e);
+            }
+        }
+        
         //会员价格
         // ✅ 改造：delete + LambdaQueryWrapper 替代 deleteByExample
         memberPriceMapper.delete(new LambdaQueryWrapper<PmsMemberPrice>().eq(PmsMemberPrice::getProductId, id));
@@ -162,7 +190,7 @@ public class PmsProductServiceImpl implements PmsProductService {
         List<PmsSkuStock> insertSkuList = currSkuList.stream().filter(item->item.getId()==null).collect(Collectors.toList());
         //获取需要更新的sku信息
         List<PmsSkuStock> updateSkuList = currSkuList.stream().filter(item->item.getId()!=null).collect(Collectors.toList());
-        List<Long> updateSkuIds = updateSkuList.stream().map(PmsSkuStock::getId).collect(Collectors.toList());
+        List<Long> updateSkuIds = updateSkuList.stream().map(PmsSkuStock::getId).toList();
         //获取需要删除的sku信息
         List<PmsSkuStock> removeSkuList = oriStuList.stream().filter(item-> !updateSkuIds.contains(item.getId())).collect(Collectors.toList());
         handleSkuStockCode(insertSkuList,id);
@@ -267,6 +295,19 @@ public class PmsProductServiceImpl implements PmsProductService {
             product,
             new LambdaUpdateWrapper<PmsProduct>().in(PmsProduct::getId, ids)
         );
+        
+        // 记录操作日志
+        if (count > 0 && ids != null && !ids.isEmpty()) {
+            for (Long id : ids) {
+                try {
+                    String statusDesc = verifyStatus == 1 ? "审核通过" : (verifyStatus == 0 ? "审核未通过" : "审核状态变更");
+                    saveSimpleOperateLog(id, statusDesc);
+                } catch (Exception e) {
+                    LOGGER.error("【商品审核】记录日志失败 - productId={}", id, e);
+                }
+            }
+        }
+        
         //修改完审核状态后插入审核记录
         List<PmsProductVerifyRecord> list = new ArrayList<>();
         for (Long id : ids) {
@@ -284,46 +325,118 @@ public class PmsProductServiceImpl implements PmsProductService {
 
     @Override
     public int updatePublishStatus(List<Long> ids, Integer publishStatus) {
+        LOGGER.info("【商品上架/下架】开始 - ids={}, publishStatus={}", ids, publishStatus);
+        
         // ✅ 改造：update + LambdaUpdateWrapper 替代 updateByExampleSelective
         PmsProduct record = new PmsProduct();
         record.setPublishStatus(publishStatus);
-        return productMapper.update(
+        int count = productMapper.update(
             record,
             new LambdaUpdateWrapper<PmsProduct>().in(PmsProduct::getId, ids)
         );
+        
+        LOGGER.info("【商品上架/下架】更新结果: count={}", count);
+        
+        // 记录操作日志
+        if (count > 0 && ids != null && !ids.isEmpty()) {
+            for (Long id : ids) {
+                try {
+                    String statusDesc = publishStatus == 1 ? "商品上架" : "商品下架";
+                    saveSimpleOperateLog(id, statusDesc);
+                } catch (Exception e) {
+                    LOGGER.error("【商品上架/下架】记录日志失败 - productId={}", id, e);
+                }
+            }
+        }
+        
+        return count;
     }
 
     @Override
     public int updateRecommendStatus(List<Long> ids, Integer recommendStatus) {
+        LOGGER.info("【商品推荐】开始 - ids={}, recommendStatus={}", ids, recommendStatus);
+        
         // ✅ 改造：update + LambdaUpdateWrapper 替代 updateByExampleSelective
         PmsProduct record = new PmsProduct();
         record.setRecommandStatus(recommendStatus);
-        return productMapper.update(
+        int count = productMapper.update(
             record,
             new LambdaUpdateWrapper<PmsProduct>().in(PmsProduct::getId, ids)
         );
+        
+        LOGGER.info("【商品推荐】更新结果: count={}", count);
+        
+        // 记录操作日志
+        if (count > 0 && ids != null && !ids.isEmpty()) {
+            for (Long id : ids) {
+                try {
+                    String statusDesc = recommendStatus == 1 ? "设为推荐" : "取消推荐";
+                    saveSimpleOperateLog(id, statusDesc);
+                } catch (Exception e) {
+                    LOGGER.error("【商品推荐】记录日志失败 - productId={}", id, e);
+                }
+            }
+        }
+        
+        return count;
     }
 
     @Override
     public int updateNewStatus(List<Long> ids, Integer newStatus) {
+        LOGGER.info("【商品新品】开始 - ids={}, newStatus={}", ids, newStatus);
+        
         // ✅ 改造：update + LambdaUpdateWrapper 替代 updateByExampleSelective
         PmsProduct record = new PmsProduct();
         record.setNewStatus(newStatus);
-        return productMapper.update(
+        int count = productMapper.update(
             record,
             new LambdaUpdateWrapper<PmsProduct>().in(PmsProduct::getId, ids)
         );
+        
+        LOGGER.info("【商品新品】更新结果: count={}", count);
+        
+        // 记录操作日志
+        if (count > 0 && ids != null && !ids.isEmpty()) {
+            for (Long id : ids) {
+                try {
+                    String statusDesc = newStatus == 1 ? "设为新品" : "取消新品";
+                    saveSimpleOperateLog(id, statusDesc);
+                } catch (Exception e) {
+                    LOGGER.error("【商品新品】记录日志失败 - productId={}", id, e);
+                }
+            }
+        }
+        
+        return count;
     }
 
     @Override
     public int updateDeleteStatus(List<Long> ids, Integer deleteStatus) {
+        LOGGER.info("【商品删除】开始 - ids={}, deleteStatus={}", ids, deleteStatus);
+        
         // ✅ 改造：update + LambdaUpdateWrapper 替代 updateByExampleSelective
         PmsProduct record = new PmsProduct();
         record.setDeleteStatus(deleteStatus);
-        return productMapper.update(
+        int count = productMapper.update(
             record,
             new LambdaUpdateWrapper<PmsProduct>().in(PmsProduct::getId, ids)
         );
+        
+        LOGGER.info("【商品删除】更新结果: count={}", count);
+        
+        // 记录操作日志
+        if (count > 0 && ids != null && !ids.isEmpty()) {
+            for (Long id : ids) {
+                try {
+                    String statusDesc = deleteStatus == 1 ? "删除商品" : "恢复商品";
+                    saveSimpleOperateLog(id, statusDesc);
+                } catch (Exception e) {
+                    LOGGER.error("【商品删除】记录日志失败 - productId={}", id, e);
+                }
+            }
+        }
+        
+        return count;
     }
 
     @Override
@@ -347,9 +460,11 @@ public class PmsProductServiceImpl implements PmsProductService {
      * @param dataList  要插入的数据
      * @param productId 建立关系的id
      */
-    private void relateAndInsertList(Object dao, List dataList, Long productId) {
+    private void relateAndInsertList(Object dao, List<?> dataList, Long productId) {
         try {
-            if (CollectionUtils.isEmpty(dataList)) return;
+            if (CollectionUtils.isEmpty(dataList)) {
+                return;
+            }
             for (Object item : dataList) {
                 Method setId = item.getClass().getMethod("setId", Long.class);
                 setId.invoke(item, (Long) null);
@@ -361,6 +476,70 @@ public class PmsProductServiceImpl implements PmsProductService {
         } catch (Exception e) {
             LOGGER.warn("创建产品出错:{}", e.getMessage());
             throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    /**
+     * 保存商品操作日志
+     *
+     * @param oldProduct 旧商品信息
+     * @param newProduct 新商品信息
+     * @param operateDesc 操作描述
+     */
+    private void saveOperateLog(PmsProduct oldProduct, PmsProduct newProduct, String operateDesc) {
+        if (oldProduct == null || newProduct == null) {
+            LOGGER.warn("【商品日志】保存失败 - oldProduct或newProduct为空");
+            return;
+        }
+
+        try {
+            PmsProductOperateLog log = new PmsProductOperateLog();
+            log.setProductId(oldProduct.getId());
+            log.setPriceOld(oldProduct.getPrice());
+            log.setPriceNew(newProduct.getPrice());
+            log.setSalePriceOld(oldProduct.getPromotionPrice());
+            log.setSalePriceNew(newProduct.getPromotionPrice());
+            log.setGiftPointOld(oldProduct.getGiftPoint());
+            log.setGiftPointNew(newProduct.getGiftPoint());
+            log.setUsePointLimitOld(oldProduct.getUsePointLimit());
+            log.setUsePointLimitNew(newProduct.getUsePointLimit());
+
+            // 审核信息
+            log.setVerifyStatusOld(oldProduct.getVerifyStatus());
+            log.setVerifyStatusNew(newProduct.getVerifyStatus());
+
+            log.setOperateMan("admin");
+            log.setCreateTime(new Date());
+
+            LOGGER.info("【商品日志】准备保存 - productId={}, operateDesc={}", oldProduct.getId(), operateDesc);
+            
+            productOperateLogService.saveLog(log);
+            LOGGER.info("【商品日志】保存成功 - productId={}", oldProduct.getId());
+        } catch (Exception e) {
+            LOGGER.error("【商品日志】保存异常 - productId={}", oldProduct != null ? oldProduct.getId() : null, e);
+            throw e;
+        }
+    }
+
+    /**
+     * 保存简单的操作日志（只记录操作，无字段变更）
+     */
+    private void saveSimpleOperateLog(Long productId, String operateDesc) {
+        if (productId == null) {
+            LOGGER.warn("【商品日志】productId为空，跳过保存");
+            return;
+        }
+
+        try {
+            PmsProduct product = productMapper.selectById(productId);
+            if (product == null) {
+                LOGGER.warn("【商品日志】未找到商品 - productId={}", productId);
+                return;
+            }
+            // 复用 saveOperateLog，oldProduct 和 newProduct 是同一个（无字段变更）
+            saveOperateLog(product, product, operateDesc);
+        } catch (Exception e) {
+            LOGGER.error("【商品日志】保存简单日志异常 - productId={}", productId, e);
         }
     }
 
