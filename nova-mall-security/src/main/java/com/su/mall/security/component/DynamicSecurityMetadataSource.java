@@ -1,24 +1,16 @@
 package com.su.mall.security.component;
 
-import cn.hutool.core.util.URLUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.ConfigAttribute;
-import org.springframework.security.web.FilterInvocation;
-import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
 import jakarta.annotation.PostConstruct;
 import java.util.*;
 
-/**
- * 动态权限数据源，用于获取动态权限规则
- * @author Su
- */
 @RequiredArgsConstructor
-public class DynamicSecurityMetadataSource implements FilterInvocationSecurityMetadataSource {
+public class DynamicSecurityMetadataSource {
 
-    private static Map<String, ConfigAttribute> configAttributeMap = null;
+    private static Map<String, CustomConfigAttribute> configAttributeMap = null;
     private final DynamicSecurityService dynamicSecurityService;
 
     @PostConstruct
@@ -31,39 +23,18 @@ public class DynamicSecurityMetadataSource implements FilterInvocationSecurityMe
         configAttributeMap = null;
     }
 
-    @Override
-    public Collection<ConfigAttribute> getAttributes(Object o) throws IllegalArgumentException {
-        //获取当前访问的路径
-        String url = ((FilterInvocation) o).getRequestUrl();
-        String path = URLUtil.getPath(url);
-        return getConfigAttributesWithPath(path);
-    }
-
-    //根据当前访问的路径获取对应权限
-    public List<ConfigAttribute> getConfigAttributesWithPath(String path) {
-        if (configAttributeMap == null) this.loadDataSource();
-        List<ConfigAttribute>  configAttributes = new ArrayList<>();
+    public List<CustomConfigAttribute> getConfigAttributesWithPath(String path) {
+        if (configAttributeMap == null) {
+            this.loadDataSource();
+        }
+        List<CustomConfigAttribute> configAttributes = new ArrayList<>();
         PathMatcher pathMatcher = new AntPathMatcher();
-        Iterator<String> iterator = configAttributeMap.keySet().iterator();
-        //获取访问该路径所需资源
-        while (iterator.hasNext()) {
-            String pattern = iterator.next();
+        for (String pattern : configAttributeMap.keySet()) {
             if (pathMatcher.match(pattern, path)) {
                 configAttributes.add(configAttributeMap.get(pattern));
             }
         }
-        // 未设置操作请求权限，返回空集合
         return configAttributes;
-    }
-
-    @Override
-    public Collection<ConfigAttribute> getAllConfigAttributes() {
-        return null;
-    }
-
-    @Override
-    public boolean supports(Class<?> aClass) {
-        return true;
     }
 
 }

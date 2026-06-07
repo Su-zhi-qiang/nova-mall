@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
 public class RedisCacheAspect {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisCacheAspect.class);
 
-    @Pointcut("execution(public * com.su.mall.portal.service.*CacheService.*(..)) || execution(public * com.su.mall.service.*CacheService.*(..))")
+    @Pointcut("execution(public * com.su.mall..service.*CacheService.*(..))")
     public void cacheAspect() {
     }
 
@@ -33,18 +33,17 @@ public class RedisCacheAspect {
         Signature signature = joinPoint.getSignature();
         MethodSignature methodSignature = (MethodSignature) signature;
         Method method = methodSignature.getMethod();
-        Object result = null;
         try {
-            result = joinPoint.proceed();
+            return joinPoint.proceed();
         } catch (Throwable throwable) {
             //有CacheException注解的方法需要抛出异常
             if (method.isAnnotationPresent(CacheException.class)) {
                 throw throwable;
             } else {
-                LOGGER.error(throwable.getMessage());
+                LOGGER.error("Redis cache operation failed: {}", throwable.getMessage(), throwable);
             }
         }
-        return result;
+        return null;
     }
 
 }

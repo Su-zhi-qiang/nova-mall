@@ -167,7 +167,7 @@ public class JwtTokenUtil {
             return null;
         }
         // 如果token在30分钟之内刚刷新过，返回原token
-        if (tokenRefreshJustBefore(token, 30 * 60)) {
+        if (tokenRefreshJustBefore(token)) {
             return token;
         } else {
             payload.put(CLAIM_KEY_CREATED, new Date());
@@ -179,9 +179,8 @@ public class JwtTokenUtil {
      * 判断token在指定时间内是否刚刚刷新过
      *
      * @param token 原token
-     * @param time  指定时间（秒）
      */
-    private boolean tokenRefreshJustBefore(String token, int time) {
+    private boolean tokenRefreshJustBefore(String token) {
         Map<String, Object> payload = getPayloadFromToken(token);
         if (payload == null) {
             return false;
@@ -198,6 +197,6 @@ public class JwtTokenUtil {
         }
         Date refreshDate = new Date();
         // 刷新时间在创建时间的指定时间内
-        return refreshDate.after(createdDate) && refreshDate.before(DateUtil.offsetSecond(createdDate, time));
+        return refreshDate.after(createdDate) && refreshDate.before(DateUtil.offsetSecond(createdDate, 1800));
     }
 }

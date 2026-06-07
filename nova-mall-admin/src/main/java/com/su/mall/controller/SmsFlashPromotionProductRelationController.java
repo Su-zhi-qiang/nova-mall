@@ -3,7 +3,6 @@ package com.su.mall.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
-import com.su.mall.dto.SmsFlashPromotionProduct;
 import com.su.mall.model.SmsFlashPromotionProductRelation;
 import com.su.mall.service.SmsFlashPromotionProductRelationService;
 import io.swagger.v3.oas.annotations.Operation;
