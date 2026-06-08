@@ -28,18 +28,19 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public Object get(String key) {
-        return redisTemplate.opsForValue().get(key);
+    @SuppressWarnings("unchecked")
+    public <T> T get(String key) {
+        return (T) redisTemplate.opsForValue().get(key);
     }
 
     @Override
-    public Boolean del(String key) {
-        return redisTemplate.delete(key);
+    public void del(String key) {
+        redisTemplate.delete(key);
     }
 
     @Override
-    public Long del(List<String> keys) {
-        return redisTemplate.delete(keys);
+    public void del(List<String> keys) {
+        redisTemplate.delete(keys);
     }
 
     @Override

@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.su.mall.common.service.RedisService;
 import com.su.mall.mapper.*;
 import com.su.mall.model.*;
 import com.su.mall.portal.dao.PortalProductDao;
@@ -33,6 +34,7 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
     private final PmsProductLadderMapper productLadderMapper;
     private final PmsProductFullReductionMapper productFullReductionMapper;
     private final PortalProductDao portalProductDao;
+    private final RedisService redisService;
 
     @Override
     public Page<PmsProduct> search(String keyword, Long brandId, Long productCategoryId, Integer pageNum, Integer pageSize, Integer sort) {
@@ -64,6 +66,12 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
 
     @Override
     public PmsPortalProductDetail detail(Long id) {
+        String cacheKey = "product:detail:" + id;
+        PmsPortalProductDetail cached = redisService.get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+
         PmsPortalProductDetail result = new PmsPortalProductDetail();
         //获取商品信息
         // ✅ 改造：selectByPrimaryKey → selectById
@@ -110,6 +118,9 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
         }
         //商品可用优惠券
         result.setCouponList(portalProductDao.getAvailableCouponList(product.getId(),product.getProductCategoryId()));
+        
+        // 存入缓存，30分钟过期
+        redisService.set(cacheKey, result, 1800);
         return result;
     }
 

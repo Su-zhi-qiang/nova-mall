@@ -24,10 +24,12 @@ import java.lang.reflect.Method;
 public class RedisCacheAspect {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisCacheAspect.class);
 
+    // 定义切点，匹配所有以CacheService结尾的服务类的方法
     @Pointcut("execution(public * com.su.mall..service.*CacheService.*(..))")
     public void cacheAspect() {
     }
 
+    // 定义环绕通知，拦截所有缓存方法的调用
     @Around("cacheAspect()")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
         Signature signature = joinPoint.getSignature();

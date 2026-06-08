@@ -2,6 +2,7 @@ package com.su.mall.portal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.su.mall.common.service.RedisService;
 import com.su.mall.mapper.*;
 import com.su.mall.model.*;
 import com.su.mall.portal.dao.HomeDao;
@@ -31,9 +32,17 @@ public class HomeServiceImpl implements HomeService {
     private final PmsProductMapper productMapper;
     private final PmsProductCategoryMapper productCategoryMapper;
     private final CmsSubjectMapper subjectMapper;
+    private final RedisService redisService;
 
     @Override
     public HomeContentResult content() {
+        String cacheKey = "home:content";
+        // 先从缓存获取
+        HomeContentResult cached = redisService.get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+
         HomeContentResult result = new HomeContentResult();
         //获取首页广告
         result.setAdvertiseList(getHomeAdvertiseList());
@@ -47,6 +56,9 @@ public class HomeServiceImpl implements HomeService {
         result.setHotProductList(homeDao.getHotProductList(0,4));
         //获取推荐专题
         result.setSubjectList(homeDao.getRecommendSubjectList(0,4));
+        
+        // 存入缓存，1小时过期
+        redisService.set(cacheKey, result, 3600);
         return result;
     }
 

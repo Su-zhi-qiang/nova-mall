@@ -23,17 +23,17 @@ public interface RedisService {
     /**
      * 获取属性
      */
-    Object get(String key);
+    <T> T get(String key);
 
     /**
      * 删除属性
      */
-    Boolean del(String key);
+    void del(String key);
 
     /**
      * 批量删除属性
      */
-    Long del(List<String> keys);
+    void del(List<String> keys);
 
     /**
      * 设置过期时间

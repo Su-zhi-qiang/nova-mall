@@ -39,10 +39,11 @@ public class UmsMemberCacheServiceImpl implements UmsMemberCacheService {
         }
     }
 
+    @CacheException
     @Override
     public UmsMember getMember(String username) {
         String key = REDIS_DATABASE + ":" + REDIS_KEY_MEMBER + ":" + username;
-        return (UmsMember) redisService.get(key);
+        return redisService.get(key);
     }
 
     @Override
@@ -50,7 +51,7 @@ public class UmsMemberCacheServiceImpl implements UmsMemberCacheService {
         String key = REDIS_DATABASE + ":" + REDIS_KEY_MEMBER + ":" + member.getUsername();
         redisService.set(key, member, REDIS_EXPIRE);
     }
-
+    
     @CacheException
     @Override
     public void setAuthCode(String telephone, String authCode) {
@@ -62,6 +63,6 @@ public class UmsMemberCacheServiceImpl implements UmsMemberCacheService {
     @Override
     public String getAuthCode(String telephone) {
         String key = REDIS_DATABASE + ":" + REDIS_KEY_AUTH_CODE + ":" + telephone;
-        return (String) redisService.get(key);
+        return redisService.get(key);
     }
 }

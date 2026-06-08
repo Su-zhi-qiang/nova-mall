@@ -8,6 +8,7 @@ import com.su.mall.mapper.UmsAdminRoleRelationMapper;
 import com.su.mall.model.UmsAdmin;
 import com.su.mall.model.UmsAdminRoleRelation;
 import com.su.mall.model.UmsResource;
+import com.su.mall.security.annotation.CacheException;
 import com.su.mall.service.UmsAdminCacheService;
 import com.su.mall.service.UmsAdminService;
 import lombok.RequiredArgsConstructor;
@@ -86,6 +87,7 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
         }
     }
 
+    @CacheException
     @Override
     public UmsAdmin getAdmin(String username) {
         String key = REDIS_DATABASE + ":" + REDIS_KEY_ADMIN + ":" + username;
@@ -98,10 +100,11 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
         redisService.set(key, admin, REDIS_EXPIRE);
     }
 
+    @CacheException
     @Override
     public List<UmsResource> getResourceList(Long adminId) {
         String key = REDIS_DATABASE + ":" + REDIS_KEY_RESOURCE_LIST + ":" + adminId;
-        return (List<UmsResource>) redisService.get(key);
+        return redisService.get(key);
     }
 
     @Override
