@@ -39,17 +39,31 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
     @Override
     public Page<PmsProduct> search(String keyword, Long brandId, Long productCategoryId, Integer pageNum, Integer pageSize, Integer sort) {
         Page<PmsProduct> page = new Page<>(pageNum, pageSize);
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<PmsProduct>())
         LambdaQueryWrapper<PmsProduct> wrapper = new LambdaQueryWrapper<PmsProduct>()
                 .eq(PmsProduct::getDeleteStatus, 0)
                 .eq(PmsProduct::getPublishStatus, 1)
                 .like(StrUtil.isNotEmpty(keyword), PmsProduct::getName, keyword)
                 .eq(brandId != null, PmsProduct::getBrandId, brandId)
-                .eq(productCategoryId != null, PmsProduct::getProductCategoryId, productCategoryId)
-                .orderByDesc(sort == 1 ? PmsProduct::getId : null)
-                .orderByDesc(sort == 2 ? PmsProduct::getSale : null)
-                .orderByAsc(sort == 3 ? PmsProduct::getPrice : null)
-                .orderByDesc(sort == 4 ? PmsProduct::getPrice : null);
+                .eq(productCategoryId != null, PmsProduct::getProductCategoryId, productCategoryId);
+        
+        // 修复：不要传 null 给 orderByXxx 方法
+        if (sort != null) {
+            switch (sort) {
+                case 1:
+                    wrapper.orderByDesc(PmsProduct::getId);
+                    break;
+                case 2:
+                    wrapper.orderByDesc(PmsProduct::getSale);
+                    break;
+                case 3:
+                    wrapper.orderByAsc(PmsProduct::getPrice);
+                    break;
+                case 4:
+                    wrapper.orderByDesc(PmsProduct::getPrice);
+                    break;
+            }
+        }
+        
         return productMapper.selectPage(page, wrapper);
     }
 
@@ -57,11 +71,10 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
     public List<PmsProductCategoryNode> categoryTreeList() {
         // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<PmsProductCategory>())
         List<PmsProductCategory> allList = productCategoryMapper.selectList(new LambdaQueryWrapper<PmsProductCategory>());
-        List<PmsProductCategoryNode> result = allList.stream()
+        return allList.stream()
                 .filter(item -> item.getParentId().equals(0L))
                 .map(item -> covert(item, allList))
                 .collect(Collectors.toList());
-        return result;
     }
 
     @Override

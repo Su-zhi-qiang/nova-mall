@@ -24,4 +24,12 @@ public class CartPromotionItem extends OmsCartItem{
     private Integer integration;
     @Schema(title = "购买商品赠送成长值")
     private Integer growth;
+    @Schema(title = "是否是秒杀商品")
+    private Boolean flashPromotion = false;
+    @Schema(title = "秒杀活动ID")
+    private Long flashPromotionId;
+    @Schema(title = "秒杀场次ID")
+    private Long flashPromotionSessionId;
+    @Schema(title = "秒杀关联ID")
+    private Long flashPromotionRelationId;
 }

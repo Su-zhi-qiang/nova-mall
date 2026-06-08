@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.Objects;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -120,7 +122,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
             Integer useType = couponHistoryDetail.getCoupon().getUseType();
             BigDecimal minPoint = couponHistoryDetail.getCoupon().getMinPoint();
             Date endTime = couponHistoryDetail.getCoupon().getEndTime();
-            if(useType.equals(0)){
+            if (Objects.equals(0, useType)) {
                 //0->全场通用
                 //判断是否满足优惠起点
                 //计算购物车商品的总价
@@ -130,7 +132,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
                 }else{
                     disableList.add(couponHistoryDetail);
                 }
-            }else if(useType.equals(1)){
+            } else if (Objects.equals(1, useType)) {
                 //1->指定分类
                 //计算指定分类商品的总价
                 List<Long> productCategoryIds = new ArrayList<>();
@@ -143,7 +145,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
                 }else{
                     disableList.add(couponHistoryDetail);
                 }
-            }else if(useType.equals(2)){
+            } else if (Objects.equals(2, useType)) {
                 //2->指定商品
                 //计算指定商品的总价
                 List<Long> productIds = new ArrayList<>();
@@ -174,7 +176,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
                 new LambdaQueryWrapper<SmsCouponProductRelation>()
                         .eq(SmsCouponProductRelation::getProductId, productId));
         if(CollUtil.isNotEmpty(cprList)){
-            List<Long> couponIds = cprList.stream().map(SmsCouponProductRelation::getCouponId).collect(Collectors.toList());
+            List<Long> couponIds = cprList.stream().map(SmsCouponProductRelation::getCouponId).toList();
             allCouponIds.addAll(couponIds);
         }
         //获取指定分类优惠券
@@ -185,7 +187,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
                 new LambdaQueryWrapper<SmsCouponProductCategoryRelation>()
                         .eq(SmsCouponProductCategoryRelation::getProductCategoryId, product.getProductCategoryId()));
         if(CollUtil.isNotEmpty(cpcrList)){
-            List<Long> couponIds = cpcrList.stream().map(SmsCouponProductCategoryRelation::getCouponId).collect(Collectors.toList());
+            List<Long> couponIds = cpcrList.stream().map(SmsCouponProductCategoryRelation::getCouponId).toList();
             allCouponIds.addAll(couponIds);
         }
         // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<SmsCoupon>())
@@ -197,7 +199,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
                 .and(w -> w.gt(SmsCoupon::getEndTime, new Date())
                         .lt(SmsCoupon::getStartTime, new Date())
                         .ne(SmsCoupon::getUseType, 0)
-                        .in(SmsCoupon::getId, allCouponIds)));
+                        .in(CollUtil.isNotEmpty(allCouponIds), SmsCoupon::getId, allCouponIds)));
     }
 
     @Override

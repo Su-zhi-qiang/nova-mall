@@ -34,7 +34,7 @@ public class PmsSkuStock implements Serializable {
     private BigDecimal promotionPrice;
 
     @Schema(title = "锁定库存")
-    private Integer lockStock;
+    private Integer lockStock = 0;
 
     @Schema(title = "商品销售属性，json格式")
     private String spData;
