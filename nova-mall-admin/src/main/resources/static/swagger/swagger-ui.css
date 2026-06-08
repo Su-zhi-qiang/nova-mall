@@ -1,0 +1,464 @@
+/* ================================================
+   Swagger UI 自定义样式 - Nova Mall
+   ================================================ */
+
+/* ========== 基础变量定义 ========== */
+:root {
+    --nova-primary: #4091F7;
+    --nova-primary-dark: #2D7DD2;
+    --nova-success: #67C23A;
+    --nova-warning: #E6A23C;
+    --nova-danger: #F56C6C;
+    --nova-info: #909399;
+    --nova-bg: #f5f7fa;
+    --nova-text: #303133;
+    --nova-text-light: #606266;
+    --nova-border: #DCDFE6;
+    --nova-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ========== 全局样式调整 ========== */
+.swagger-ui {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ========== 顶部标题栏 ========== */
+.swagger-ui .topbar {
+    background: linear-gradient(135deg, var(--nova-primary) 0%, var(--nova-primary-dark) 100%);
+    padding: 10px 20px;
+    border-bottom: 3px solid var(--nova-primary-dark);
+}
+
+.swagger-ui .topbar .topbar-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.swagger-ui .topbar .topbar-content .topbar-logo {
+    height: 40px;
+}
+
+.swagger-ui .topbar .topbar-content .topbar-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: white;
+    font-size: 14px;
+}
+
+/* ========== 信息卡片（文档标题区域） ========== */
+.swagger-ui .info {
+    margin: 30px 0;
+    padding: 25px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--nova-shadow);
+    border-left: 4px solid var(--nova-primary);
+}
+
+.swagger-ui .info .title {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--nova-text);
+    margin-bottom: 10px;
+}
+
+.swagger-ui .info .description {
+    font-size: 15px;
+    color: var(--nova-text-light);
+    line-height: 1.6;
+}
+
+.swagger-ui .info .contact {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--nova-border);
+}
+
+.swagger-ui .info .contact span {
+    display: inline-block;
+    margin-right: 20px;
+    color: var(--nova-text-light);
+    font-size: 13px;
+}
+
+/* ========== 标签页样式 ========== */
+.swagger-ui .opblock-tag {
+    background: white;
+    border-radius: 8px 8px 0 0;
+    margin: 15px 0 0 0;
+    padding: 15px 20px;
+    box-shadow: var(--nova-shadow);
+    border-bottom: 2px solid var(--nova-border);
+    transition: all 0.3s ease;
+}
+
+.swagger-ui .opblock-tag:hover {
+    background: var(--nova-bg);
+}
+
+.swagger-ui .opblock-tag small {
+    color: var(--nova-text-light);
+    font-size: 13px;
+}
+
+/* ========== 接口卡片样式 ========== */
+.swagger-ui .opblock {
+    background: white;
+    border-radius: 0 0 8px 8px;
+    margin: 0 0 15px 0;
+    box-shadow: var(--nova-shadow);
+    border: 1px solid var(--nova-border);
+    transition: all 0.3s ease;
+}
+
+.swagger-ui .opblock:hover {
+    box-shadow: 0 4px 15px rgba(64, 145, 247, 0.15);
+    border-color: var(--nova-primary);
+}
+
+.swagger-ui .opblock.opblock-get {
+    border-left: 4px solid var(--nova-primary);
+}
+
+.swagger-ui .opblock.opblock-post {
+    border-left: 4px solid var(--nova-success);
+}
+
+.swagger-ui .opblock.opblock-put {
+    border-left: 4px solid var(--nova-warning);
+}
+
+.swagger-ui .opblock.opblock-delete {
+    border-left: 4px solid var(--nova-danger);
+}
+
+.swagger-ui .opblock.opblock-patch {
+    border-left: 4px solid var(--nova-info);
+}
+
+/* ========== HTTP 方法标签 ========== */
+.swagger-ui .opblock .opblock-summary {
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.swagger-ui .opblock .opblock-summary .opblock-summary-method {
+    min-width: 70px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: white;
+}
+
+.swagger-ui .opblock-get .opblock-summary-method {
+    background: var(--nova-primary);
+}
+
+.swagger-ui .opblock-post .opblock-summary-method {
+    background: var(--nova-success);
+}
+
+.swagger-ui .opblock-put .opblock-summary-method {
+    background: var(--nova-warning);
+}
+
+.swagger-ui .opblock-delete .opblock-summary-method {
+    background: var(--nova-danger);
+}
+
+.swagger-ui .opblock-patch .opblock-summary-method {
+    background: var(--nova-info);
+}
+
+/* ========== 路径和描述 ========== */
+.swagger-ui .opblock .opblock-summary .opblock-summary-path {
+    font-size: 15px;
+    color: var(--nova-text);
+    font-weight: 500;
+    flex: 1;
+}
+
+.swagger-ui .opblock .opblock-summary .opblock-summary-path annotation {
+    color: var(--nova-text-light);
+    font-size: 13px;
+    margin-left: 10px;
+}
+
+.swagger-ui .opblock .opblock-summary .opblock-summary-description {
+    font-size: 13px;
+    color: var(--nova-text-light);
+    text-align: right;
+}
+
+/* ========== 展开/折叠箭头 ========== */
+.swagger-ui .opblock .opblock-summary .opblock-summary-control {
+    color: var(--nova-text-light);
+}
+
+.swagger-ui .opblock .opblock-summary-control:focus {
+    outline: none;
+}
+
+/* ========== 参数区域 ========== */
+.swagger-ui .opblock .opblock-body {
+    padding: 20px;
+    background: var(--nova-bg);
+    border-top: 1px solid var(--nova-border);
+}
+
+.swagger-ui .opblock .opblock-body .opblock-section {
+    margin-bottom: 20px;
+}
+
+.swagger-ui .opblock .opblock-body .opblock-section-header {
+    padding: 10px 0;
+    margin-bottom: 15px;
+}
+
+.swagger-ui .opblock .opblock-body .opblock-section-header h4 {
+    color: var(--nova-text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ========== 参数表格 ========== */
+.swagger-ui .table-container {
+    background: white;
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.swagger-ui .parameters .parameter {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--nova-border);
+}
+
+.swagger-ui .parameters .parameter:last-child {
+    border-bottom: none;
+}
+
+.swagger-ui .parameters .parameter .parameter__name {
+    color: var(--nova-text);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.swagger-ui .parameters .parameter .parameter__name.required::after {
+    content: "*";
+    color: var(--nova-danger);
+    margin-left: 4px;
+}
+
+.swagger-ui .parameters .parameter .parameter__type {
+    color: var(--nova-text-light);
+    font-size: 13px;
+}
+
+.swagger-ui .parameters .parameter .parameter__extension {
+    color: var(--nova-info);
+    font-size: 12px;
+}
+
+/* ========== 请求体编辑器 ========== */
+.swagger-ui .body-editor {
+    background: white;
+    border-radius: 6px;
+    border: 1px solid var(--nova-border);
+}
+
+.swagger-ui .body-editor .microlight {
+    padding: 15px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* ========== 响应区域 ========== */
+.swagger-ui .responses-table {
+    background: white;
+    border-radius: 6px;
+}
+
+.swagger-ui .responses-table .response {
+    padding: 15px;
+    border-bottom: 1px solid var(--nova-border);
+}
+
+.swagger-ui .responses-table .response:last-child {
+    border-bottom: none;
+}
+
+.swagger-ui .responses-table .response-col_status {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.swagger-ui .responses-table .response-col_status.success {
+    color: var(--nova-success);
+}
+
+.swagger-ui .responses-table .response-col_status.error {
+    color: var(--nova-danger);
+}
+
+/* ========== 认证区域 ========== */
+.swagger-ui .auth-wrapper {
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--nova-shadow);
+    margin-bottom: 20px;
+    padding: 15px;
+}
+
+.swagger-ui .auth-wrapper .auth-container {
+    padding: 15px;
+    background: var(--nova-bg);
+    border-radius: 6px;
+}
+
+.swagger-ui .auth-wrapper .auth-container .key {
+    color: var(--nova-primary);
+    font-weight: 500;
+}
+
+/* ========== 按钮样式 ========== ========== */
+.swagger-ui .btn {
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.swagger-ui .btn.execute {
+    background: var(--nova-primary);
+    border-color: var(--nova-primary);
+}
+
+.swagger-ui .btn.execute:hover {
+    background: var(--nova-primary-dark);
+    border-color: var(--nova-primary-dark);
+}
+
+.swagger-ui .btn.try-out-on-colors {
+    background: var(--nova-primary);
+    border-color: var(--nova-primary);
+}
+
+/* ========== 滚动条美化 ========== */
+.swagger-ui ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.swagger-ui ::-webkit-scrollbar-track {
+    background: var(--nova-bg);
+}
+
+.swagger-ui ::-webkit-scrollbar-thumb {
+    background: var(--nova-border);
+    border-radius: 4px;
+}
+
+.swagger-ui ::-webkit-scrollbar-thumb:hover {
+    background: var(--nova-text-light);
+}
+
+/* ========== Model 样式 ========== */
+.swagger-ui .model {
+    background: white;
+    border-radius: 6px;
+    padding: 15px;
+    box-shadow: var(--nova-shadow);
+}
+
+.swagger-ui .model .model-box {
+    padding: 10px;
+    background: var(--nova-bg);
+    border-radius: 4px;
+}
+
+.swagger-ui .model .model-title {
+    color: var(--nova-text);
+    font-weight: 600;
+}
+
+.swagger-ui .model .model-property {
+    padding: 5px 0;
+}
+
+.swagger-ui .model .model-property-required {
+    color: var(--nova-danger);
+}
+
+/* ========== 响应示例 ========== */
+.swagger-ui .response-preview {
+    background: white;
+    border-radius: 6px;
+    border: 1px solid var(--nova-border);
+}
+
+.swagger-ui .response-preview .response-body {
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* ========== 版本选择器 ========== */
+.swagger-ui .version-stelector {
+    background: var(--nova-bg);
+    border: 1px solid var(--nova-border);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: var(--nova-text);
+}
+
+/* ========== Filter 输入框 ========== */
+.swagger-ui .sticker {
+    background: white;
+    border: 1px solid var(--nova-border);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.swagger-ui .sticker::placeholder {
+    color: var(--nova-text-light);
+}
+
+/* ========== Footer ========== */
+.swagger-ui .footer {
+    margin-top: 30px;
+    padding: 20px;
+    text-align: center;
+    color: var(--nova-text-light);
+    font-size: 13px;
+    border-top: 1px solid var(--nova-border);
+}
+
+/* ========== 加载动画 ========== */
+.swagger-ui .loading {
+    position: relative;
+}
+
+.swagger-ui .loading::after {
+    content: "加载中...";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--nova-primary);
+}
+
+/* ========== 暗色模式支持（可选） ========== */
+@media (prefers-color-scheme: dark) {
+    .swagger-ui .topbar {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-bottom-color: #0f3460;
+    }
+}

@@ -20,6 +20,19 @@ mybatis-plus:
     db-config:
       id-type: auto
 
+# 安全路径白名单（虽然search可能没安全，但配置一下以防万一）
+secure:
+  ignored:
+    urls:
+      - /swagger-ui/**
+      - /v3/api-docs
+      - /v3/api-docs/**
+      - /*/*.html
+      - /*/*.js
+      - /*/*.css
+      - /*/*.png
+      - /favicon.ico
+
 springdoc:
   swagger-ui:
     # 修改Swagger UI路径
