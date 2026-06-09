@@ -3,33 +3,29 @@
 <mapper namespace="com.su.mall.search.dao.EsProductDao">
     <resultMap id="esProductListMap" type="com.su.mall.search.domain.EsProduct" autoMapping="true">
         <id column="id" jdbcType="BIGINT" property="id" />
-        <collection property="attrValueList" columnPrefix="attr_" ofType="com.su.mall.search.domain.EsProductAttributeValue">
+        <collection property="attrValueList" columnPrefix="attr_" ofType="com.su.mall.search.domain.EsProductAttributeValue" autoMapping="true">
             <id column="id" property="id" jdbcType="BIGINT"/>
-            <result column="product_attribute_id" property="productAttributeId" jdbcType="BIGINT"/>
-            <result column="value" property="value" jdbcType="VARCHAR"/>
-            <result column="type" property="type"/>
-            <result column="name" property="name"/>
         </collection>
     </resultMap>
     <select id="getAllEsProductList" resultMap="esProductListMap">
         select
-            p.id id,
-            p.product_sn productSn,
-            p.brand_id brandId,
-            p.brand_name brandName,
-            p.product_category_id productCategoryId,
-            p.product_category_name productCategoryName,
-            p.pic pic,
-            p.name name,
-            p.sub_title subTitle,
-            p.price price,
-            p.sale sale,
-            p.new_status newStatus,
-            p.recommand_status recommandStatus,
-            p.stock stock,
-            p.promotion_type promotionType,
-            p.keywords keywords,
-            p.sort sort,
+            p.id,
+            p.product_sn,
+            p.brand_id,
+            p.brand_name,
+            p.product_category_id,
+            p.product_category_name,
+            p.pic,
+            p.name,
+            p.sub_title,
+            p.price,
+            p.sale,
+            p.new_status,
+            p.recommand_status,
+            p.stock,
+            p.promotion_type,
+            p.keywords,
+            p.sort,
             pav.id attr_id,
             pav.value attr_value,
             pav.product_attribute_id attr_product_attribute_id,

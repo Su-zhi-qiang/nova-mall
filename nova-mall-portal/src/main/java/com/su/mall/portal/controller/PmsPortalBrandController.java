@@ -29,9 +29,9 @@ public class PmsPortalBrandController {
     @Operation(summary = "分页获取推荐品牌")
     @RequestMapping(value = "/recommendList", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult<CommonPage<PmsBrand>> recommendList(@RequestParam(value = "pageSize", defaultValue = "6") Integer pageSize,
-                                                      @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        Page<PmsBrand> brandPage = portalBrandService.list(pageSize, pageNum);
+    public CommonResult<CommonPage<PmsBrand>> recommendList(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
+                                                      @RequestParam(value = "pageSize", defaultValue = "6") Integer pageSize) {
+        Page<PmsBrand> brandPage = portalBrandService.list(pageNum, pageSize);
         return CommonResult.success(CommonPage.restPage(brandPage));
     }
 

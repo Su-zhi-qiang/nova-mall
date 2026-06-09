@@ -1,38 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.su.mall.dao.SmsCouponDao">
-    <resultMap id="couponItemParam" type="com.su.mall.dto.SmsCouponParam">
+    <resultMap id="couponItemParam" type="com.su.mall.dto.SmsCouponParam" autoMapping="true">
         <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="type" jdbcType="INTEGER" property="type"/>
-        <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="platform" jdbcType="INTEGER" property="platform"/>
-        <result column="count" jdbcType="INTEGER" property="count"/>
-        <result column="amount" jdbcType="DECIMAL" property="amount"/>
-        <result column="perLimit" jdbcType="INTEGER" property="perLimit"/>
-        <result column="minPoint" jdbcType="DECIMAL" property="minPoint"/>
-        <result column="startTime" jdbcType="TIMESTAMP" property="startTime"/>
-        <result column="endTime" jdbcType="TIMESTAMP" property="endTime"/>
-        <result column="useType" jdbcType="INTEGER" property="useType"/>
-        <result column="note" jdbcType="VARCHAR" property="note"/>
-        <result column="publishCount" jdbcType="INTEGER" property="publishCount"/>
-        <result column="useCount" jdbcType="INTEGER" property="useCount"/>
-        <result column="receiveCount" jdbcType="INTEGER" property="receiveCount"/>
-        <result column="enableTime" jdbcType="TIMESTAMP" property="enableTime"/>
-        <result column="code" jdbcType="VARCHAR" property="code"/>
-        <result column="memberLevel" jdbcType="INTEGER" property="memberLevel"/>
-        <collection property="productRelationList" columnPrefix="cpr_" ofType="com.su.mall.model.SmsCouponProductRelation">
-            <id column="id" jdbcType="BIGINT" property="id"/>
-            <result column="couponId" jdbcType="BIGINT" property="couponId"/>
-            <result column="productId" jdbcType="BIGINT" property="productId"/>
-            <result column="productName" jdbcType="VARCHAR" property="productName"/>
-            <result column="productSn" jdbcType="VARCHAR" property="productSn"/>
+        <!-- 父类 SmsCoupon 字段由 autoMapping 自动映射，删除所有冗余 <result> -->
+        <collection property="productRelationList" columnPrefix="cpr_" ofType="com.su.mall.model.SmsCouponProductRelation" autoMapping="true">
+            <id column="id" property="id"/>
+            <!-- 优惠券商品关联字段由 autoMapping 自动映射 -->
         </collection>
-        <collection property="productCategoryRelationList" columnPrefix="cpcr_" ofType="com.su.mall.model.SmsCouponProductCategoryRelation">
-            <id column="id" jdbcType="BIGINT" property="id"/>
-            <result column="couponId" jdbcType="BIGINT" property="couponId"/>
-            <result column="productCategoryId" jdbcType="BIGINT" property="productCategoryId"/>
-            <result column="productCategoryName" jdbcType="VARCHAR" property="productCategoryName"/>
-            <result column="parentCategoryName" jdbcType="VARCHAR" property="parentCategoryName"/>
+        <collection property="productCategoryRelationList" columnPrefix="cpcr_" ofType="com.su.mall.model.SmsCouponProductCategoryRelation" autoMapping="true">
+            <id column="id" property="id"/>
+            <!-- 优惠券分类关联字段由 autoMapping 自动映射 -->
         </collection>
     </resultMap>
     <select id="getItem" resultMap="couponItemParam">

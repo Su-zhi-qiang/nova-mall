@@ -47,14 +47,14 @@ public class EsClientService {
     }
 
     public void createIndexIfNotExists() throws IOException {
-        boolean exists = restHighLevelClient.indices().exists(
-                new org.elasticsearch.action.admin.indices.get.GetIndexRequest(),
-                RequestOptions.DEFAULT);
+        // 新版 ES 客户端必须指定 indices，否则抛出 "indices are mandatory"
+        org.elasticsearch.action.admin.indices.get.GetIndexRequest existsRequest =
+                new org.elasticsearch.action.admin.indices.get.GetIndexRequest().indices(INDEX_NAME);
+        boolean exists = restHighLevelClient.indices().exists(existsRequest, RequestOptions.DEFAULT);
 
         if (!exists) {
             CreateIndexRequest createRequest = new CreateIndexRequest(INDEX_NAME);
-            // ====================== 改这里 ======================
-            createRequest.source(getIndexMapping(), XContentType.valueOf("json"));
+            createRequest.source(getIndexMapping(), XContentType.JSON);
             CreateIndexResponse createResponse = restHighLevelClient.indices().create(createRequest, RequestOptions.DEFAULT);
             LOGGER.info("索引 {} 创建结果: {}", INDEX_NAME, createResponse.isAcknowledged());
         } else {

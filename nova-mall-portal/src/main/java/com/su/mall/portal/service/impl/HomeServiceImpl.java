@@ -167,9 +167,20 @@ public class HomeServiceImpl implements HomeService {
             SmsFlashPromotionSession nextSession = getNextFlashPromotionSession(now);
             if (nextSession != null) {
                 LOGGER.info("下一场预告: {}", nextSession.getName());
-                // 日期部分为今天+1，时间部分为场次时间
-                homeFlashPromotion.setNextStartTime(mergeDateAndTime(1, nextSession.getStartTime()));
-                homeFlashPromotion.setNextEndTime(mergeDateAndTime(1, nextSession.getEndTime()));
+                // 获取当前时间（仅时间部分）
+                Date currTime = DateUtil.getTime(now);
+                
+                if (nextSession.getStartTime().after(currTime)) {
+                    // 下一场在今天还没到，使用今天的日期
+                    homeFlashPromotion.setNextStartTime(mergeDateAndTime(0, nextSession.getStartTime()));
+                    homeFlashPromotion.setNextEndTime(mergeDateAndTime(0, nextSession.getEndTime()));
+                    LOGGER.info("下一场在今天，开始时间: {}", homeFlashPromotion.getNextStartTime());
+                } else {
+                    // 今天所有场次都已结束，使用明天的日期
+                    homeFlashPromotion.setNextStartTime(mergeDateAndTime(1, nextSession.getStartTime()));
+                    homeFlashPromotion.setNextEndTime(mergeDateAndTime(1, nextSession.getEndTime()));
+                    LOGGER.info("下一场在明天，开始时间: {}", homeFlashPromotion.getNextStartTime());
+                }
             }
             return homeFlashPromotion;
         }
@@ -256,15 +267,28 @@ public class HomeServiceImpl implements HomeService {
 
     //获取下一个场次信息
     private SmsFlashPromotionSession getNextFlashPromotionSession(Date date) {
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<SmsFlashPromotionSession>())
+        // 获取所有启用的场次
         List<SmsFlashPromotionSession> promotionSessionList = promotionSessionMapper.selectList(
                 new LambdaQueryWrapper<SmsFlashPromotionSession>()
-                        .gt(SmsFlashPromotionSession::getStartTime, date)
+                        .eq(SmsFlashPromotionSession::getStatus, 1)
                         .orderByAsc(SmsFlashPromotionSession::getStartTime));
-        if (!CollectionUtils.isEmpty(promotionSessionList)) {
-            return promotionSessionList.get(0);
+        
+        if (CollectionUtils.isEmpty(promotionSessionList)) {
+            return null;
         }
-        return null;
+        
+        // 获取当前时间（仅时间部分，日期设为1970-01-01）
+        Date currTime = DateUtil.getTime(date);
+        
+        // 遍历场次，找到第一个开始时间晚于当前时间的场次
+        for (SmsFlashPromotionSession session : promotionSessionList) {
+            if (session.getStartTime().after(currTime)) {
+                return session;
+            }
+        }
+        
+        // 如果今天所有场次都已结束，返回明天的第一个场次
+        return promotionSessionList.get(0);
     }
 
     private List<SmsHomeAdvertise> getHomeAdvertiseList() {

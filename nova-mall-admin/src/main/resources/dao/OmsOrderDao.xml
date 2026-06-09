@@ -1,81 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.su.mall.dao.OmsOrderDao">
-    <resultMap id="orderDetailResultMap" type="com.su.mall.dto.OmsOrderDetail">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="member_id" jdbcType="BIGINT" property="memberId"/>
-        <result column="coupon_id" jdbcType="BIGINT" property="couponId"/>
-        <result column="order_sn" jdbcType="VARCHAR" property="orderSn"/>
-        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="member_username" jdbcType="VARCHAR" property="memberUsername"/>
-        <result column="total_amount" jdbcType="DECIMAL" property="totalAmount"/>
-        <result column="pay_amount" jdbcType="DECIMAL" property="payAmount"/>
-        <result column="freight_amount" jdbcType="DECIMAL" property="freightAmount"/>
-        <result column="promotion_amount" jdbcType="DECIMAL" property="promotionAmount"/>
-        <result column="integration_amount" jdbcType="DECIMAL" property="integrationAmount"/>
-        <result column="coupon_amount" jdbcType="DECIMAL" property="couponAmount"/>
-        <result column="discount_amount" jdbcType="DECIMAL" property="discountAmount"/>
-        <result column="pay_type" jdbcType="INTEGER" property="payType"/>
-        <result column="source_type" jdbcType="INTEGER" property="sourceType"/>
-        <result column="status" jdbcType="INTEGER" property="status"/>
-        <result column="order_type" jdbcType="INTEGER" property="orderType"/>
-        <result column="delivery_company" jdbcType="VARCHAR" property="deliveryCompany"/>
-        <result column="delivery_sn" jdbcType="VARCHAR" property="deliverySn"/>
-        <result column="auto_confirm_day" jdbcType="INTEGER" property="autoConfirmDay"/>
-        <result column="integration" jdbcType="INTEGER" property="integration"/>
-        <result column="growth" jdbcType="INTEGER" property="growth"/>
-        <result column="promotion_info" jdbcType="VARCHAR" property="promotionInfo"/>
-        <result column="bill_type" jdbcType="INTEGER" property="billType"/>
-        <result column="bill_header" jdbcType="VARCHAR" property="billHeader"/>
-        <result column="bill_content" jdbcType="VARCHAR" property="billContent"/>
-        <result column="bill_receiver_phone" jdbcType="VARCHAR" property="billReceiverPhone"/>
-        <result column="bill_receiver_email" jdbcType="VARCHAR" property="billReceiverEmail"/>
-        <result column="receiver_name" jdbcType="VARCHAR" property="receiverName"/>
-        <result column="receiver_phone" jdbcType="VARCHAR" property="receiverPhone"/>
-        <result column="receiver_post_code" jdbcType="VARCHAR" property="receiverPostCode"/>
-        <result column="receiver_province" jdbcType="VARCHAR" property="receiverProvince"/>
-        <result column="receiver_city" jdbcType="VARCHAR" property="receiverCity"/>
-        <result column="receiver_region" jdbcType="VARCHAR" property="receiverRegion"/>
-        <result column="receiver_detail_address" jdbcType="VARCHAR" property="receiverDetailAddress"/>
-        <result column="note" jdbcType="VARCHAR" property="note"/>
-        <result column="confirm_status" jdbcType="INTEGER" property="confirmStatus"/>
-        <result column="delete_status" jdbcType="INTEGER" property="deleteStatus"/>
-        <result column="use_integration" jdbcType="INTEGER" property="useIntegration"/>
-        <result column="payment_time" jdbcType="TIMESTAMP" property="paymentTime"/>
-        <result column="delivery_time" jdbcType="TIMESTAMP" property="deliveryTime"/>
-        <result column="receive_time" jdbcType="TIMESTAMP" property="receiveTime"/>
-        <result column="comment_time" jdbcType="TIMESTAMP" property="commentTime"/>
-        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
-        <collection property="orderItemList" ofType="com.su.mall.model.OmsOrderItem">
-            <id column="item_id" jdbcType="BIGINT" property="id"/>
-            <result column="item_order_id" jdbcType="BIGINT" property="orderId"/>
-            <result column="item_order_sn" jdbcType="VARCHAR" property="orderSn"/>
-            <result column="item_product_id" jdbcType="BIGINT" property="productId"/>
-            <result column="item_product_pic" jdbcType="VARCHAR" property="productPic"/>
-            <result column="item_product_name" jdbcType="VARCHAR" property="productName"/>
-            <result column="item_product_brand" jdbcType="VARCHAR" property="productBrand"/>
-            <result column="item_product_sn" jdbcType="VARCHAR" property="productSn"/>
-            <result column="item_product_price" jdbcType="DECIMAL" property="productPrice"/>
-            <result column="item_product_quantity" jdbcType="INTEGER" property="productQuantity"/>
-            <result column="item_product_sku_id" jdbcType="BIGINT" property="productSkuId"/>
-            <result column="item_product_sku_code" jdbcType="VARCHAR" property="productSkuCode"/>
-            <result column="item_product_category_id" jdbcType="BIGINT" property="productCategoryId"/>
-            <result column="item_promotion_name" jdbcType="VARCHAR" property="promotionName"/>
-            <result column="item_promotion_amount" jdbcType="DECIMAL" property="promotionAmount"/>
-            <result column="item_coupon_amount" jdbcType="DECIMAL" property="couponAmount"/>
-            <result column="item_integration_amount" jdbcType="DECIMAL" property="integrationAmount"/>
-            <result column="item_real_amount" jdbcType="DECIMAL" property="realAmount"/>
-            <result column="item_gift_integration" jdbcType="INTEGER" property="giftIntegration"/>
-            <result column="item_gift_growth" jdbcType="INTEGER" property="giftGrowth"/>
-            <result column="item_product_attr" jdbcType="VARCHAR" property="productAttr"/>
+    <resultMap id="orderDetailResultMap" type="com.su.mall.dto.OmsOrderDetail" autoMapping="true">
+        <id column="id" property="id"/>
+        <!-- 父类 OmsOrder 字段由 autoMapping 自动映射，删除所有冗余 <result> -->
+        <collection property="orderItemList" ofType="com.su.mall.model.OmsOrderItem" autoMapping="true">
+            <id column="item_id" property="id"/>
+            <!-- 订单项字段由 autoMapping 自动映射 -->
         </collection>
-        <collection property="historyList" ofType="com.su.mall.model.OmsOrderOperateHistory">
-            <id column="history_id" jdbcType="BIGINT" property="id"/>
-            <result column="history_order_id" jdbcType="BIGINT" property="orderId"/>
-            <result column="history_operate_man" jdbcType="VARCHAR" property="operateMan"/>
-            <result column="history_create_time" jdbcType="TIMESTAMP" property="createTime"/>
-            <result column="history_order_status" jdbcType="INTEGER" property="orderStatus"/>
-            <result column="history_note" jdbcType="VARCHAR" property="note"/>
+        <collection property="historyList" ofType="com.su.mall.model.OmsOrderOperateHistory" autoMapping="true">
+            <id column="history_id" property="id"/>
+            <!-- 操作历史字段由 autoMapping 自动映射 -->
         </collection>
     </resultMap>
     <!-- 改为使用 resultType -->

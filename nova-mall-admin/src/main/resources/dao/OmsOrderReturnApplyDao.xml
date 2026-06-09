@@ -1,45 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.su.mall.dao.OmsOrderReturnApplyDao">
-    <resultMap id="returnApplyDetailResultMap" type="com.su.mall.dto.OmsOrderReturnApplyResult">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="order_id" jdbcType="BIGINT" property="orderId"/>
-        <result column="company_address_id" jdbcType="BIGINT" property="companyAddressId"/>
-        <result column="product_id" jdbcType="BIGINT" property="productId"/>
-        <result column="order_sn" jdbcType="VARCHAR" property="orderSn"/>
-        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="member_username" jdbcType="VARCHAR" property="memberUsername"/>
-        <result column="return_amount" jdbcType="DECIMAL" property="returnAmount"/>
-        <result column="return_name" jdbcType="VARCHAR" property="returnName"/>
-        <result column="return_phone" jdbcType="VARCHAR" property="returnPhone"/>
-        <result column="status" jdbcType="INTEGER" property="status"/>
-        <result column="handle_time" jdbcType="TIMESTAMP" property="handleTime"/>
-        <result column="product_pic" jdbcType="VARCHAR" property="productPic"/>
-        <result column="product_name" jdbcType="VARCHAR" property="productName"/>
-        <result column="product_brand" jdbcType="VARCHAR" property="productBrand"/>
-        <result column="product_attr" jdbcType="VARCHAR" property="productAttr"/>
-        <result column="product_count" jdbcType="INTEGER" property="productCount"/>
-        <result column="product_price" jdbcType="DECIMAL" property="productPrice"/>
-        <result column="product_real_price" jdbcType="DECIMAL" property="productRealPrice"/>
-        <result column="reason" jdbcType="VARCHAR" property="reason"/>
-        <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="proof_pics" jdbcType="VARCHAR" property="proofPics"/>
-        <result column="handle_note" jdbcType="VARCHAR" property="handleNote"/>
-        <result column="handle_man" jdbcType="VARCHAR" property="handleMan"/>
-        <result column="receive_man" jdbcType="VARCHAR" property="receiveMan"/>
-        <result column="receive_time" jdbcType="TIMESTAMP" property="receiveTime"/>
-        <result column="receive_note" jdbcType="VARCHAR" property="receiveNote"/>
-        <association property="companyAddress" columnPrefix="ca_" javaType="com.su.mall.model.OmsCompanyAddress">
-            <id column="id" jdbcType="BIGINT" property="id"/>
-            <result column="address_name" jdbcType="VARCHAR" property="addressName"/>
-            <result column="send_status" jdbcType="INTEGER" property="sendStatus"/>
-            <result column="receive_status" jdbcType="INTEGER" property="receiveStatus"/>
-            <result column="name" jdbcType="VARCHAR" property="name"/>
-            <result column="phone" jdbcType="VARCHAR" property="phone"/>
-            <result column="province" jdbcType="VARCHAR" property="province"/>
-            <result column="city" jdbcType="VARCHAR" property="city"/>
-            <result column="region" jdbcType="VARCHAR" property="region"/>
-            <result column="detail_address" jdbcType="VARCHAR" property="detailAddress"/>
+    <resultMap id="returnApplyDetailResultMap" type="com.su.mall.dto.OmsOrderReturnApplyResult" autoMapping="true">
+        <id column="id" property="id"/>
+        <!-- 父类 OmsOrderReturnApply 字段由 autoMapping 自动映射，删除所有冗余 <result> -->
+        <association property="companyAddress" columnPrefix="ca_" javaType="com.su.mall.model.OmsCompanyAddress" autoMapping="true">
+            <id column="id" property="id"/>
+            <!-- 公司地址字段由 autoMapping 自动映射 -->
         </association>
     </resultMap>
     <!-- 改为使用 resultType -->

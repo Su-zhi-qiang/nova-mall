@@ -1,34 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.su.mall.dao.PmsProductDao">
-    <resultMap id="updateInfoMap" type="com.su.mall.dto.PmsProductResult">
-        <!-- PmsProduct 所有字段 -->
+    <resultMap id="updateInfoMap" type="com.su.mall.dto.PmsProductResult" autoMapping="true">
         <id column="id" property="id"/>
-        <result column="brand_id" property="brandId"/>
-        <result column="product_category_id" property="productCategoryId"/>
-        <result column="name" property="name"/>
-        <result column="pic" property="pic"/>
-        <result column="product_sn" property="productSn"/>
-        <result column="price" property="price"/>
-        <result column="stock" property="stock"/>
-        <result column="sale" property="sale"/>
-        <result column="description" property="description"/>
-        <result column="related_url" property="relatedUrl"/>
-        <result column="product_attribute_category_id" property="productAttributeCategoryId"/>
-        <result column="description" property="description"/>
-        <result column="content" property="content"/>
-        <result column="coupon_id" property="couponId"/>
-        <result column="gift_point" property="giftPoint"/>
-        <result column="use_minimum_meet_price" property="useMinimumMeetPrice"/>
-        <result column="meets_condition_coupon_count" property="meetsConditionCouponCount"/>
-        <result column="publish_status" property="publishStatus"/>
-        <result column="recommend_status" property="recommendStatus"/>
-        <result column="new_status" property="newStatus"/>
-        <result column="verify_status" property="verifyStatus"/>
-        <result column="album_pics" property="albumPics"/>
-        <result column="cateParentId" property="cateParentId"/>
-        
-        <!-- 移除对旧 MBG resultMap 的引用，使用 select 查询 -->
+        <!-- PmsProduct/PmsProductParam 字段由 autoMapping 自动映射，删除所有冗余 <result> -->
+        <!-- 使用 select 查询关联数据（N+1），不需要在主 resultMap 中指定嵌套映射 -->
         <collection property="productLadderList" column="id" select="selectProductLadderByProductId"/>
         <collection property="productFullReductionList" column="id" select="selectProductFullReductionByProductId"/>
         <collection property="memberPriceList" column="id" select="selectMemberPriceByProductId"/>
@@ -40,7 +16,7 @@
 
     <select id="getUpdateInfo" resultMap="updateInfoMap">
         SELECT p.*,
-            pc.parent_id cateParentId
+            pc.parent_id cate_parent_id
         FROM pms_product p
         LEFT JOIN pms_product_category pc on pc.id = p.product_category_id
         WHERE p.id=#{id};
@@ -50,27 +26,27 @@
     <select id="selectProductLadderByProductId" resultType="com.su.mall.model.PmsProductLadder">
         SELECT * FROM pms_product_ladder WHERE product_id = #{productId}
     </select>
-    
+
     <select id="selectProductFullReductionByProductId" resultType="com.su.mall.model.PmsProductFullReduction">
         SELECT * FROM pms_product_full_reduction WHERE product_id = #{productId}
     </select>
-    
+
     <select id="selectMemberPriceByProductId" resultType="com.su.mall.model.PmsMemberPrice">
         SELECT * FROM pms_member_price WHERE product_id = #{productId}
     </select>
-    
+
     <select id="selectSkuStockByProductId" resultType="com.su.mall.model.PmsSkuStock">
         SELECT * FROM pms_sku_stock WHERE product_id = #{productId}
     </select>
-    
+
     <select id="selectProductAttributeValueByProductId" resultType="com.su.mall.model.PmsProductAttributeValue">
         SELECT * FROM pms_product_attribute_value WHERE product_id = #{productId}
     </select>
-    
+
     <select id="selectSubjectProductRelationByProductId" resultType="com.su.mall.model.CmsSubjectProductRelation">
         SELECT * FROM cms_subject_product_relation WHERE product_id = #{productId}
     </select>
-    
+
     <select id="selectPrefrenceAreaProductRelationByProductId" resultType="com.su.mall.model.CmsPrefrenceAreaProductRelation">
         SELECT * FROM cms_prefrence_area_product_relation WHERE product_id = #{productId}
     </select>
