@@ -5,6 +5,7 @@ import com.su.mall.model.CmsSubject;
 import com.su.mall.model.PmsProduct;
 import com.su.mall.model.PmsProductCategory;
 import com.su.mall.portal.domain.HomeContentResult;
+import com.su.mall.portal.domain.HomeFlashPromotion;
 
 import java.util.List;
 
@@ -18,6 +19,11 @@ public interface HomeService {
      * 获取首页内容
      */
     HomeContentResult content();
+
+    /**
+     * 获取秒杀活动信息
+     */
+    HomeFlashPromotion getFlashPromotion();
 
     /**
      * 首页商品推荐

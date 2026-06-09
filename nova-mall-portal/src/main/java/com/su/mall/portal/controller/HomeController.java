@@ -7,6 +7,7 @@ import com.su.mall.model.CmsSubject;
 import com.su.mall.model.PmsProduct;
 import com.su.mall.model.PmsProductCategory;
 import com.su.mall.portal.domain.HomeContentResult;
+import com.su.mall.portal.domain.HomeFlashPromotion;
 import com.su.mall.portal.service.HomeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +34,14 @@ public class HomeController {
     public CommonResult<HomeContentResult> content() {
         HomeContentResult contentResult = homeService.content();
         return CommonResult.success(contentResult);
+    }
+
+    @Operation(summary = "获取秒杀活动信息")
+    @RequestMapping(value = "/flashPromotion", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonResult<HomeFlashPromotion> flashPromotion() {
+        HomeFlashPromotion flashPromotion = homeService.getFlashPromotion();
+        return CommonResult.success(flashPromotion);
     }
 
     @Operation(summary = "分页获取推荐商品")

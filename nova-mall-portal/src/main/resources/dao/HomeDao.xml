@@ -1,54 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.su.mall.portal.dao.HomeDao">
-    <resultMap id="flashPromotionProduct" type="com.su.mall.portal.domain.FlashPromotionProduct">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="brandId" jdbcType="BIGINT" property="brandId"/>
-        <result column="productCategoryId" jdbcType="BIGINT" property="productCategoryId"/>
-        <result column="feightTemplateId" jdbcType="BIGINT" property="feightTemplateId"/>
-        <result column="productAttributeCategoryId" jdbcType="BIGINT" property="productAttributeCategoryId"/>
-        <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="pic" jdbcType="VARCHAR" property="pic"/>
-        <result column="productSn" jdbcType="VARCHAR" property="productSn"/>
-        <result column="deleteStatus" jdbcType="INTEGER" property="deleteStatus"/>
-        <result column="publishStatus" jdbcType="INTEGER" property="publishStatus"/>
-        <result column="newStatus" jdbcType="INTEGER" property="newStatus"/>
-        <result column="recommandStatus" jdbcType="INTEGER" property="recommandStatus"/>
-        <result column="verifyStatus" jdbcType="INTEGER" property="verifyStatus"/>
-        <result column="sort" jdbcType="INTEGER" property="sort"/>
-        <result column="sale" jdbcType="INTEGER" property="sale"/>
-        <result column="price" jdbcType="DECIMAL" property="price"/>
-        <result column="promotionPrice" jdbcType="DECIMAL" property="promotionPrice"/>
-        <result column="giftGrowth" jdbcType="INTEGER" property="giftGrowth"/>
-        <result column="giftPoint" jdbcType="INTEGER" property="giftPoint"/>
-        <result column="usePointLimit" jdbcType="INTEGER" property="usePointLimit"/>
-        <result column="subTitle" jdbcType="VARCHAR" property="subTitle"/>
-        <result column="originalPrice" jdbcType="DECIMAL" property="originalPrice"/>
-        <result column="stock" jdbcType="INTEGER" property="stock"/>
-        <result column="lowStock" jdbcType="INTEGER" property="lowStock"/>
-        <result column="unit" jdbcType="VARCHAR" property="unit"/>
-        <result column="weight" jdbcType="DECIMAL" property="weight"/>
-        <result column="previewStatus" jdbcType="INTEGER" property="previewStatus"/>
-        <result column="serviceIds" jdbcType="VARCHAR" property="serviceIds"/>
-        <result column="keywords" jdbcType="VARCHAR" property="keywords"/>
-        <result column="note" jdbcType="VARCHAR" property="note"/>
-        <result column="albumPics" jdbcType="VARCHAR" property="albumPics"/>
-        <result column="detailTitle" jdbcType="VARCHAR" property="detailTitle"/>
-        <result column="promotionStartTime" jdbcType="TIMESTAMP" property="promotionStartTime"/>
-        <result column="promotionEndTime" jdbcType="TIMESTAMP" property="promotionEndTime"/>
-        <result column="promotionPerLimit" jdbcType="INTEGER" property="promotionPerLimit"/>
-        <result column="promotionType" jdbcType="INTEGER" property="promotionType"/>
-        <result column="brandName" jdbcType="VARCHAR" property="brandName"/>
-        <result column="productCategoryName" jdbcType="VARCHAR" property="productCategoryName"/>
-        <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="detailDesc" jdbcType="VARCHAR" property="detailDesc"/>
-        <result column="detailHtml" jdbcType="VARCHAR" property="detailHtml"/>
-        <result column="detailMobileHtml" jdbcType="VARCHAR" property="detailMobileHtml"/>
-        <result column="flashPromotionPrice" property="flashPromotionPrice"/>
-        <result column="flashPromotionCount" property="flashPromotionCount"/>
-        <result column="flashPromotionLimit" property="flashPromotionLimit"/>
-    </resultMap>
-
     <!-- 改为使用 resultType -->
     <select id="getRecommendBrandList" resultType="com.su.mall.model.PmsBrand">
         SELECT b.*
@@ -63,18 +15,25 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="getFlashProductList" resultMap="flashPromotionProduct">
+    <!-- 获取秒杀商品列表 - 使用 resultType 让 MyBatis-Plus 自动做驼峰映射 -->
+    <select id="getFlashProductList" resultType="com.su.mall.portal.domain.FlashPromotionProduct">
         SELECT
+            p.*,
             pr.flash_promotion_price,
             pr.flash_promotion_count,
-            pr.flash_promotion_limit,
-            p.*
+            pr.flash_promotion_limit
         FROM
             sms_flash_promotion_product_relation pr
             LEFT JOIN pms_product p ON pr.product_id = p.id
         WHERE
             pr.flash_promotion_id = #{flashPromotionId}
             AND pr.flash_promotion_session_id = #{sessionId}
+            AND pr.flash_promotion_price IS NOT NULL
+            AND pr.flash_promotion_count > 0
+            AND p.delete_status = 0
+            AND p.publish_status = 1
+        ORDER BY
+            pr.sort ASC
     </select>
 
     <!-- 改为使用 resultType -->
