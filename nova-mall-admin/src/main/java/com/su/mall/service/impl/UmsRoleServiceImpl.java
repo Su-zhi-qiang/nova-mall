@@ -12,6 +12,7 @@ import com.su.mall.service.UmsAdminCacheService;
 import com.su.mall.service.UmsRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -29,6 +30,7 @@ public class UmsRoleServiceImpl implements UmsRoleService {
     private final UmsRoleDao roleDao;
     private final UmsAdminCacheService adminCacheService;
     @Override
+    @Transactional
     public int create(UmsRole role) {
         role.setCreateTime(new Date());
         role.setAdminCount(0);
@@ -37,6 +39,7 @@ public class UmsRoleServiceImpl implements UmsRoleService {
     }
 
     @Override
+    @Transactional
     public int update(Long id, UmsRole role) {
         role.setId(id);
         // ✅ 改造：updateByPrimaryKeySelective → updateById
@@ -44,6 +47,7 @@ public class UmsRoleServiceImpl implements UmsRoleService {
     }
 
     @Override
+    @Transactional
     public int delete(List<Long> ids) {
         // ✅ 改造：deleteByExample → delete + LambdaQueryWrapper
         int count = roleMapper.delete(new LambdaQueryWrapper<UmsRole>().in(UmsRole::getId, ids));
@@ -84,6 +88,7 @@ public class UmsRoleServiceImpl implements UmsRoleService {
     }
 
     @Override
+    @Transactional
     public int allocMenu(Long roleId, List<Long> menuIds) {
         //先删除原有关系
         // ✅ 改造：deleteByExample → delete + LambdaQueryWrapper
@@ -99,6 +104,7 @@ public class UmsRoleServiceImpl implements UmsRoleService {
     }
 
     @Override
+    @Transactional
     public int allocResource(Long roleId, List<Long> resourceIds) {
         //先删除原有关系
         // ✅ 改造：deleteByExample → delete + LambdaQueryWrapper

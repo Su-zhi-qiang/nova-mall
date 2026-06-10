@@ -9,6 +9,7 @@ import com.su.mall.service.UmsMenuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -24,6 +25,7 @@ public class UmsMenuServiceImpl implements UmsMenuService {
     private final UmsMenuMapper menuMapper;
 
     @Override
+    @Transactional
     public int create(UmsMenu umsMenu) {
         umsMenu.setCreateTime(new Date());
         updateLevel(umsMenu);
@@ -50,6 +52,7 @@ public class UmsMenuServiceImpl implements UmsMenuService {
     }
 
     @Override
+    @Transactional
     public int update(Long id, UmsMenu umsMenu) {
         umsMenu.setId(id);
         updateLevel(umsMenu);
@@ -64,6 +67,7 @@ public class UmsMenuServiceImpl implements UmsMenuService {
     }
 
     @Override
+    @Transactional
     public int delete(Long id) {
         // ✅ 改造：deleteByPrimaryKey → deleteById
         return menuMapper.deleteById(id);
@@ -90,6 +94,7 @@ public class UmsMenuServiceImpl implements UmsMenuService {
     }
 
     @Override
+    @Transactional
     public int updateHidden(Long id, Integer hidden) {
         UmsMenu umsMenu = new UmsMenu();
         umsMenu.setId(id);

@@ -13,6 +13,7 @@ import com.su.mall.model.OmsOrderOperateHistory;
 import com.su.mall.service.OmsOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -39,6 +40,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     }
 
     @Override
+    @Transactional
     public int delivery(List<OmsOrderDeliveryParam> deliveryParamList) {
         //批量发货
         int count = orderDao.delivery(deliveryParamList);
@@ -58,6 +60,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     }
 
     @Override
+    @Transactional
     public int close(List<Long> ids, String note) {
         OmsOrder record = new OmsOrder();
         record.setStatus(4);
@@ -79,6 +82,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     }
 
     @Override
+    @Transactional
     public int delete(List<Long> ids) {
         OmsOrder record = new OmsOrder();
         record.setDeleteStatus(1);
@@ -94,6 +98,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     }
 
     @Override
+    @Transactional
     public int updateReceiverInfo(OmsReceiverInfoParam receiverInfoParam) {
         OmsOrder order = new OmsOrder();
         order.setId(receiverInfoParam.getOrderId());
@@ -119,6 +124,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     }
 
     @Override
+    @Transactional
     public int updateMoneyInfo(OmsMoneyInfoParam moneyInfoParam) {
         OmsOrder order = new OmsOrder();
         order.setId(moneyInfoParam.getOrderId());
@@ -139,6 +145,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     }
 
     @Override
+    @Transactional
     public int updateNote(Long id, String note, Integer status) {
         OmsOrder order = new OmsOrder();
         order.setId(id);

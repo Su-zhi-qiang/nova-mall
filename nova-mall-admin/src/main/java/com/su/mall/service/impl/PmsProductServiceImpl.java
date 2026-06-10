@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
@@ -56,6 +57,7 @@ public class PmsProductServiceImpl implements PmsProductService {
     private final PmsProductOperateLogService productOperateLogService;
 
     @Override
+    @Transactional
     public int create(PmsProductParam productParam) {
         int count;
         //创建商品
@@ -110,6 +112,7 @@ public class PmsProductServiceImpl implements PmsProductService {
     }
 
     @Override
+    @Transactional
     public int update(Long id, PmsProductParam productParam) {
         int count;
         // 查询旧商品信息用于记录日志
@@ -287,6 +290,7 @@ public class PmsProductServiceImpl implements PmsProductService {
     }
 
     @Override
+    @Transactional
     public int updateVerifyStatus(List<Long> ids, Integer verifyStatus, String detail) {
         // ✅ 改造：update + LambdaUpdateWrapper 替代 updateByExampleSelective
         PmsProduct product = new PmsProduct();
@@ -411,6 +415,7 @@ public class PmsProductServiceImpl implements PmsProductService {
     }
 
     @Override
+    @Transactional
     public int updateDeleteStatus(List<Long> ids, Integer deleteStatus) {
         LOGGER.info("【商品删除】开始 - ids={}, deleteStatus={}", ids, deleteStatus);
         

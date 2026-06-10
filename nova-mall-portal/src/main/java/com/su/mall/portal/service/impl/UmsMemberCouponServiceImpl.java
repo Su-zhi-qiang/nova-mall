@@ -12,6 +12,7 @@ import com.su.mall.portal.service.UmsMemberCouponService;
 import com.su.mall.portal.service.UmsMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
     private final SmsCouponProductCategoryRelationMapper couponProductCategoryRelationMapper;
     private final PmsProductMapper productMapper;
     @Override
+    @Transactional
     public void add(Long couponId) {
         UmsMember currentMember = memberService.getCurrentMember();
         //获取优惠券信息，判断数量

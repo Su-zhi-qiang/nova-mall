@@ -13,6 +13,7 @@ import com.su.mall.portal.service.OmsPromotionService;
 import com.su.mall.portal.service.UmsMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
     private final UmsMemberService memberService;
 
     @Override
+    @Transactional
     public int add(OmsCartItem cartItem) {
         int count;
         UmsMember currentMember =memberService.getCurrentMember();
@@ -122,6 +124,7 @@ private OmsCartItem getCartItem(OmsCartItem cartItem) {
     }
 
     @Override
+    @Transactional
     public int updateAttr(OmsCartItem cartItem) {
         //删除原购物车信息
         OmsCartItem updateCart = new OmsCartItem();

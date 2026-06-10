@@ -25,6 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
@@ -72,6 +73,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     }
 
     @Override
+    @Transactional
     public void register(String username, String password, String telephone, String authCode) {
         //验证验证码
         if(!verifyAuthCode(authCode,telephone)){
@@ -118,6 +120,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     }
 
     @Override
+    @Transactional
     public void updatePassword(String telephone, String password, String authCode) {
         // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<UmsMember>())
         List<UmsMember> memberList = memberMapper.selectList(
@@ -145,6 +148,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     }
 
     @Override
+    @Transactional
     public void updateIntegration(Long id, Integer integration) {
         UmsMember record=new UmsMember();
         record.setId(id);

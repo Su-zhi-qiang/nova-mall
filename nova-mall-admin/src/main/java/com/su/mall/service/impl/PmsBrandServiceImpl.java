@@ -13,6 +13,7 @@ import com.su.mall.service.PmsBrandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class PmsBrandServiceImpl implements PmsBrandService {
     }
 
     @Override
+    @Transactional
     public int createBrand(PmsBrandParam pmsBrandParam) {
         PmsBrand pmsBrand = new PmsBrand();
         BeanUtils.copyProperties(pmsBrandParam, pmsBrand);
@@ -45,6 +47,7 @@ public class PmsBrandServiceImpl implements PmsBrandService {
     }
 
     @Override
+    @Transactional
     public int updateBrand(Long id, PmsBrandParam pmsBrandParam) {
         PmsBrand pmsBrand = new PmsBrand();
         BeanUtils.copyProperties(pmsBrandParam, pmsBrand);
@@ -65,12 +68,14 @@ public class PmsBrandServiceImpl implements PmsBrandService {
     }
 
     @Override
+    @Transactional
     public int deleteBrand(Long id) {
         // ✅ 改造：deleteById 替代 deleteByPrimaryKey
         return brandMapper.deleteById(id);
     }
 
     @Override
+    @Transactional
     public int deleteBrand(List<Long> ids) {
         // ✅ 改造：delete 替代 deleteByExample
         return brandMapper.delete(new LambdaQueryWrapper<PmsBrand>().in(PmsBrand::getId, ids));
@@ -95,6 +100,7 @@ public class PmsBrandServiceImpl implements PmsBrandService {
     }
 
     @Override
+    @Transactional
     public int updateShowStatus(List<Long> ids, Integer showStatus) {
         // ✅ 改造：update + LambdaQueryWrapper 替代 updateByExampleSelective
         PmsBrand brand = new PmsBrand();
@@ -103,6 +109,7 @@ public class PmsBrandServiceImpl implements PmsBrandService {
     }
 
     @Override
+    @Transactional
     public int updateFactoryStatus(List<Long> ids, Integer factoryStatus) {
         // ✅ 改造：update + LambdaQueryWrapper 替代 updateByExampleSelective
         PmsBrand brand = new PmsBrand();
