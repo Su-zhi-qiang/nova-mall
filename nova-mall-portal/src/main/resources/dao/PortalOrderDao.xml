@@ -21,7 +21,8 @@
             ot.product_name ot_product_name,
             ot.product_sku_id ot_product_sku_id,
             ot.product_sku_code ot_product_sku_code,
-            ot.product_quantity ot_product_quantity
+            ot.product_quantity ot_product_quantity,
+            ot.flash_promotion_relation_id ot_flash_promotion_relation_id
         FROM
             oms_order o
             LEFT JOIN oms_order_item ot ON o.id = ot.order_id
@@ -116,4 +117,12 @@
             #{item.productSkuId}
         </foreach>
     </update>
+    <select id="getMemberFlashBuyCount" resultType="java.lang.Integer">
+        SELECT IFNULL(SUM(ot.product_quantity), 0)
+        FROM oms_order o
+        LEFT JOIN oms_order_item ot ON o.id = ot.order_id
+        WHERE o.member_id = #{memberId}
+          AND ot.flash_promotion_relation_id = #{relationId}
+          AND o.status IN (1,2,3)
+    </select>
 </mapper>

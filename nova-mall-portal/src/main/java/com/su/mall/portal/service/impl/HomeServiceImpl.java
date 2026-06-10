@@ -42,22 +42,45 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public HomeFlashPromotion getFlashPromotion() {
-        String cacheKey = "home:flashPromotion";
-        // 先从缓存获取
+        Date now = new Date();
+        SmsFlashPromotionSession currentSession = getFlashPromotionSession(now);
+
+        if (currentSession == null) {
+            LOGGER.info("当前无进行中的秒杀场次，尝试获取下一场预告");
+            return buildEmptyFlashPromotionWithNext(now);
+        }
+
+        SmsFlashPromotion currentActivity = getCurrentActivity(now);
+        if (currentActivity == null) {
+            LOGGER.info("当前无有效秒杀活动");
+            return buildEmptyFlashPromotionWithNext(now);
+        }
+
+        String cacheKey = "home:flashPromotion:" + currentActivity.getId() + ":" + currentSession.getId() + ":" + new java.text.SimpleDateFormat("yyyyMMddHH").format(now);
         HomeFlashPromotion cached = redisService.get(cacheKey);
         if (cached != null) {
-            LOGGER.info("秒杀信息从缓存获取成功");
+            LOGGER.info("秒杀信息从缓存获取成功，cacheKey: {}", cacheKey);
             return cached;
         }
 
-        HomeFlashPromotion result = getHomeFlashPromotion();
+        String resetKey = "flash:reset:" + currentActivity.getId() + ":" + currentSession.getId() + ":" + new java.text.SimpleDateFormat("yyyyMMddHH").format(now);
+        if (!redisService.hasKey(resetKey)) {
+            try {
+                int resetCount = flashPromotionProductRelationMapper.resetFlashStock(currentActivity.getId(), currentSession.getId());
+                LOGGER.info("场次切换，已重置 {} 个秒杀商品的库存", resetCount);
+            } catch (Exception e) {
+                LOGGER.warn("重置秒杀库存失败（可能 original_count 字段尚未添加）：{}", e.getMessage());
+            }
+            redisService.set(resetKey, "1", 3600);
+        }
 
-        // 存入缓存，10分钟过期（秒杀时间较短，缓存时间不宜过长）
+        HomeFlashPromotion result = buildHomeFlashPromotion(currentActivity, currentSession, now);
+
         if (result.getProductList() != null && !result.getProductList().isEmpty()) {
-            redisService.set(cacheKey, result, 600);
-            LOGGER.info("秒杀信息已缓存，商品数量: {}", result.getProductList().size());
+            redisService.set(cacheKey, result, 300);
+            LOGGER.info("秒杀信息已缓存，cacheKey: {}, 商品数量: {}", cacheKey, result.getProductList().size());
         } else {
-            LOGGER.info("秒杀信息为空，未进行缓存");
+            LOGGER.info("秒杀商品列表为空，未缓存");
         }
 
         return result;
@@ -78,7 +101,7 @@ public class HomeServiceImpl implements HomeService {
         //获取推荐品牌
         result.setBrandList(homeDao.getRecommendBrandList(0,6));
         //获取秒杀信息
-        result.setHomeFlashPromotion(getHomeFlashPromotion());
+        result.setHomeFlashPromotion(getFlashPromotion());
         //获取新品推荐
         result.setNewProductList(homeDao.getNewProductList(0,4));
         //获取人气推荐
@@ -143,94 +166,60 @@ public class HomeServiceImpl implements HomeService {
         return page;
     }
 
-    private HomeFlashPromotion getHomeFlashPromotion() {
+    private HomeFlashPromotion buildHomeFlashPromotion(SmsFlashPromotion activity, SmsFlashPromotionSession session, Date now) {
         HomeFlashPromotion homeFlashPromotion = new HomeFlashPromotion();
-        Date now = new Date();
-        LOGGER.info("开始获取秒杀信息，当前时间: {}", now);
 
-        // 获取所有当前有效的秒杀活动
-        List<SmsFlashPromotion> flashPromotionList = getFlashPromotionList(now);
-        LOGGER.info("找到 {} 个秒杀活动", flashPromotionList != null ? flashPromotionList.size() : 0);
+        long productCount = flashPromotionProductRelationMapper.selectCount(
+            new LambdaQueryWrapper<SmsFlashPromotionProductRelation>()
+                .eq(SmsFlashPromotionProductRelation::getFlashPromotionId, activity.getId())
+                .eq(SmsFlashPromotionProductRelation::getFlashPromotionSessionId, session.getId())
+                .isNotNull(SmsFlashPromotionProductRelation::getFlashPromotionPrice)
+                .gt(SmsFlashPromotionProductRelation::getFlashPromotionCount, 0));
 
-        if (CollectionUtils.isEmpty(flashPromotionList)) {
-            LOGGER.info("没有找到秒杀活动，返回空");
+        if (productCount <= 0) {
+            LOGGER.info("活动 {} (ID:{}) 当前场次无有效商品", activity.getTitle(), activity.getId());
             return homeFlashPromotion;
         }
 
-        // 获取当前秒杀场次
-        SmsFlashPromotionSession flashPromotionSession = getFlashPromotionSession(now);
-        LOGGER.info("当前场次: {}", flashPromotionSession != null ? flashPromotionSession.getName() : "无");
+        Date startTimeToday = mergeDateAndTime(0, session.getStartTime());
+        Date endTimeToday = mergeDateAndTime(0, session.getEndTime());
 
-        if (flashPromotionSession == null) {
-            // 当前没有进行中的场次，尝试获取下一场预告
-            LOGGER.info("当前没有进行中的场次");
-            SmsFlashPromotionSession nextSession = getNextFlashPromotionSession(now);
-            if (nextSession != null) {
-                LOGGER.info("下一场预告: {}", nextSession.getName());
-                // 获取当前时间（仅时间部分）
-                Date currTime = DateUtil.getTime(now);
-                
-                if (nextSession.getStartTime().after(currTime)) {
-                    // 下一场在今天还没到，使用今天的日期
-                    homeFlashPromotion.setNextStartTime(mergeDateAndTime(0, nextSession.getStartTime()));
-                    homeFlashPromotion.setNextEndTime(mergeDateAndTime(0, nextSession.getEndTime()));
-                    LOGGER.info("下一场在今天，开始时间: {}", homeFlashPromotion.getNextStartTime());
-                } else {
-                    // 今天所有场次都已结束，使用明天的日期
-                    homeFlashPromotion.setNextStartTime(mergeDateAndTime(1, nextSession.getStartTime()));
-                    homeFlashPromotion.setNextEndTime(mergeDateAndTime(1, nextSession.getEndTime()));
-                    LOGGER.info("下一场在明天，开始时间: {}", homeFlashPromotion.getNextStartTime());
-                }
-            }
-            return homeFlashPromotion;
+        homeFlashPromotion.setStartTime(startTimeToday);
+        homeFlashPromotion.setEndTime(endTimeToday);
+
+        SmsFlashPromotionSession nextSession = getNextFlashPromotionSession(now);
+        if (nextSession != null) {
+            homeFlashPromotion.setNextStartTime(mergeDateAndTime(1, nextSession.getStartTime()));
+            homeFlashPromotion.setNextEndTime(mergeDateAndTime(1, nextSession.getEndTime()));
         }
 
-        // 遍历活动，找到有商品的活动
-        for (SmsFlashPromotion flashPromotion : flashPromotionList) {
-            LOGGER.info("检查活动: {} (ID: {})", flashPromotion.getTitle(), flashPromotion.getId());
+        List<FlashPromotionProduct> flashProductList = homeDao.getFlashProductList(
+            activity.getId(), session.getId());
+        LOGGER.info("秒杀活动 {} 场次 {} 获取到 {} 个商品", activity.getId(), session.getId(),
+            flashProductList != null ? flashProductList.size() : 0);
 
-            // 检查该活动+场次是否有有效商品（有价格且库存>0）
-            long productCount = flashPromotionProductRelationMapper.selectCount(
-                new LambdaQueryWrapper<SmsFlashPromotionProductRelation>()
-                    .eq(SmsFlashPromotionProductRelation::getFlashPromotionId, flashPromotion.getId())
-                    .eq(SmsFlashPromotionProductRelation::getFlashPromotionSessionId, flashPromotionSession.getId())
-                    .isNotNull(SmsFlashPromotionProductRelation::getFlashPromotionPrice)
-                    .gt(SmsFlashPromotionProductRelation::getFlashPromotionCount, 0));
-
-            LOGGER.info("活动 {} 有 {} 个有效商品", flashPromotion.getId(), productCount);
-
-            if (productCount > 0) {
-                // 找到有商品的活动，填充数据
-                // 日期部分为今天，时间部分为场次时间
-                Date startTimeToday = mergeDateAndTime(0, flashPromotionSession.getStartTime());
-                Date endTimeToday = mergeDateAndTime(0, flashPromotionSession.getEndTime());
-                LOGGER.info("本场开始时间: {}", startTimeToday);
-                LOGGER.info("本场结束时间: {}", endTimeToday);
-
-                homeFlashPromotion.setStartTime(startTimeToday);
-                homeFlashPromotion.setEndTime(endTimeToday);
-
-                // 获取下一个秒杀场次
-                SmsFlashPromotionSession nextSession = getNextFlashPromotionSession(now);
-                if (nextSession != null) {
-                    LOGGER.info("下一场预告: {}", nextSession.getName());
-                    // 日期部分为今天+1，时间部分为场次时间
-                    homeFlashPromotion.setNextStartTime(mergeDateAndTime(1, nextSession.getStartTime()));
-                    homeFlashPromotion.setNextEndTime(mergeDateAndTime(1, nextSession.getEndTime()));
-                }
-
-                // 获取秒杀商品
-                List<FlashPromotionProduct> flashProductList = homeDao.getFlashProductList(
-                    flashPromotion.getId(), flashPromotionSession.getId());
-                LOGGER.info("获取到 {} 个秒杀商品", flashProductList != null ? flashProductList.size() : 0);
-
-                homeFlashPromotion.setProductList(flashProductList);
-                return homeFlashPromotion;
-            }
-        }
-
-        LOGGER.info("所有活动都没有有效商品，返回空");
+        homeFlashPromotion.setProductList(flashProductList);
         return homeFlashPromotion;
+    }
+
+    private HomeFlashPromotion buildEmptyFlashPromotionWithNext(Date now) {
+        HomeFlashPromotion homeFlashPromotion = new HomeFlashPromotion();
+        SmsFlashPromotionSession nextSession = getNextFlashPromotionSession(now);
+        if (nextSession != null) {
+            Date currTime = DateUtil.getTime(now);
+            int dateOffset = nextSession.getStartTime().after(currTime) ? 0 : 1;
+            homeFlashPromotion.setNextStartTime(mergeDateAndTime(dateOffset, nextSession.getStartTime()));
+            homeFlashPromotion.setNextEndTime(mergeDateAndTime(dateOffset, nextSession.getEndTime()));
+        }
+        return homeFlashPromotion;
+    }
+
+    private SmsFlashPromotion getCurrentActivity(Date date) {
+        List<SmsFlashPromotion> list = getFlashPromotionList(date);
+        if (list != null && !list.isEmpty()) {
+            return list.get(0);
+        }
+        return null;
     }
 
     /**
@@ -308,15 +297,6 @@ public class HomeServiceImpl implements HomeService {
                         .eq(SmsFlashPromotion::getStatus, 1)
                         .le(SmsFlashPromotion::getStartDate, currDate)
                         .ge(SmsFlashPromotion::getEndDate, currDate));
-    }
-
-    //根据时间获取秒杀活动（保留原方法，供其他地方使用）
-    private SmsFlashPromotion getFlashPromotion(Date date) {
-        List<SmsFlashPromotion> flashPromotionList = getFlashPromotionList(date);
-        if (!CollectionUtils.isEmpty(flashPromotionList)) {
-            return flashPromotionList.get(0);
-        }
-        return null;
     }
 
     //根据时间获取秒杀场次

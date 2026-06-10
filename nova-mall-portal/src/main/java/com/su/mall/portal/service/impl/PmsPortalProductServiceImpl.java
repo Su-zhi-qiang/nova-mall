@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,6 +38,9 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
     private final PmsProductFullReductionMapper productFullReductionMapper;
     private final PortalProductDao portalProductDao;
     private final RedisService redisService;
+    private final SmsFlashPromotionMapper flashPromotionMapper;
+    private final SmsFlashPromotionSessionMapper promotionSessionMapper;
+    private final SmsFlashPromotionProductRelationMapper flashPromotionProductRelationMapper;
 
     @Override
     public Page<PmsProduct> search(String keyword, Long brandId, Long productCategoryId, Integer pageNum, Integer pageSize, Integer sort) {
@@ -107,15 +112,12 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
 
         PmsPortalProductDetail result = new PmsPortalProductDetail();
         //获取商品信息
-        // ✅ 改造：selectByPrimaryKey → selectById
         PmsProduct product = productMapper.selectById(id);
         result.setProduct(product);
         //获取品牌信息
-        // ✅ 改造：selectByPrimaryKey → selectById
         PmsBrand brand = brandMapper.selectById(product.getBrandId());
         result.setBrand(brand);
         //获取商品属性信息
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<PmsProductAttribute>())
         List<PmsProductAttribute> productAttributeList = productAttributeMapper.selectList(
                 new LambdaQueryWrapper<PmsProductAttribute>()
                         .eq(PmsProductAttribute::getProductAttributeCategoryId, product.getProductAttributeCategoryId()));
@@ -123,7 +125,6 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
         //获取商品属性值信息
         if(CollUtil.isNotEmpty(productAttributeList)){
             List<Long> attributeIds = productAttributeList.stream().map(PmsProductAttribute::getId).collect(Collectors.toList());
-            // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<PmsProductAttributeValue>())
             List<PmsProductAttributeValue> productAttributeValueList = productAttributeValueMapper.selectList(
                     new LambdaQueryWrapper<PmsProductAttributeValue>()
                             .eq(PmsProductAttributeValue::getProductId, product.getId())
@@ -131,30 +132,142 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
             result.setProductAttributeValueList(productAttributeValueList);
         }
         //获取商品SKU库存信息
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<PmsSkuStock>())
         List<PmsSkuStock> skuStockList = skuStockMapper.selectList(
                 new LambdaQueryWrapper<PmsSkuStock>().eq(PmsSkuStock::getProductId, product.getId()));
         result.setSkuStockList(skuStockList);
         //商品阶梯价格设置
         if(product.getPromotionType()==3){
-            // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<PmsProductLadder>())
             List<PmsProductLadder> productLadderList = productLadderMapper.selectList(
                     new LambdaQueryWrapper<PmsProductLadder>().eq(PmsProductLadder::getProductId, product.getId()));
             result.setProductLadderList(productLadderList);
         }
         //商品满减价格设置
         if(product.getPromotionType()==4){
-            // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<PmsProductFullReduction>())
             List<PmsProductFullReduction> productFullReductionList = productFullReductionMapper.selectList(
                     new LambdaQueryWrapper<PmsProductFullReduction>().eq(PmsProductFullReduction::getProductId, product.getId()));
             result.setProductFullReductionList(productFullReductionList);
         }
         //商品可用优惠券
         result.setCouponList(portalProductDao.getAvailableCouponList(product.getId(),product.getProductCategoryId()));
-        
+
+        // ========== 查询秒杀活动信息 ==========
+        fillFlashPromotionInfo(result, id);
+
         // 存入缓存，30分钟过期
         redisService.set(cacheKey, result, 1800);
         return result;
+    }
+
+    /**
+     * 填充秒杀活动信息
+     */
+    private void fillFlashPromotionInfo(PmsPortalProductDetail result, Long productId) {
+        Date now = new Date();
+        Date currDate = getDatePart(now);
+        Date currTime = getTimePart(now);
+
+        // 查询当前有效的秒杀活动
+        List<SmsFlashPromotion> activePromotions = flashPromotionMapper.selectList(
+                new LambdaQueryWrapper<SmsFlashPromotion>()
+                        .eq(SmsFlashPromotion::getStatus, 1)
+                        .le(SmsFlashPromotion::getStartDate, currDate)
+                        .ge(SmsFlashPromotion::getEndDate, currDate));
+
+        if (CollUtil.isEmpty(activePromotions)) {
+            return;
+        }
+
+        // 查询当前有效的场次
+        List<SmsFlashPromotionSession> activeSessions = promotionSessionMapper.selectList(
+                new LambdaQueryWrapper<SmsFlashPromotionSession>()
+                        .eq(SmsFlashPromotionSession::getStatus, 1)
+                        .le(SmsFlashPromotionSession::getStartTime, currTime)
+                        .ge(SmsFlashPromotionSession::getEndTime, currTime));
+
+        if (CollUtil.isEmpty(activeSessions)) {
+            return;
+        }
+
+        // 查询该商品在当前场次的秒杀信息
+        List<SmsFlashPromotionProductRelation> flashRelations = flashPromotionProductRelationMapper.selectList(
+                new LambdaQueryWrapper<SmsFlashPromotionProductRelation>()
+                        .eq(SmsFlashPromotionProductRelation::getProductId, productId)
+                        .in(SmsFlashPromotionProductRelation::getFlashPromotionId,
+                                activePromotions.stream().map(SmsFlashPromotion::getId).collect(Collectors.toList()))
+                        .in(SmsFlashPromotionProductRelation::getFlashPromotionSessionId,
+                                activeSessions.stream().map(SmsFlashPromotionSession::getId).collect(Collectors.toList()))
+                        .isNotNull(SmsFlashPromotionProductRelation::getFlashPromotionPrice)
+                        .gt(SmsFlashPromotionProductRelation::getFlashPromotionCount, 0));
+
+        if (CollUtil.isEmpty(flashRelations)) {
+            return;
+        }
+
+        // 取第一个匹配的结果
+        SmsFlashPromotionProductRelation flashRelation = flashRelations.get(0);
+
+        // 设置秒杀信息
+        result.setFlashPromotion(true);
+        result.setFlashPromotionRelationId(flashRelation.getId());
+        result.setFlashPromotionPrice(flashRelation.getFlashPromotionPrice());
+        result.setFlashPromotionCount(flashRelation.getFlashPromotionCount());
+        result.setFlashPromotionLimit(flashRelation.getFlashPromotionLimit());
+
+        // 查找对应的场次信息，填充场次时间
+        for (SmsFlashPromotionSession session : activeSessions) {
+            if (session.getId().equals(flashRelation.getFlashPromotionSessionId())) {
+                result.setFlashSessionStartTime(mergeDateAndTime(0, session.getStartTime()));
+                result.setFlashSessionEndTime(mergeDateAndTime(0, session.getEndTime()));
+                break;
+            }
+        }
+    }
+
+    /**
+     * 获取日期部分（年-月-日 00:00:00）
+     */
+    private Date getDatePart(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
+    /**
+     * 获取时间部分（1970-01-01 时:分:秒）
+     */
+    private Date getTimePart(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.YEAR, 1970);
+        calendar.set(Calendar.MONTH, 0);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        return calendar.getTime();
+    }
+
+    /**
+     * 合并日期和时间
+     */
+    private Date mergeDateAndTime(int dateOffset, Date timeOnlyDate) {
+        if (timeOnlyDate == null) {
+            return null;
+        }
+        Calendar todayCal = Calendar.getInstance();
+        todayCal.setTime(new Date());
+        todayCal.add(Calendar.DAY_OF_MONTH, dateOffset);
+
+        Calendar timeCal = Calendar.getInstance();
+        timeCal.setTime(timeOnlyDate);
+
+        todayCal.set(Calendar.HOUR_OF_DAY, timeCal.get(Calendar.HOUR_OF_DAY));
+        todayCal.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE));
+        todayCal.set(Calendar.SECOND, timeCal.get(Calendar.SECOND));
+        todayCal.set(Calendar.MILLISECOND, 0);
+
+        return todayCal.getTime();
     }
 
 

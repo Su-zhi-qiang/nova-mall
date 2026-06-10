@@ -196,4 +196,17 @@ public interface RedisService {
      * @return 是否释放成功
      */
     Boolean releaseLock(String key, Object value);
+
+    /**
+     * 根据模式获取所有匹配的key
+     * @param pattern 匹配模式，如 "home:flashPromotion:*"
+     * @return 匹配的key集合
+     */
+    Set<String> keys(String pattern);
+
+    /**
+     * 批量删除属性（支持Set参数）
+     * @param keys 要删除的key集合
+     */
+    void del(Set<String> keys);
 }

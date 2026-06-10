@@ -215,4 +215,16 @@ public class RedisServiceImpl implements RedisService {
         Long result = redisTemplate.execute(redisScript, Collections.singletonList(key), value);
         return result != null && result > 0;
     }
+
+    @Override
+    public Set<String> keys(String pattern) {
+        return redisTemplate.keys(pattern);
+    }
+
+    @Override
+    public void del(Set<String> keys) {
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
+    }
 }

@@ -47,4 +47,9 @@ public interface PortalOrderDao {
      */
     int updateSkuSale(@Param("itemList") List<OmsOrderItem> orderItemList);
 
+    /**
+     * 查询会员在某秒杀场次中已购买的数量（已支付状态）
+     */
+    int getMemberFlashBuyCount(@Param("memberId") Long memberId, @Param("relationId") Long relationId);
+
 }

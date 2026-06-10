@@ -30,4 +30,26 @@ public class PmsPortalProductDetail{
     private List<PmsProductFullReduction> productFullReductionList;
     @Schema(title = "商品可用优惠券")
     private List<SmsCoupon> couponList;
+
+    // ========== 秒杀相关字段 ==========
+    @Schema(title = "是否在秒杀活动中")
+    private Boolean flashPromotion;
+
+    @Schema(title = "秒杀关联ID")
+    private Long flashPromotionRelationId;
+
+    @Schema(title = "秒杀价格")
+    private java.math.BigDecimal flashPromotionPrice;
+
+    @Schema(title = "秒杀剩余库存")
+    private Integer flashPromotionCount;
+
+    @Schema(title = "限购数量")
+    private Integer flashPromotionLimit;
+
+    @Schema(title = "秒杀场次开始时间")
+    private java.util.Date flashSessionStartTime;
+
+    @Schema(title = "秒杀场次结束时间")
+    private java.util.Date flashSessionEndTime;
 }

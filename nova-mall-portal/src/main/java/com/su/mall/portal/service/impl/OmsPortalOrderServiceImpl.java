@@ -102,6 +102,35 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             }
         }
 
+        //秒杀商品库存和限购校验
+        if (hasFlashPromotion) {
+            for (CartPromotionItem cartPromotionItem : cartPromotionItemList) {
+                if (cartPromotionItem.getFlashPromotion() != null && cartPromotionItem.getFlashPromotion()) {
+                    if (cartPromotionItem.getFlashPromotionRelationId() == null) {
+                        Asserts.fail("秒杀商品信息异常");
+                    }
+                    SmsFlashPromotionProductRelation relation = flashPromotionProductRelationMapper.selectById(
+                            cartPromotionItem.getFlashPromotionRelationId());
+                    if (relation == null) {
+                        Asserts.fail("秒杀活动不存在");
+                    }
+                    //秒杀库存校验
+                    if (relation.getFlashPromotionCount() == null || relation.getFlashPromotionCount() < cartPromotionItem.getQuantity()) {
+                        Asserts.fail("秒杀库存不足");
+                    }
+                    //限购数量校验
+                    if (relation.getFlashPromotionLimit() != null && cartPromotionItem.getQuantity() > relation.getFlashPromotionLimit()) {
+                        Asserts.fail("超出限购数量，每人限购" + relation.getFlashPromotionLimit() + "件");
+                    }
+                    //当前账号已购数量校验
+                    int buyCount = getMemberFlashBuyCount(currentMember.getId(), cartPromotionItem.getFlashPromotionRelationId());
+                    if (relation.getFlashPromotionLimit() != null && buyCount + cartPromotionItem.getQuantity() > relation.getFlashPromotionLimit()) {
+                        Asserts.fail("超出限购数量，您已购买" + buyCount + "件，每人限购" + relation.getFlashPromotionLimit() + "件");
+                    }
+                }
+            }
+        }
+
         for (CartPromotionItem cartPromotionItem : cartPromotionItemList) {
             //生成下单商品信息
             OmsOrderItem orderItem = getOmsOrderItem(cartPromotionItem);
@@ -307,6 +336,10 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
                         resultCount++;
                     }
                 }
+                // 秒杀订单同时扣减商品 SKU 真实库存
+                portalOrderDao.updateSkuStock(orderItemList);
+                // 清除秒杀列表缓存，确保前端获取最新库存
+                clearFlashPromotionCache();
             } finally {
                 redisService.releaseLock(lockKey, lockValue);
             }
@@ -338,6 +371,24 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             String cacheKey = "product:detail:" + item.getProductId();
             redisService.del(cacheKey);
         }
+    }
+
+    /**
+     * 清除秒杀列表缓存（支付成功后调用，确保库存实时更新）
+     */
+    private void clearFlashPromotionCache() {
+        // 清除首页秒杀缓存（使用通配符匹配所有场次和小时）
+        Set<String> keys = redisService.keys("home:flashPromotion:*");
+        if (keys != null && !keys.isEmpty()) {
+            redisService.del(keys);
+        }
+    }
+
+    /**
+     * 查询会员在某秒杀场次中已购买的数量（已支付状态）
+     */
+    private int getMemberFlashBuyCount(Long memberId, Long relationId) {
+        return portalOrderDao.getMemberFlashBuyCount(memberId, relationId);
     }
 
     @Override

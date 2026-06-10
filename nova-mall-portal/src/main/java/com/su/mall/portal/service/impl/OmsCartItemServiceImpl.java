@@ -3,7 +3,9 @@ package com.su.mall.portal.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.su.mall.mapper.OmsCartItemMapper;
+import com.su.mall.mapper.SmsFlashPromotionProductRelationMapper;
 import com.su.mall.model.OmsCartItem;
+import com.su.mall.model.SmsFlashPromotionProductRelation;
 import com.su.mall.model.UmsMember;
 import com.su.mall.portal.dao.PortalProductDao;
 import com.su.mall.portal.domain.CartProduct;
@@ -32,6 +34,7 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
     private final PortalProductDao productDao;
     private final OmsPromotionService promotionService;
     private final UmsMemberService memberService;
+    private final SmsFlashPromotionProductRelationMapper flashPromotionProductRelationMapper;
 
     @Override
     @Transactional
@@ -41,6 +44,17 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
         cartItem.setMemberId(currentMember.getId());
         cartItem.setMemberNickname(currentMember.getNickname());
         cartItem.setDeleteStatus(0);
+
+        // 如果是秒杀商品，自动使用秒杀价
+        if (cartItem.getFlashPromotionRelationId() != null) {
+            SmsFlashPromotionProductRelation flashRelation = flashPromotionProductRelationMapper.selectById(
+                    cartItem.getFlashPromotionRelationId());
+            if (flashRelation != null && flashRelation.getFlashPromotionPrice() != null
+                    && flashRelation.getFlashPromotionCount() != null && flashRelation.getFlashPromotionCount() > 0) {
+                cartItem.setPrice(flashRelation.getFlashPromotionPrice());
+            }
+        }
+
         OmsCartItem existCartItem = getCartItem(cartItem);
         if (existCartItem == null) {
             cartItem.setCreateDate(new Date());
@@ -55,18 +69,26 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
     }
 
         /**
- * 根据会员id,商品id和规格获取购物车中商品
+ * 根据会员id,商品id,规格和秒杀关联ID获取购物车中商品
  *
  * @author Su
  */
 private OmsCartItem getCartItem(OmsCartItem cartItem) {
     // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<OmsCartItem>())
-    List<OmsCartItem> cartItemList = cartItemMapper.selectList(
-            new LambdaQueryWrapper<OmsCartItem>()
-                    .eq(OmsCartItem::getMemberId, cartItem.getMemberId())
-                    .eq(OmsCartItem::getProductId, cartItem.getProductId())
-                    .eq(OmsCartItem::getDeleteStatus, 0)
-                    .eq(cartItem.getProductSkuId() != null, OmsCartItem::getProductSkuId, cartItem.getProductSkuId()));
+    LambdaQueryWrapper<OmsCartItem> wrapper = new LambdaQueryWrapper<OmsCartItem>()
+            .eq(OmsCartItem::getMemberId, cartItem.getMemberId())
+            .eq(OmsCartItem::getProductId, cartItem.getProductId())
+            .eq(OmsCartItem::getDeleteStatus, 0)
+            .eq(cartItem.getProductSkuId() != null, OmsCartItem::getProductSkuId, cartItem.getProductSkuId());
+
+    // 秒杀商品需要额外按 flashPromotionRelationId 区分
+    if (cartItem.getFlashPromotionRelationId() != null) {
+        wrapper.eq(OmsCartItem::getFlashPromotionRelationId, cartItem.getFlashPromotionRelationId());
+    } else {
+        wrapper.isNull(OmsCartItem::getFlashPromotionRelationId);
+    }
+
+    List<OmsCartItem> cartItemList = cartItemMapper.selectList(wrapper);
     if (!CollectionUtils.isEmpty(cartItemList)) {
         return cartItemList.get(0);
     }

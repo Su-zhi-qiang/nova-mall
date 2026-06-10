@@ -27,9 +27,15 @@ public class SmsFlashPromotionProductRelation implements Serializable {
     @Schema(title = "限时购数量")
     private Integer flashPromotionCount;
 
+    @Schema(title = "原始限时购数量（用于场次重置）")
+    private Integer originalCount;
+
     @Schema(title = "每人限购数量")
     private Integer flashPromotionLimit;
 
     @Schema(title = "排序")
     private Integer sort;
+
+    @Schema(title = "已抢购数量")
+    private Integer flashPromotionSold;
 }

@@ -19,9 +19,14 @@
     <select id="getFlashProductList" resultType="com.su.mall.portal.domain.FlashPromotionProduct">
         SELECT
             p.*,
+            pr.id flash_promotion_relation_id,
+            pr.flash_promotion_id,
+            pr.flash_promotion_session_id,
             pr.flash_promotion_price,
             pr.flash_promotion_count,
-            pr.flash_promotion_limit
+            pr.flash_promotion_limit,
+            pr.original_count flash_promotion_original_count,
+            pr.flash_promotion_sold flash_promotion_sold
         FROM
             sms_flash_promotion_product_relation pr
             LEFT JOIN pms_product p ON pr.product_id = p.id

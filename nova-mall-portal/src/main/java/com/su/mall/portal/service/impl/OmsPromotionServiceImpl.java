@@ -24,6 +24,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class OmsPromotionServiceImpl implements OmsPromotionService {
     private final PortalProductDao portalProductDao;
+    private final com.su.mall.mapper.SmsFlashPromotionProductRelationMapper flashPromotionProductRelationMapper;
 
     @Override
     public List<CartPromotionItem> calcCartPromotion(List<OmsCartItem> cartItemList) {
@@ -39,7 +40,51 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
             List<OmsCartItem> itemList = entry.getValue();
             assert promotionProduct != null;
             Integer promotionType = promotionProduct.getPromotionType();
-            if (promotionType != null && promotionType == 1) {
+
+            // 拆分秒杀项和普通项：秒杀商品优先使用购物车中已保存的 flashPromotionRelationId 直接查询
+            List<OmsCartItem> flashItemList = new ArrayList<>();
+            List<OmsCartItem> normalItemList = new ArrayList<>();
+            for (OmsCartItem item : itemList) {
+                if (item.getFlashPromotionRelationId() != null) {
+                    com.su.mall.model.SmsFlashPromotionProductRelation flashRelation =
+                            flashPromotionProductRelationMapper.selectById(item.getFlashPromotionRelationId());
+                    if (flashRelation != null && flashRelation.getFlashPromotionCount() != null && flashRelation.getFlashPromotionCount() > 0) {
+                        flashItemList.add(item);
+                        continue;
+                    }
+                }
+                normalItemList.add(item);
+            }
+
+            // 秒杀项按秒杀逻辑处理
+            for (OmsCartItem item : flashItemList) {
+                com.su.mall.model.SmsFlashPromotionProductRelation flashRelation =
+                        flashPromotionProductRelationMapper.selectById(item.getFlashPromotionRelationId());
+                if (flashRelation == null) continue;
+                CartPromotionItem cartPromotionItem = new CartPromotionItem();
+                BeanUtils.copyProperties(item, cartPromotionItem);
+                cartPromotionItem.setPromotionMessage("限时秒杀");
+                cartPromotionItem.setFlashPromotion(true);
+                cartPromotionItem.setFlashPromotionId(flashRelation.getFlashPromotionId());
+                cartPromotionItem.setFlashPromotionSessionId(flashRelation.getFlashPromotionSessionId());
+                cartPromotionItem.setFlashPromotionRelationId(flashRelation.getId());
+
+                PmsSkuStock skuStock = getOriginalPrice(promotionProduct, item.getProductSkuId());
+                assert skuStock != null;
+                BigDecimal originalPrice = skuStock.getPrice();
+                cartPromotionItem.setPrice(originalPrice);
+                cartPromotionItem.setReduceAmount(originalPrice.subtract(flashRelation.getFlashPromotionPrice()));
+                int limit = flashRelation.getFlashPromotionLimit() != null ? flashRelation.getFlashPromotionLimit() : 0;
+                int realStock = Math.min(flashRelation.getFlashPromotionCount(), limit > 0 ? limit : flashRelation.getFlashPromotionCount());
+                cartPromotionItem.setRealStock(realStock);
+                cartPromotionItem.setIntegration(promotionProduct.getGiftPoint());
+                cartPromotionItem.setGrowth(promotionProduct.getGiftGrowth());
+                cartPromotionItemList.add(cartPromotionItem);
+            }
+
+            // 普通项走原来的促销逻辑
+            itemList = normalItemList;
+            if (!itemList.isEmpty() && promotionType != null && promotionType == 1) {
                 //单品促销
                 for (OmsCartItem item : itemList) {
                     CartPromotionItem cartPromotionItem = new CartPromotionItem();

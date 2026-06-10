@@ -24,6 +24,9 @@ public class SmsFlashPromotionProductRelationServiceImpl implements SmsFlashProm
     @Override
     public int create(List<SmsFlashPromotionProductRelation> relationList) {
         for (SmsFlashPromotionProductRelation relation : relationList) {
+            if (relation.getOriginalCount() == null && relation.getFlashPromotionCount() != null) {
+                relation.setOriginalCount(relation.getFlashPromotionCount());
+            }
             relationMapper.insert(relation);
         }
         return relationList.size();
@@ -32,6 +35,9 @@ public class SmsFlashPromotionProductRelationServiceImpl implements SmsFlashProm
     @Override
     public int update(Long id, SmsFlashPromotionProductRelation relation) {
         relation.setId(id);
+        if (relation.getOriginalCount() == null && relation.getFlashPromotionCount() != null) {
+            relation.setOriginalCount(relation.getFlashPromotionCount());
+        }
         return relationMapper.updateById(relation);
     }
 
