@@ -37,4 +37,14 @@ public interface PortalOrderDao {
      */
     int releaseSkuStockLock(@Param("itemList") List<OmsOrderItem> orderItemList);
 
+    /**
+     * 更新商品销量
+     */
+    int updateProductSale(@Param("itemList") List<OmsOrderItem> orderItemList);
+
+    /**
+     * 更新SKU销量
+     */
+    int updateSkuSale(@Param("itemList") List<OmsOrderItem> orderItemList);
+
 }

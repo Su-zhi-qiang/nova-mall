@@ -17,6 +17,7 @@
             o.integration,
             o.member_id,
             ot.id ot_id,
+            ot.product_id ot_product_id,
             ot.product_name ot_product_name,
             ot.product_sku_id ot_product_sku_id,
             ot.product_sku_code ot_product_sku_code,
@@ -37,6 +38,7 @@
             o.member_id,
             o.use_integration,
             ot.id ot_id,
+            ot.product_id ot_product_id,
             ot.product_name ot_product_name,
             ot.product_sku_id ot_product_sku_id,
             ot.product_sku_code ot_product_sku_code,
@@ -86,6 +88,30 @@
         END
         WHERE
             id IN
+        <foreach collection="itemList" item="item" separator="," open="(" close=")">
+            #{item.productSkuId}
+        </foreach>
+    </update>
+    <update id="updateProductSale">
+        UPDATE pms_product
+        SET sale = sale + CASE id
+        <foreach collection="itemList" item="item">
+            WHEN #{item.productId} THEN #{item.productQuantity}
+        </foreach>
+        END
+        WHERE id IN
+        <foreach collection="itemList" item="item" separator="," open="(" close=")">
+            #{item.productId}
+        </foreach>
+    </update>
+    <update id="updateSkuSale">
+        UPDATE pms_sku_stock
+        SET sale = sale + CASE id
+        <foreach collection="itemList" item="item">
+            WHEN #{item.productSkuId} THEN #{item.productQuantity}
+        </foreach>
+        END
+        WHERE id IN
         <foreach collection="itemList" item="item" separator="," open="(" close=")">
             #{item.productSkuId}
         </foreach>

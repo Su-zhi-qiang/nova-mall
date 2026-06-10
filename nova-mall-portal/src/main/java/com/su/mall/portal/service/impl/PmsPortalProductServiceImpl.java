@@ -3,6 +3,7 @@ package com.su.mall.portal.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.service.RedisService;
 import com.su.mall.mapper.*;
@@ -80,8 +81,27 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
     @Override
     public PmsPortalProductDetail detail(Long id) {
         String cacheKey = "product:detail:" + id;
+        
+        // 更新浏览量（即使缓存命中也要更新）
+        LambdaUpdateWrapper<PmsProduct> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(PmsProduct::getId, id);
+        updateWrapper.setSql("view_count = IFNULL(view_count, 0) + 1");
+        productMapper.update(null, updateWrapper);
+        
+        // 清除缓存，确保下次获取最新浏览量数据
+        redisService.del(cacheKey);
+        
         PmsPortalProductDetail cached = redisService.get(cacheKey);
         if (cached != null) {
+            // 更新缓存数据中的浏览量
+            if (cached.getProduct() != null) {
+                PmsProduct product = cached.getProduct();
+                if (product.getViewCount() == null) {
+                    product.setViewCount(1);
+                } else {
+                    product.setViewCount(product.getViewCount() + 1);
+                }
+            }
             return cached;
         }
 

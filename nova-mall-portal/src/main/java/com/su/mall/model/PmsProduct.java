@@ -48,6 +48,9 @@ public class PmsProduct implements Serializable {
     @Schema(title = "销量")
     private Integer sale;
 
+    @Schema(title = "浏览量")
+    private Integer viewCount;
+
     private BigDecimal price;
 
     @Schema(title = "促销价格")

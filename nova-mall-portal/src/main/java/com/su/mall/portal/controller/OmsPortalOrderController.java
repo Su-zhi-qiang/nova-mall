@@ -51,6 +51,7 @@ public class OmsPortalOrderController {
     public CommonResult<Integer> paySuccess(@RequestParam Long orderId,@RequestParam Integer payType) {
         Integer count = portalOrderService.paySuccess(orderId,payType);
         return CommonResult.success(count, "支付成功");
+
     }
 
     @Operation(summary = "自动取消超时订单")

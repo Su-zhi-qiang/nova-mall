@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -260,22 +261,31 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     }
 
     @Override
+    @Transactional
     public Integer paySuccess(Long orderId, Integer payType) {
-        //修改订单支付状态
-        OmsOrder order = new OmsOrder();
-        order.setId(orderId);
-        order.setStatus(1);
-        order.setPaymentTime(new Date());
-        order.setPayType(payType);
-        orderMapper.updateById(order);
-
-        //获取订单详情
-        OmsOrderDetail orderDetail = portalOrderDao.getDetail(orderId);
-
-        //先查询完整订单判断是否是秒杀订单
+        // 获取完整订单（只查一次）
         OmsOrder fullOrder = orderMapper.selectById(orderId);
+        if (fullOrder == null) {
+            Asserts.fail("订单不存在");
+        }
+        
+        // 更新订单支付状态（复用查询结果）
+        fullOrder.setStatus(1);
+        fullOrder.setPaymentTime(new Date());
+        fullOrder.setPayType(payType);
+        orderMapper.updateById(fullOrder);
+
+        // 获取订单详情
+        OmsOrderDetail orderDetail = portalOrderDao.getDetail(orderId);
+        if (orderDetail == null || CollectionUtils.isEmpty(orderDetail.getOrderItemList())) {
+            Asserts.fail("订单详情为空");
+        }
+
+        List<OmsOrderItem> orderItemList = orderDetail.getOrderItemList();
+        int resultCount = 0;
+
         if (fullOrder.getOrderType() != null && fullOrder.getOrderType() == 1) {
-            //秒杀订单：使用分布式锁防止超卖
+            // 秒杀订单：使用分布式锁防止超卖
             String lockKey = "flash:lock:" + orderId;
             String lockValue = UUID.randomUUID().toString();
             try {
@@ -283,10 +293,8 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
                 if (!locked) {
                     Asserts.fail("当前抢购人数过多，请稍后重试");
                 }
-
-                //秒杀订单：扣减秒杀库存
-                int flashCount = 0;
-                for (OmsOrderItem orderItem : orderDetail.getOrderItemList()) {
+                // 扣减秒杀库存
+                for (OmsOrderItem orderItem : orderItemList) {
                     if (orderItem.getFlashPromotionRelationId() != null) {
                         int result = flashPromotionProductRelationMapper.decreaseStock(
                                 orderItem.getFlashPromotionRelationId(),
@@ -295,17 +303,39 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
                         if (result == 0) {
                             Asserts.fail("秒杀库存不足");
                         }
-                        flashCount++;
+                        resultCount++;
                     }
                 }
-                return flashCount;
             } finally {
                 redisService.releaseLock(lockKey, lockValue);
             }
         } else {
-            //普通订单：恢复所有下单商品的锁定库存，扣减真实库存
-            int count = portalOrderDao.updateSkuStock(orderDetail.getOrderItemList());
-            return count;
+            // 普通订单：扣减真实库存，释放锁定库存
+            resultCount = portalOrderDao.updateSkuStock(orderItemList);
+        }
+
+        // 统一更新销量和清除缓存（消除重复代码）
+        updateSalesAndClearCache(orderItemList);
+        
+        return resultCount;
+    }
+
+    /**
+     * 更新销量并清除缓存（复用逻辑）
+     */
+    private void updateSalesAndClearCache(List<OmsOrderItem> orderItemList) {
+        portalOrderDao.updateProductSale(orderItemList);
+        portalOrderDao.updateSkuSale(orderItemList);
+        clearProductCache(orderItemList);
+    }
+
+    /**
+     * 清除订单商品的详情缓存
+     */
+    private void clearProductCache(List<OmsOrderItem> orderItemList) {
+        for (OmsOrderItem item : orderItemList) {
+            String cacheKey = "product:detail:" + item.getProductId();
+            redisService.del(cacheKey);
         }
     }
 
@@ -508,7 +538,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
      * 计算该订单赠送的成长值（已修复空指针）
      */
     private Integer calcGiftGrowth(List<OmsOrderItem> orderItemList) {
-        Integer sum = 0;
+        int sum = 0;
         for (OmsOrderItem orderItem : orderItemList) {
             Integer giftGrowth = Objects.requireNonNullElse(orderItem.getGiftGrowth(), 0);
             sum = sum + giftGrowth * orderItem.getProductQuantity();
@@ -531,7 +561,9 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
      * 将优惠券信息更改为指定状态
      */
     private void updateCouponStatus(Long couponId, Long memberId, Integer useStatus) {
-        if (couponId == null) return;
+        if (couponId == null) {
+            return;
+        }
         List<SmsCouponHistory> couponHistoryList = couponHistoryMapper.selectList(
                 new LambdaQueryWrapper<SmsCouponHistory>()
                         .eq(SmsCouponHistory::getMemberId, memberId)
