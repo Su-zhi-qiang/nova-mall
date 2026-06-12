@@ -8,7 +8,7 @@ import com.su.mall.service.SmsHomeRecommendSubjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.List;
  * 首页专题推荐管理Controller
  * @author Su
  */
-@Controller
+@RestController
 @Tag(name = "SmsHomeRecommendSubjectController", description = "首页专题推荐管理")
 @RequestMapping("/home/recommendSubject")
 @RequiredArgsConstructor
@@ -26,7 +26,6 @@ public class SmsHomeRecommendSubjectController {
 
     @Operation(summary = "添加首页推荐专题")
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> create(@RequestBody List<SmsHomeRecommendSubject> homeRecommendSubjectList) {
         int count = recommendSubjectService.create(homeRecommendSubjectList);
         if (count > 0) {
@@ -37,7 +36,6 @@ public class SmsHomeRecommendSubjectController {
 
     @Operation(summary = "修改推荐排序")
     @RequestMapping(value = "/update/sort/{id}", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> updateSort(@PathVariable Long id, Integer sort) {
         int count = recommendSubjectService.updateSort(id, sort);
         if (count > 0) {
@@ -48,7 +46,6 @@ public class SmsHomeRecommendSubjectController {
 
     @Operation(summary = "批量删除推荐")
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> delete(@RequestParam("ids") List<Long> ids) {
         int count = recommendSubjectService.delete(ids);
         if (count > 0) {
@@ -59,7 +56,6 @@ public class SmsHomeRecommendSubjectController {
 
     @Operation(summary = "批量修改推荐状态")
     @RequestMapping(value = "/update/recommendStatus", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> updateRecommendStatus(@RequestParam("ids") List<Long> ids, @RequestParam Integer recommendStatus) {
         int count = recommendSubjectService.updateRecommendStatus(ids, recommendStatus);
         if (count > 0) {
@@ -70,7 +66,6 @@ public class SmsHomeRecommendSubjectController {
 
     @Operation(summary = "分页查询推荐")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<CommonPage<SmsHomeRecommendSubject>> list(@RequestParam(value = "subjectName", required = false) String subjectName,
                                                                   @RequestParam(value = "recommendStatus", required = false) Integer recommendStatus,
                                                                   @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,

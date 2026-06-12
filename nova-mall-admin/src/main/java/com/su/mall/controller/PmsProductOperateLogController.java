@@ -9,13 +9,13 @@ import com.su.mall.service.PmsProductOperateLogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * 商品操作日志Controller
  */
-@Controller
+@RestController
 @Tag(name = "PmsProductOperateLogController", description = "商品操作日志管理")
 @RequestMapping("/product")
 @RequiredArgsConstructor
@@ -25,7 +25,6 @@ public class PmsProductOperateLogController {
 
     @Operation(summary = "根据商品ID查询操作日志")
     @RequestMapping(value = "/operateLog/list", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<CommonPage<PmsProductOperateLog>> list(
             @RequestParam Long productId,
             @RequestParam(defaultValue = "1") Integer pageNum,

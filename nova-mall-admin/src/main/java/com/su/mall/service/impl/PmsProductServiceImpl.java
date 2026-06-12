@@ -443,7 +443,6 @@ public class PmsProductServiceImpl implements PmsProductService {
             .and(!StrUtil.isEmpty(keyword), 
                 w -> w.like(PmsProduct::getName, keyword)
                     .or()
-                    .eq(PmsProduct::getDeleteStatus, 0)
                     .like(PmsProduct::getProductSn, keyword)
             );
         return productMapper.selectList(wrapper);

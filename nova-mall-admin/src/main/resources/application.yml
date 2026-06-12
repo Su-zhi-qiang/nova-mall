@@ -25,7 +25,7 @@ mybatis-plus:
 
 jwt:
   tokenHeader: Authorization #JWT存储的请求头
-  secret: mall-admin-secret #JWT加解密使用的密钥
+  secret: mall-admin-secret-key-2024-secure-enough-for-production-use-please-change-in-real-deployment
   expiration: 604800 #JWT的超期限时间(60*60*24*7)
   tokenHead: 'Bearer '  #JWT负载中拿到开头
 
@@ -51,8 +51,6 @@ secure:
       - /actuator/**
       - /druid/**
       - /admin/login
-      - /admin/register
-      - /admin/info
       - /admin/logout
       - /minio/upload
       - /aliyun/oss/policy

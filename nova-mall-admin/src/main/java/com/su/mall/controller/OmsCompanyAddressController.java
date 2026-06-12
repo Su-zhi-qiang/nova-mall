@@ -6,10 +6,9 @@ import com.su.mall.service.OmsCompanyAddressService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 
@@ -17,7 +16,7 @@ import java.util.List;
  * 收货地址管理Controller
  * @author Su
  */
-@Controller
+@RestController
 @Tag(name = "OmsCompanyAddressController", description = "收货地址管理")
 @RequestMapping("/companyAddress")
 @RequiredArgsConstructor
@@ -26,7 +25,6 @@ public class OmsCompanyAddressController {
 
     @Operation(summary = "获取所有收货地址")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<List<OmsCompanyAddress>> list() {
         List<OmsCompanyAddress> companyAddressList = companyAddressService.list();
         return CommonResult.success(companyAddressList);

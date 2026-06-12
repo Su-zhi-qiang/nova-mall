@@ -12,7 +12,7 @@ import com.su.mall.model.*;
 import com.su.mall.portal.component.CancelOrderSender;
 import com.su.mall.portal.dao.PortalOrderDao;
 import com.su.mall.portal.dao.PortalOrderItemDao;
-import com.su.mall.portal.dao.SmsCouponHistoryDao;
+
 import com.su.mall.portal.domain.*;
 import com.su.mall.portal.service.*;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,8 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,7 +42,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     private final UmsMemberCouponService memberCouponService;
     private final UmsIntegrationConsumeSettingMapper integrationConsumeSettingMapper;
     private final PmsSkuStockMapper skuStockMapper;
-    private final SmsCouponHistoryDao couponHistoryDao;
+
     private final OmsOrderMapper orderMapper;
     private final PortalOrderItemDao orderItemDao;
     private final SmsCouponHistoryMapper couponHistoryMapper;
@@ -231,7 +232,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         //生成订单号
         order.setOrderSn(generateOrderSn(order));
         //设置自动收货天数
-        List<OmsOrderSetting> orderSettings = orderSettingMapper.selectList(new LambdaQueryWrapper<OmsOrderSetting>());
+        List<OmsOrderSetting> orderSettings = orderSettingMapper.selectList(new LambdaQueryWrapper<>());
         if(CollUtil.isNotEmpty(orderSettings)){
             order.setAutoConfirmDay(orderSettings.get(0).getConfirmOvertime());
         }
@@ -297,6 +298,10 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         OmsOrder fullOrder = orderMapper.selectById(orderId);
         if (fullOrder == null) {
             Asserts.fail("订单不存在");
+        }
+        // 校验订单状态，只有待付款订单才能标记为已支付
+        if(fullOrder.getStatus() != 0){
+            Asserts.fail("订单状态异常，无法支付");
         }
         
         // 更新订单支付状态（复用查询结果）
@@ -396,6 +401,9 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     public Integer cancelTimeOutOrder() {
         Integer count=0;
         OmsOrderSetting orderSetting = orderSettingMapper.selectById(1L);
+        if(orderSetting == null){
+            return count;
+        }
         //查询超时、未支付的订单及订单详情
         List<OmsOrderDetail> timeOutOrders = portalOrderDao.getTimeOutOrders(orderSetting.getNormalOrderOvertime());
         if (CollectionUtils.isEmpty(timeOutOrders)) {
@@ -415,7 +423,9 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             //返还使用积分
             if (timeOutOrder.getUseIntegration() != null) {
                 UmsMember member = memberService.getById(timeOutOrder.getMemberId());
-                memberService.updateIntegration(timeOutOrder.getMemberId(), member.getIntegration() + timeOutOrder.getUseIntegration());
+                if(member != null){
+                    memberService.updateIntegration(timeOutOrder.getMemberId(), member.getIntegration() + timeOutOrder.getUseIntegration());
+                }
             }
         }
         return timeOutOrders.size();
@@ -424,10 +434,12 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     @Override
     @Transactional
     public void cancelOrder(Long orderId) {
-        //查询未付款的取消订单
+        UmsMember member = memberService.getCurrentMember();
+        //查询未付款的取消订单（增加会员id校验，防止越权操作）
         List<OmsOrder> cancelOrderList = orderMapper.selectList(
                 new LambdaQueryWrapper<OmsOrder>()
                         .eq(OmsOrder::getId, orderId)
+                        .eq(OmsOrder::getMemberId, member.getId())
                         .eq(OmsOrder::getStatus, 0)
                         .eq(OmsOrder::getDeleteStatus, 0));
         if (CollectionUtils.isEmpty(cancelOrderList)) {
@@ -448,8 +460,10 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             updateCouponStatus(cancelOrder.getCouponId(), cancelOrder.getMemberId(), 0);
             //返还使用积分
             if (cancelOrder.getUseIntegration() != null) {
-                UmsMember member = memberService.getById(cancelOrder.getMemberId());
-                memberService.updateIntegration(cancelOrder.getMemberId(), member.getIntegration() + cancelOrder.getUseIntegration());
+                UmsMember returnMember = memberService.getById(cancelOrder.getMemberId());
+                if(returnMember != null){
+                    memberService.updateIntegration(cancelOrder.getMemberId(), returnMember.getIntegration() + cancelOrder.getUseIntegration());
+                }
             }
         }
     }
@@ -458,6 +472,9 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     public void sendDelayMessageCancelOrder(Long orderId) {
         //获取订单超时时间
         OmsOrderSetting orderSetting = orderSettingMapper.selectById(1L);
+        if(orderSetting == null){
+            return;
+        }
         long delayTimes = orderSetting.getNormalOrderOvertime() * 60 * 1000;
         //发送延迟消息
         cancelOrderSender.sendMessage(orderId, delayTimes);
@@ -468,6 +485,9 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     public void confirmReceiveOrder(Long orderId) {
         UmsMember member = memberService.getCurrentMember();
         OmsOrder order = orderMapper.selectById(orderId);
+        if(order == null){
+            Asserts.fail("订单不存在！");
+        }
         if(!member.getId().equals(order.getMemberId())){
             Asserts.fail("不能确认他人订单！");
         }
@@ -493,7 +513,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
                         .eq(OmsOrder::getMemberId, member.getId())
                         .eq(status != null, OmsOrder::getStatus, status)
                         .orderByDesc(OmsOrder::getCreateTime));
-        CommonPage<OmsOrder> orderPageResult = CommonPage.restPage(orderPage);
+
         //设置分页信息
         CommonPage<OmsOrderDetail> resultPage = new CommonPage<>();
         resultPage.setPageNum((int) orderPage.getCurrent());
@@ -521,7 +541,14 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
 
     @Override
     public OmsOrderDetail detail(Long orderId) {
-        OmsOrder omsOrder = orderMapper.selectById(orderId);
+        UmsMember member = memberService.getCurrentMember();
+        OmsOrder omsOrder = orderMapper.selectOne(
+                new LambdaQueryWrapper<OmsOrder>()
+                        .eq(OmsOrder::getId, orderId)
+                        .eq(OmsOrder::getMemberId, member.getId()));
+        if(omsOrder == null){
+            return null;
+        }
         List<OmsOrderItem> orderItemList = orderItemMapper.selectList(
                 new LambdaQueryWrapper<OmsOrderItem>().eq(OmsOrderItem::getOrderId, orderId));
         OmsOrderDetail orderDetail = new OmsOrderDetail();
@@ -535,6 +562,9 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     public void deleteOrder(Long orderId) {
         UmsMember member = memberService.getCurrentMember();
         OmsOrder order = orderMapper.selectById(orderId);
+        if(order == null){
+            Asserts.fail("订单不存在！");
+        }
         if(!member.getId().equals(order.getMemberId())){
             Asserts.fail("不能删除他人订单！");
         }
@@ -563,9 +593,11 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     /**
      * 生成18位订单编号:8位日期+2位平台号码+2位支付方式+6位以上自增id
      */
+    private static final DateTimeFormatter ORDER_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+
     private String generateOrderSn(OmsOrder order) {
         StringBuilder sb = new StringBuilder();
-        String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
+        String date = LocalDate.now().format(ORDER_DATE_FORMATTER);
         String key = REDIS_DATABASE+":"+ REDIS_KEY_ORDER_ID + date;
         Long increment = redisService.incr(key, 1);
         sb.append(date);
@@ -829,13 +861,14 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     }
 
     /**
-     * 锁定下单商品的所有库存
+     * 锁定下单商品的所有库存（原子操作，防止超卖）
      */
     private void lockStock(List<CartPromotionItem> cartPromotionItemList) {
         for (CartPromotionItem cartPromotionItem : cartPromotionItemList) {
-            PmsSkuStock skuStock = skuStockMapper.selectById(cartPromotionItem.getProductSkuId());
-            skuStock.setLockStock(skuStock.getLockStock() + cartPromotionItem.getQuantity());
-            skuStockMapper.updateById(skuStock);
+            int result = skuStockMapper.increaseLockStock(cartPromotionItem.getProductSkuId(), cartPromotionItem.getQuantity());
+            if (result == 0) {
+                Asserts.fail("库存不足，无法下单");
+            }
         }
     }
 

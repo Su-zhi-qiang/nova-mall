@@ -7,10 +7,9 @@ import com.su.mall.portal.service.AlipayService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,7 +21,7 @@ import java.util.Map;
  * @auther Su
  * @description 支付宝支付Controller
  */
-@Controller
+@RestController
 @Tag(name = "AlipayController", description = "支付宝支付相关接口")
 @RequestMapping("/alipay")
 @RequiredArgsConstructor
@@ -62,7 +61,6 @@ public class AlipayController {
 
     @Operation(summary = "支付宝统一收单线下交易查询",description = "订单支付成功返回交易状态：TRADE_SUCCESS")
     @RequestMapping(value = "/query", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<String> query(String outTradeNo, String tradeNo){
         return CommonResult.success(alipayService.query(outTradeNo,tradeNo));
     }

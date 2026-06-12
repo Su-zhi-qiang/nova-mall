@@ -8,17 +8,16 @@ import com.su.mall.service.SmsCouponHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * 优惠券领取记录管理Controller
  * @author Su
  */
-@Controller
+@RestController
 @Tag(name = "SmsCouponHistoryController", description = "优惠券领取记录管理")
 @RequestMapping("/couponHistory")
 @RequiredArgsConstructor
@@ -27,7 +26,6 @@ public class SmsCouponHistoryController {
 
     @Operation(summary = "根据优惠券id，使用状态，订单编号分页获取领取记录")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<CommonPage<SmsCouponHistory>> list(@RequestParam(value = "couponId", required = false) Long couponId,
                                                            @RequestParam(value = "useStatus", required = false) Integer useStatus,
                                                            @RequestParam(value = "orderSn", required = false) String orderSn,

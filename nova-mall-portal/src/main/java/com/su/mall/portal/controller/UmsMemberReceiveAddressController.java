@@ -6,7 +6,7 @@ import com.su.mall.portal.service.UmsMemberReceiveAddressService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
  * 会员收货地址管理Controller
  * @author Su
  */
-@Controller
+@RestController
 @Tag(name = "UmsMemberReceiveAddressController", description = "会员收货地址管理")
 @RequestMapping("/member/address")
 @RequiredArgsConstructor
@@ -24,7 +24,6 @@ public class UmsMemberReceiveAddressController {
 
     @Operation(summary = "添加收货地址")
     @RequestMapping(value = "/add", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> add(@RequestBody UmsMemberReceiveAddress address) {
         int count = memberReceiveAddressService.add(address);
         if (count > 0) {
@@ -35,7 +34,6 @@ public class UmsMemberReceiveAddressController {
 
     @Operation(summary = "删除收货地址")
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> delete(@PathVariable Long id) {
         int count = memberReceiveAddressService.delete(id);
         if (count > 0) {
@@ -46,7 +44,6 @@ public class UmsMemberReceiveAddressController {
 
     @Operation(summary = "修改收货地址")
     @RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> update(@PathVariable Long id, @RequestBody UmsMemberReceiveAddress address) {
         int count = memberReceiveAddressService.update(id, address);
         if (count > 0) {
@@ -57,7 +54,6 @@ public class UmsMemberReceiveAddressController {
 
     @Operation(summary = "获取所有收货地址")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<List<UmsMemberReceiveAddress>> list() {
         List<UmsMemberReceiveAddress> addressList = memberReceiveAddressService.list();
         return CommonResult.success(addressList);
@@ -65,7 +61,6 @@ public class UmsMemberReceiveAddressController {
 
     @Operation(summary = "获取收货地址详情")
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<UmsMemberReceiveAddress> getItem(@PathVariable Long id) {
         UmsMemberReceiveAddress address = memberReceiveAddressService.getItem(id);
         return CommonResult.success(address);

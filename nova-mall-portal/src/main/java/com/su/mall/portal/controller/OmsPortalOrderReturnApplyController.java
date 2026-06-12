@@ -6,17 +6,16 @@ import com.su.mall.portal.service.OmsPortalOrderReturnApplyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * 退货申请管理Controller
  * @author Su
  */
-@Controller
+@RestController
 @Tag(name = "OmsPortalOrderReturnApplyController",description = "退货申请管理")
 @RequestMapping("/returnApply")
 @RequiredArgsConstructor
@@ -25,7 +24,6 @@ public class OmsPortalOrderReturnApplyController {
 
     @Operation(summary = "申请退货")
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> create(@RequestBody OmsOrderReturnApplyParam returnApply) {
         int count = returnApplyService.create(returnApply);
         if (count > 0) {

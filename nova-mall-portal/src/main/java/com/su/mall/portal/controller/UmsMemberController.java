@@ -7,11 +7,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
@@ -22,7 +21,7 @@ import java.util.Map;
  * 会员管理Controller
  * @author Su
  */
-@Controller
+@RestController
 @Tag(name = "UmsMemberController", description = "会员登录注册管理")
 @RequestMapping("/sso")
 @RequiredArgsConstructor
@@ -35,7 +34,6 @@ public class UmsMemberController {
 
     @Operation(summary = "会员注册")
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Void> register(@RequestParam String username,
                                  @RequestParam String password,
                                  @RequestParam String telephone,
@@ -46,7 +44,6 @@ public class UmsMemberController {
 
     @Operation(summary = "会员登录")
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Map<String, String>> login(@RequestParam String username,
                               @RequestParam String password) {
         String token = memberService.login(username, password);
@@ -61,7 +58,6 @@ public class UmsMemberController {
 
     @Operation(summary = "获取会员信息")
     @RequestMapping(value = "/info", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<UmsMember> info(Principal principal) {
         if(principal==null){
             return CommonResult.unauthorized(null);
@@ -72,7 +68,6 @@ public class UmsMemberController {
 
     @Operation(summary = "获取验证码")
     @RequestMapping(value = "/getAuthCode", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<String> getAuthCode(@RequestParam String telephone) {
         String authCode = memberService.generateAuthCode(telephone);
         return CommonResult.success(authCode,"获取验证码成功");
@@ -80,7 +75,6 @@ public class UmsMemberController {
 
     @Operation(summary = "会员修改密码")
     @RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Void> updatePassword(@RequestParam String telephone,
                                  @RequestParam String password,
                                  @RequestParam String authCode) {
@@ -91,7 +85,6 @@ public class UmsMemberController {
 
     @Operation(summary = "刷新token")
     @RequestMapping(value = "/refreshToken", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<Map<String, String>> refreshToken(HttpServletRequest request) {
         String token = request.getHeader(tokenHeader);
         String refreshToken = memberService.refreshToken(token);

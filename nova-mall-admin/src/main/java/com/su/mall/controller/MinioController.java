@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,7 +23,7 @@ import java.util.Date;
  * MinIO对象存储管理Controller
  * @author Su
  */
-@Controller
+@RestController
 @Tag(name = "MinioController", description = "MinIO对象存储管理")
 @RequestMapping("/minio")
 public class MinioController {
@@ -40,7 +40,6 @@ public class MinioController {
 
     @Operation(summary = "文件上传")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ResponseBody
     public CommonResult<MinioUploadDto> upload(@RequestPart("file") MultipartFile file) {
         try {
             //创建一个MinIO的Java客户端
@@ -101,7 +100,6 @@ public class MinioController {
 
     @Operation(summary = "文件删除")
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Void> delete(@RequestParam("objectName") String objectName) {
         try {
             MinioClient minioClient = MinioClient.builder()

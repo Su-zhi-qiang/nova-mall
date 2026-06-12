@@ -8,7 +8,7 @@ import com.su.mall.service.SmsHomeAdvertiseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.List;
  * 首页轮播广告管理Controller
  * @author Su
  */
-@Controller
+@RestController
 @Tag(name = "SmsHomeAdvertiseController", description = "首页轮播广告管理")
 @RequestMapping("/home/advertise")
 @RequiredArgsConstructor
@@ -26,7 +26,6 @@ public class SmsHomeAdvertiseController {
 
     @Operation(summary = "添加广告")
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> create(@RequestBody SmsHomeAdvertise advertise) {
         int count = advertiseService.create(advertise);
         if (count > 0)
@@ -36,7 +35,6 @@ public class SmsHomeAdvertiseController {
 
     @Operation(summary = "删除广告")
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> delete(@RequestParam("ids") List<Long> ids) {
         int count = advertiseService.delete(ids);
         if (count > 0)
@@ -46,7 +44,6 @@ public class SmsHomeAdvertiseController {
 
     @Operation(summary = "修改上下线状态")
     @RequestMapping(value = "/update/status/{id}", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> updateStatus(@PathVariable Long id, Integer status) {
         int count = advertiseService.updateStatus(id, status);
         if (count > 0)
@@ -56,7 +53,6 @@ public class SmsHomeAdvertiseController {
 
     @Operation(summary = "获取广告详情")
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<SmsHomeAdvertise> getItem(@PathVariable Long id) {
         SmsHomeAdvertise advertise = advertiseService.getItem(id);
         return CommonResult.success(advertise);
@@ -64,7 +60,6 @@ public class SmsHomeAdvertiseController {
 
     @Operation(summary = "修改广告")
     @RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> update(@PathVariable Long id, @RequestBody SmsHomeAdvertise advertise) {
         int count = advertiseService.update(id, advertise);
         if (count > 0)
@@ -74,7 +69,6 @@ public class SmsHomeAdvertiseController {
 
     @Operation(summary = "分页查询广告")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<CommonPage<SmsHomeAdvertise>> list(@RequestParam(value = "name", required = false) String name,
                                                            @RequestParam(value = "type", required = false) Integer type,
                                                            @RequestParam(value = "endTime", required = false) String endTime,

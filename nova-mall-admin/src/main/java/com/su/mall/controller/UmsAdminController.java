@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  * 后台用户管理Controller
  * @author Su
  */
-@Controller
+@RestController
 @Tag(name = "UmsAdminController", description = "后台用户管理")
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -45,7 +45,6 @@ public class UmsAdminController {
 
     @Operation(summary = "用户注册")
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<UmsAdmin> register(@Validated @RequestBody UmsAdminParam umsAdminParam) {
         UmsAdmin umsAdmin = adminService.register(umsAdminParam);
         if (umsAdmin == null) {
@@ -56,7 +55,6 @@ public class UmsAdminController {
 
     @Operation(summary = "登录以后返回token")
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Map<String, String>> login(@Validated @RequestBody UmsAdminLoginParam umsAdminLoginParam) {
         String token = adminService.login(umsAdminLoginParam.getUsername(), umsAdminLoginParam.getPassword());
         if (token == null) {
@@ -70,7 +68,6 @@ public class UmsAdminController {
 
     @Operation(summary = "刷新token")
     @RequestMapping(value = "/refreshToken", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<Map<String, String>> refreshToken(HttpServletRequest request) {
         String token = request.getHeader(tokenHeader);
         String refreshToken = adminService.refreshToken(token);
@@ -85,7 +82,6 @@ public class UmsAdminController {
 
     @Operation(summary = "获取当前登录用户信息")
     @RequestMapping(value = "/info", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<Map<String, Object>> getAdminInfo(Principal principal) {
         if(principal==null){
             return CommonResult.unauthorized(null);
@@ -106,7 +102,6 @@ public class UmsAdminController {
 
     @Operation(summary = "登出功能")
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Void> logout(Principal principal) {
         adminService.logout(principal.getName());
         return CommonResult.success(null);
@@ -114,7 +109,6 @@ public class UmsAdminController {
 
     @Operation(summary = "根据用户名或姓名分页获取用户列表")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<CommonPage<UmsAdmin>> list(@RequestParam(value = "keyword", required = false) String keyword,
                                                    @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                                                    @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
@@ -124,7 +118,6 @@ public class UmsAdminController {
 
     @Operation(summary = "获取指定用户信息")
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<UmsAdmin> getItem(@PathVariable Long id) {
         UmsAdmin admin = adminService.getItem(id);
         return CommonResult.success(admin);
@@ -132,7 +125,6 @@ public class UmsAdminController {
 
     @Operation(summary = "修改指定用户信息")
     @RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> update(@PathVariable Long id, @RequestBody UmsAdmin admin) {
         int count = adminService.update(id, admin);
         if (count > 0) {
@@ -143,7 +135,6 @@ public class UmsAdminController {
 
     @Operation(summary = "修改指定用户密码")
     @RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> updatePassword(@Validated @RequestBody UpdateAdminPasswordParam updatePasswordParam) {
         int status = adminService.updatePassword(updatePasswordParam);
         if (status > 0) {
@@ -161,7 +152,6 @@ public class UmsAdminController {
 
     @Operation(summary = "删除指定用户信息")
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> delete(@PathVariable Long id) {
         int count = adminService.delete(id);
         if (count > 0) {
@@ -172,7 +162,6 @@ public class UmsAdminController {
 
     @Operation(summary = "修改账号状态")
     @RequestMapping(value = "/updateStatus/{id}", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> updateStatus(@PathVariable Long id,@RequestParam(value = "status") Integer status) {
         UmsAdmin umsAdmin = new UmsAdmin();
         umsAdmin.setStatus(status);
@@ -185,7 +174,6 @@ public class UmsAdminController {
 
     @Operation(summary = "给用户分配角色")
     @RequestMapping(value = "/role/update", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<Integer> updateRole(@RequestParam("adminId") Long adminId,
                                        @RequestParam("roleIds") List<Long> roleIds) {
         int count = adminService.updateRole(adminId, roleIds);
@@ -197,7 +185,6 @@ public class UmsAdminController {
 
     @Operation(summary = "获取指定用户的角色")
     @RequestMapping(value = "/role/{adminId}", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<List<UmsRole>> getRoleList(@PathVariable Long adminId) {
         List<UmsRole> roleList = adminService.getRoleList(adminId);
         return CommonResult.success(roleList);

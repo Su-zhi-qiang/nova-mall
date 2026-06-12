@@ -12,7 +12,7 @@ import com.su.mall.portal.service.HomeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.List;
  * 首页内容管理Controller
  * @author Su
  */
-@Controller
+@RestController
 @Tag(name = "HomeController", description = "首页内容管理")
 @RequestMapping("/home")
 @RequiredArgsConstructor
@@ -30,7 +30,6 @@ public class HomeController {
 
     @Operation(summary = "首页内容信息展示")
     @RequestMapping(value = "/content", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<HomeContentResult> content() {
         HomeContentResult contentResult = homeService.content();
         return CommonResult.success(contentResult);
@@ -38,7 +37,6 @@ public class HomeController {
 
     @Operation(summary = "获取秒杀活动信息")
     @RequestMapping(value = "/flashPromotion", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<HomeFlashPromotion> flashPromotion() {
         HomeFlashPromotion flashPromotion = homeService.getFlashPromotion();
         return CommonResult.success(flashPromotion);
@@ -46,7 +44,6 @@ public class HomeController {
 
     @Operation(summary = "分页获取推荐商品")
     @RequestMapping(value = "/recommendProductList", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<CommonPage<PmsProduct>> recommendProductList(@RequestParam(value = "pageSize", defaultValue = "4") Integer pageSize,
                                                                @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
         Page<PmsProduct> page = homeService.recommendProductList(pageSize, pageNum);
@@ -55,7 +52,6 @@ public class HomeController {
 
     @Operation(summary = "获取首页商品分类")
     @RequestMapping(value = "/productCateList/{parentId}", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<List<PmsProductCategory>> getProductCateList(@PathVariable Long parentId) {
         List<PmsProductCategory> productCategoryList = homeService.getProductCateList(parentId);
         return CommonResult.success(productCategoryList);
@@ -63,7 +59,6 @@ public class HomeController {
 
     @Operation(summary = "根据分类获取专题")
     @RequestMapping(value = "/subjectList", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<CommonPage<CmsSubject>> getSubjectList(@RequestParam(required = false) Long cateId,
                                                               @RequestParam(value = "pageSize", defaultValue = "4") Integer pageSize,
                                                               @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
@@ -73,7 +68,6 @@ public class HomeController {
 
     @Operation(summary = "分页获取人气推荐商品")
     @RequestMapping(value = "/hotProductList", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<CommonPage<PmsProduct>> hotProductList(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                                                 @RequestParam(value = "pageSize", defaultValue = "6") Integer pageSize) {
         Page<PmsProduct> page = homeService.hotProductList(pageNum, pageSize);
@@ -82,7 +76,6 @@ public class HomeController {
 
     @Operation(summary = "分页获取新品推荐商品")
     @RequestMapping(value = "/newProductList", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<CommonPage<PmsProduct>> newProductList(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                                                 @RequestParam(value = "pageSize", defaultValue = "6") Integer pageSize) {
         Page<PmsProduct> page = homeService.newProductList(pageNum, pageSize);

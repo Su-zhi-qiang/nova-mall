@@ -93,6 +93,7 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         umsAdmin.setPassword(encodePassword);
         // ✅ 改造：insert 替代 insertSelective
         adminMapper.insert(umsAdmin);
+        umsAdmin.setPassword(null);
         return umsAdmin;
     }
 
@@ -181,6 +182,9 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         admin.setId(id);
         // ✅ 改造：selectById 替代 selectByPrimaryKey
         UmsAdmin rawAdmin = adminMapper.selectById(id);
+        if(rawAdmin == null){
+            return 0;
+        }
         if(rawAdmin.getPassword().equals(admin.getPassword())){
             //与原加密密码相同的不需要修改
             admin.setPassword(null);
@@ -298,7 +302,9 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     public void logout(String username) {
         //清空缓存中的用户相关数据
         UmsAdmin admin = getCacheService().getAdmin(username);
-        getCacheService().delAdmin(admin.getId());
-        getCacheService().delResourceList(admin.getId());
+        if (admin != null) {
+            getCacheService().delAdmin(admin.getId());
+            getCacheService().delResourceList(admin.getId());
+        }
     }
 }

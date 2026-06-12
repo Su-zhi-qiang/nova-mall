@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import com.su.mall.security.config.IgnoreUrlsConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
@@ -24,7 +23,6 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
     private final DynamicSecurityMetadataSource securityDataSource;
     private final IgnoreUrlsConfig ignoreUrlsConfig;
 
-    @SuppressWarnings("deprecation")
     @Override
     public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext requestAuthorizationContext) {
         HttpServletRequest request = requestAuthorizationContext.getRequest();
@@ -36,10 +34,15 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
                 return new AuthorizationDecision(true);
             }
         }
-        if (request.getMethod().equals(HttpMethod.OPTIONS.name())) {
+        if ("OPTIONS".equals(request.getMethod())) {
             return new AuthorizationDecision(true);
         }
         List<CustomConfigAttribute> configAttributeList = securityDataSource.getConfigAttributesWithPath(path);
+        // 如果该路径没有配置任何资源权限，则已认证用户可访问
+        if (CollUtil.isEmpty(configAttributeList)) {
+            Authentication currentAuth = authentication.get();
+            return new AuthorizationDecision(currentAuth.isAuthenticated());
+        }
         List<String> needAuthorities = configAttributeList.stream()
                 .map(CustomConfigAttribute::attribute)
                 .toList();

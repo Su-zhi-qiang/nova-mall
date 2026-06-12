@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +22,7 @@ import java.util.List;
  * @author Su
  */
 @Tag(name = "DemoController",description = "品牌管理示例接口")
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class DemoController {
     private final DemoService demoService;
@@ -31,14 +31,12 @@ public class DemoController {
 
     @Operation(summary = "获取全部品牌列表")
     @RequestMapping(value = "/brand/listAll", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<List<PmsBrand>> getBrandList() {
         return CommonResult.success(demoService.listAllBrand());
     }
 
     @Operation(summary = "添加品牌")
     @RequestMapping(value = "/brand/create", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<PmsBrandDto> createBrand(@Validated @RequestBody PmsBrandDto pmsBrand) {
         CommonResult<PmsBrandDto> commonResult;
         int count = demoService.createBrand(pmsBrand);
@@ -54,7 +52,6 @@ public class DemoController {
 
     @Operation(summary = "更新品牌")
     @RequestMapping(value = "/brand/update/{id}", method = RequestMethod.POST)
-    @ResponseBody
     public CommonResult<PmsBrandDto> updateBrand(@PathVariable("id") Long id, @Validated @RequestBody PmsBrandDto pmsBrandDto) {
         CommonResult<PmsBrandDto> commonResult;
         int count = demoService.updateBrand(id, pmsBrandDto);
@@ -70,7 +67,6 @@ public class DemoController {
 
     @Operation(summary = "删除品牌")
     @RequestMapping(value = "/brand/delete/{id}", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<Void> deleteBrand(@PathVariable("id") Long id) {
         int count = demoService.deleteBrand(id);
         if (count == 1) {
@@ -84,7 +80,6 @@ public class DemoController {
 
     @Operation(summary = "分页获取品牌列表")
     @RequestMapping(value = "/brand/list", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<CommonPage<PmsBrand>> listBrand(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                                        @RequestParam(value = "pageSize", defaultValue = "3") Integer pageSize) {
         Page<PmsBrand> page = demoService.listBrand(pageNum, pageSize);
@@ -93,7 +88,6 @@ public class DemoController {
 
     @Operation(summary = "根据编号查询品牌信息")
     @RequestMapping(value = "/brand/{id}", method = RequestMethod.GET)
-    @ResponseBody
     public CommonResult<PmsBrand> brand(@PathVariable("id") Long id) {
         return CommonResult.success(demoService.getBrand(id));
     }
