@@ -44,4 +44,9 @@ public interface SmsFlashPromotionSessionService {
      * 获取全部可选场次及其数量
      */
     List<SmsFlashPromotionSessionDetail> selectList(Long flashPromotionId);
+
+    /**
+     * 重置指定活动+场次下的秒杀库存（将 flash_promotion_count 还原为 original_count，已抢购数归零）
+     */
+    int resetFlashStock(Long flashPromotionId, Long flashPromotionSessionId);
 }

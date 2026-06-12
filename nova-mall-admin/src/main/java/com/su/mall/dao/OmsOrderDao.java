@@ -1,5 +1,6 @@
 package com.su.mall.dao;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dto.OmsOrderDeliveryParam;
 import com.su.mall.dto.OmsOrderDetail;
 import com.su.mall.dto.OmsOrderQueryParam;
@@ -14,9 +15,9 @@ import java.util.List;
  */
 public interface OmsOrderDao {
     /**
-     * 条件查询订单
+     * 条件分页查询订单
      */
-    List<OmsOrder> getList(@Param("queryParam") OmsOrderQueryParam queryParam);
+    Page<OmsOrder> getList(Page<?> page, @Param("queryParam") OmsOrderQueryParam queryParam);
 
     /**
      * 批量发货
@@ -24,7 +25,7 @@ public interface OmsOrderDao {
     int delivery(@Param("list") List<OmsOrderDeliveryParam> deliveryParamList);
 
     /**
-     * 获取订单详情
+     * 获取订单详情（订单信息 + 商品列表 + 操作记录）
      */
     OmsOrderDetail getDetail(@Param("id") Long id);
 }

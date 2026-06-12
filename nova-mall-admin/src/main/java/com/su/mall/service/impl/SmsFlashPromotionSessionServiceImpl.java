@@ -66,7 +66,6 @@ public class SmsFlashPromotionSessionServiceImpl implements SmsFlashPromotionSes
     @Override
     public List<SmsFlashPromotionSessionDetail> selectList(Long flashPromotionId) {
         List<SmsFlashPromotionSessionDetail> result = new ArrayList<>();
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<>())
         LambdaQueryWrapper<SmsFlashPromotionSession> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SmsFlashPromotionSession::getStatus, 1);
         List<SmsFlashPromotionSession> list = promotionSessionMapper.selectList(wrapper);
@@ -78,5 +77,10 @@ public class SmsFlashPromotionSessionServiceImpl implements SmsFlashPromotionSes
             result.add(detail);
         }
         return result;
+    }
+
+    @Override
+    public int resetFlashStock(Long flashPromotionId, Long flashPromotionSessionId) {
+        return relationService.resetFlashStock(flashPromotionId, flashPromotionSessionId);
     }
 }

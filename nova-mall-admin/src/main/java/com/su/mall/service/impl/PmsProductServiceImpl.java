@@ -248,16 +248,7 @@ public class PmsProductServiceImpl implements PmsProductService {
         }
         long totalCount = productMapper.selectCount(countWrapper);
         LOGGER.info("符合条件的商品总数: {}", totalCount);
-        
-        // 统计所有商品的分布情况（调试用）
-        LambdaQueryWrapper<PmsProduct> allWrapper = new LambdaQueryWrapper<>();
-        List<PmsProduct> allProducts = productMapper.selectList(allWrapper);
-        LOGGER.info("数据库中所有商品总数: {}", allProducts.size());
-        long deletedCount = allProducts.stream().filter(p -> p.getDeleteStatus() != null && p.getDeleteStatus() == 1).count();
-        LOGGER.info("已删除商品数量: {}", deletedCount);
-        long activeCount = allProducts.stream().filter(p -> p.getDeleteStatus() == null || p.getDeleteStatus() == 0).count();
-        LOGGER.info("未删除商品数量: {}", activeCount);
-        
+
         // 构建查询条件
         LambdaQueryWrapper<PmsProduct> wrapper = new LambdaQueryWrapper<>();
         // 查询未删除的商品，同时处理 deleteStatus 为 null 的情况

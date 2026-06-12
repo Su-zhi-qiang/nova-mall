@@ -21,6 +21,7 @@ import java.util.List;
 public class SmsFlashPromotionProductRelationServiceImpl implements SmsFlashPromotionProductRelationService {
     private final SmsFlashPromotionProductRelationMapper relationMapper;
     private final SmsFlashPromotionProductRelationDao relationDao;
+
     @Override
     public int create(List<SmsFlashPromotionProductRelation> relationList) {
         for (SmsFlashPromotionProductRelation relation : relationList) {
@@ -43,28 +44,29 @@ public class SmsFlashPromotionProductRelationServiceImpl implements SmsFlashProm
 
     @Override
     public int delete(Long id) {
-        // ✅ 改造：deleteByPrimaryKey → deleteById
         return relationMapper.deleteById(id);
     }
 
     @Override
     public SmsFlashPromotionProductRelation getItem(Long id) {
-        // ✅ 改造：selectByPrimaryKey → selectById
         return relationMapper.selectById(id);
     }
 
     @Override
-    public Page<SmsFlashPromotionProductRelation> list(Long sessionId, Integer pageSize, Integer pageNum) {
-        Page<SmsFlashPromotionProductRelation> page = new Page<>(pageNum, pageSize);
-        LambdaQueryWrapper<SmsFlashPromotionProductRelation> wrapper = new LambdaQueryWrapper<>();
-        return relationMapper.selectPage(page, wrapper);
+    public Page<SmsFlashPromotionProduct> list(Long flashPromotionId, Long flashPromotionSessionId, Integer pageSize, Integer pageNum) {
+        Page<SmsFlashPromotionProduct> page = new Page<>(pageNum, pageSize);
+        return relationDao.getList(page, flashPromotionId, flashPromotionSessionId);
     }
 
     @Override
     public long getCount(Long flashPromotionId, Long flashPromotionSessionId) {
-        // ✅ 改造：countByExample → selectCount(new LambdaQueryWrapper<>())
         return relationMapper.selectCount(new LambdaQueryWrapper<SmsFlashPromotionProductRelation>()
                 .eq(SmsFlashPromotionProductRelation::getFlashPromotionId, flashPromotionId)
                 .eq(SmsFlashPromotionProductRelation::getFlashPromotionSessionId, flashPromotionSessionId));
+    }
+
+    @Override
+    public int resetFlashStock(Long flashPromotionId, Long flashPromotionSessionId) {
+        return relationMapper.resetFlashStock(flashPromotionId, flashPromotionSessionId);
     }
 }

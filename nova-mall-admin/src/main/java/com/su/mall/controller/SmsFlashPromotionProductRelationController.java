@@ -3,6 +3,7 @@ package com.su.mall.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
+import com.su.mall.dto.SmsFlashPromotionProduct;
 import com.su.mall.model.SmsFlashPromotionProductRelation;
 import com.su.mall.service.SmsFlashPromotionProductRelationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -65,13 +66,14 @@ public class SmsFlashPromotionProductRelationController {
         return CommonResult.success(relation);
     }
 
-    @Operation(summary = "分页查询不同场次关联及商品信息")
+    @Operation(summary = "分页查询不同场次关联及商品信息（含商品名称、货号、价格、库存）")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult<CommonPage<SmsFlashPromotionProductRelation>> list(@RequestParam(value = "flashPromotionSessionId") Long sessionId,
-                                                                           @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
-                                                                           @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        Page<SmsFlashPromotionProductRelation> relationPage = relationService.list(sessionId, pageSize, pageNum);
+    public CommonResult<CommonPage<SmsFlashPromotionProduct>> list(@RequestParam(value = "flashPromotionId", required = false) Long flashPromotionId,
+                                                                   @RequestParam(value = "flashPromotionSessionId", required = false) Long flashPromotionSessionId,
+                                                                   @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
+                                                                   @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
+        Page<SmsFlashPromotionProduct> relationPage = relationService.list(flashPromotionId, flashPromotionSessionId, pageSize, pageNum);
         return CommonResult.success(CommonPage.restPage(relationPage));
     }
 }

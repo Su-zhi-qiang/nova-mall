@@ -3,17 +3,16 @@
 <mapper namespace="com.su.mall.dao.OmsOrderDao">
     <resultMap id="orderDetailResultMap" type="com.su.mall.dto.OmsOrderDetail" autoMapping="true">
         <id column="id" property="id"/>
-        <!-- 父类 OmsOrder 字段由 autoMapping 自动映射，删除所有冗余 <result> -->
-        <collection property="orderItemList" ofType="com.su.mall.model.OmsOrderItem" autoMapping="true">
-            <id column="item_id" property="id"/>
-            <!-- 订单项字段由 autoMapping 自动映射 -->
+        <!-- 订单项字段：列名以 item_ 为前缀，MyBatis 通过 columnPrefix 去除前缀后再做驼峰映射 -->
+        <collection property="orderItemList" ofType="com.su.mall.model.OmsOrderItem" columnPrefix="item_" autoMapping="true">
+            <id column="id" property="id"/>
         </collection>
-        <collection property="historyList" ofType="com.su.mall.model.OmsOrderOperateHistory" autoMapping="true">
-            <id column="history_id" property="id"/>
-            <!-- 操作历史字段由 autoMapping 自动映射 -->
+        <!-- 操作历史字段：列名以 history_ 为前缀 -->
+        <collection property="historyList" ofType="com.su.mall.model.OmsOrderOperateHistory" columnPrefix="history_" autoMapping="true">
+            <id column="id" property="id"/>
         </collection>
     </resultMap>
-    <!-- 改为使用 resultType -->
+    <!-- 订单列表查询：支持多条件模糊筛选；结果映射到 OmsOrder -->
     <select id="getList" resultType="com.su.mall.model.OmsOrder">
         SELECT *
         FROM
@@ -21,7 +20,7 @@
         WHERE
         delete_status = 0
         <if test="queryParam.orderSn!=null and queryParam.orderSn!=''">
-            AND order_sn = #{queryParam.orderSn}
+            AND order_sn LIKE concat("%",#{queryParam.orderSn},"%")
         </if>
         <if test="queryParam.status!=null">
             AND `status` = #{queryParam.status}
@@ -41,6 +40,7 @@
             OR receiver_phone LIKE concat("%",#{queryParam.receiverKeyword},"%")
             )
         </if>
+        ORDER BY create_time DESC
     </select>
     <update id="delivery">
         UPDATE oms_order

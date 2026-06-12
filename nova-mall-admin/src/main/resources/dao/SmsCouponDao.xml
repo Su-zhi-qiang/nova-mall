@@ -3,32 +3,25 @@
 <mapper namespace="com.su.mall.dao.SmsCouponDao">
     <resultMap id="couponItemParam" type="com.su.mall.dto.SmsCouponParam" autoMapping="true">
         <id column="id" jdbcType="BIGINT" property="id"/>
-        <!-- 父类 SmsCoupon 字段由 autoMapping 自动映射，删除所有冗余 <result> -->
-        <collection property="productRelationList" columnPrefix="cpr_" ofType="com.su.mall.model.SmsCouponProductRelation" autoMapping="true">
-            <id column="id" property="id"/>
-            <!-- 优惠券商品关联字段由 autoMapping 自动映射 -->
-        </collection>
-        <collection property="productCategoryRelationList" columnPrefix="cpcr_" ofType="com.su.mall.model.SmsCouponProductCategoryRelation" autoMapping="true">
-            <id column="id" property="id"/>
-            <!-- 优惠券分类关联字段由 autoMapping 自动映射 -->
-        </collection>
+        <collection property="productRelationList" column="id" select="selectProductRelation" ofType="com.su.mall.model.SmsCouponProductRelation"/>
+        <collection property="productCategoryRelationList" column="id" select="selectProductCategoryRelation" ofType="com.su.mall.model.SmsCouponProductCategoryRelation"/>
     </resultMap>
+
     <select id="getItem" resultMap="couponItemParam">
-        SELECT
-            c.*,
-            cpr.id                   cpr_id,
-            cpr.product_id           cpr_product_id,
-            cpr.product_name         cpr_product_name,
-            cpr.product_sn           cpr_product_sn,
-            cpcr.id                  cpcr_id,
-            cpcr.product_category_id cpcr_product_category_id,
-            cpcr.product_category_name cpcr_product_category_name,
-            cpcr.parent_category_name cpcr_parent_category_name
-        FROM
-            sms_coupon c
-            LEFT JOIN sms_coupon_product_relation cpr ON c.id = cpr.coupon_id
-            LEFT JOIN sms_coupon_product_category_relation cpcr ON c.id = cpcr.coupon_id
-        WHERE
-            c.id = #{id}
+        SELECT c.*
+        FROM sms_coupon c
+        WHERE c.id = #{id}
+    </select>
+
+    <select id="selectProductRelation" resultType="com.su.mall.model.SmsCouponProductRelation">
+        SELECT id, coupon_id, product_id, product_name, product_sn
+        FROM sms_coupon_product_relation
+        WHERE coupon_id = #{id}
+    </select>
+
+    <select id="selectProductCategoryRelation" resultType="com.su.mall.model.SmsCouponProductCategoryRelation">
+        SELECT id, coupon_id, product_category_id, product_category_name, parent_category_name
+        FROM sms_coupon_product_category_relation
+        WHERE coupon_id = #{id}
     </select>
 </mapper>

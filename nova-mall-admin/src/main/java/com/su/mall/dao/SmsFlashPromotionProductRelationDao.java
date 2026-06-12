@@ -1,9 +1,8 @@
 package com.su.mall.dao;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dto.SmsFlashPromotionProduct;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 /**
  * 限时购商品关系管理自定义Dao
@@ -11,7 +10,9 @@ import java.util.List;
  */
 public interface SmsFlashPromotionProductRelationDao {
     /**
-     * 获取限时购及相关商品信息
+     * 获取限时购及相关商品信息（支持 MyBatis-Plus 分页）
      */
-    List<SmsFlashPromotionProduct> getList(@Param("flashPromotionId") Long flashPromotionId, @Param("flashPromotionSessionId") Long flashPromotionSessionId);
+    Page<SmsFlashPromotionProduct> getList(Page<?> page,
+                                           @Param("flashPromotionId") Long flashPromotionId,
+                                           @Param("flashPromotionSessionId") Long flashPromotionSessionId);
 }

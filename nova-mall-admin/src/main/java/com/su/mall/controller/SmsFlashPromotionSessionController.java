@@ -90,4 +90,15 @@ public class SmsFlashPromotionSessionController {
         List<SmsFlashPromotionSessionDetail> promotionSessionList = flashPromotionSessionService.selectList(flashPromotionId);
         return CommonResult.success(promotionSessionList);
     }
+
+    @Operation(summary = "重置场次秒杀库存（还原为原始库存，并清零已抢购数）")
+    @RequestMapping(value = "/resetStock", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult<Integer> resetFlashStock(Long flashPromotionId, Long flashPromotionSessionId) {
+        int count = flashPromotionSessionService.resetFlashStock(flashPromotionId, flashPromotionSessionId);
+        if (count >= 0) {
+            return CommonResult.success(count);
+        }
+        return CommonResult.failed();
+    }
 }
