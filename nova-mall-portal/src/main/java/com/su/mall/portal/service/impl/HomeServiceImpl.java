@@ -17,6 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -29,6 +33,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HomeServiceImpl implements HomeService {
     private static final Logger LOGGER = LoggerFactory.getLogger(HomeServiceImpl.class);
+    private static final DateTimeFormatter HOUR_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHH");
 
     private final SmsHomeAdvertiseMapper advertiseMapper;
     private final HomeDao homeDao;
@@ -56,14 +61,14 @@ public class HomeServiceImpl implements HomeService {
             return buildEmptyFlashPromotionWithNext(now);
         }
 
-        String cacheKey = "home:flashPromotion:" + currentActivity.getId() + ":" + currentSession.getId() + ":" + new java.text.SimpleDateFormat("yyyyMMddHH").format(now);
+        String cacheKey = "home:flashPromotion:" + currentActivity.getId() + ":" + currentSession.getId();
         HomeFlashPromotion cached = redisService.get(cacheKey);
         if (cached != null) {
             LOGGER.info("秒杀信息从缓存获取成功，cacheKey: {}", cacheKey);
             return cached;
         }
 
-        String resetKey = "flash:reset:" + currentActivity.getId() + ":" + currentSession.getId() + ":" + new java.text.SimpleDateFormat("yyyyMMddHH").format(now);
+        String resetKey = "flash:reset:" + currentActivity.getId() + ":" + currentSession.getId();
         if (!redisService.hasKey(resetKey)) {
             try {
                 int resetCount = flashPromotionProductRelationMapper.resetFlashStock(currentActivity.getId(), currentSession.getId());

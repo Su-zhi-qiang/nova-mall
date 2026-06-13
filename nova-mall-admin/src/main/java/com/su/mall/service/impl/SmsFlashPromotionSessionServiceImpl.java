@@ -2,13 +2,16 @@ package com.su.mall.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.su.mall.dto.SmsFlashPromotionSessionDetail;
+import com.su.mall.mapper.SmsFlashPromotionProductRelationMapper;
 import com.su.mall.mapper.SmsFlashPromotionSessionMapper;
+import com.su.mall.model.SmsFlashPromotionProductRelation;
 import com.su.mall.model.SmsFlashPromotionSession;
 import com.su.mall.service.SmsFlashPromotionProductRelationService;
 import com.su.mall.service.SmsFlashPromotionSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,6 +26,7 @@ import java.util.List;
 public class SmsFlashPromotionSessionServiceImpl implements SmsFlashPromotionSessionService {
     private final SmsFlashPromotionSessionMapper promotionSessionMapper;
     private final SmsFlashPromotionProductRelationService relationService;
+    private final SmsFlashPromotionProductRelationMapper relationMapper;
 
     @Override
     public int create(SmsFlashPromotionSession promotionSession) {
@@ -46,8 +50,11 @@ public class SmsFlashPromotionSessionServiceImpl implements SmsFlashPromotionSes
     }
 
     @Override
+    @Transactional
     public int delete(Long id) {
-        // ✅ 改造：deleteByPrimaryKey → deleteById
+        // 级联删除该场次下的所有商品关联
+        relationMapper.delete(new LambdaQueryWrapper<SmsFlashPromotionProductRelation>()
+                .eq(SmsFlashPromotionProductRelation::getFlashPromotionSessionId, id));
         return promotionSessionMapper.deleteById(id);
     }
 

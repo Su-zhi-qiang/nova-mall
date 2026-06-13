@@ -4,10 +4,13 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.mapper.SmsFlashPromotionMapper;
+import com.su.mall.mapper.SmsFlashPromotionProductRelationMapper;
 import com.su.mall.model.SmsFlashPromotion;
+import com.su.mall.model.SmsFlashPromotionProductRelation;
 import com.su.mall.service.SmsFlashPromotionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -20,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SmsFlashPromotionServiceImpl implements SmsFlashPromotionService {
     private final SmsFlashPromotionMapper flashPromotionMapper;
+    private final SmsFlashPromotionProductRelationMapper relationMapper;
 
     @Override
     public int create(SmsFlashPromotion flashPromotion) {
@@ -34,8 +38,15 @@ public class SmsFlashPromotionServiceImpl implements SmsFlashPromotionService {
     }
 
     @Override
+    @Transactional
     public int delete(Long id) {
-        // ✅ 改造：deleteByPrimaryKey → deleteById
+        SmsFlashPromotion promotion = flashPromotionMapper.selectById(id);
+        if (promotion != null && promotion.getStatus() != null && promotion.getStatus() == 1) {
+            throw new RuntimeException("不能删除进行中的秒杀活动");
+        }
+        // 级联删除关联的商品关系
+        relationMapper.delete(new LambdaQueryWrapper<SmsFlashPromotionProductRelation>()
+                .eq(SmsFlashPromotionProductRelation::getFlashPromotionId, id));
         return flashPromotionMapper.deleteById(id);
     }
 

@@ -396,6 +396,20 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         return portalOrderDao.getMemberFlashBuyCount(memberId, relationId);
     }
 
+    /**
+     * 恢复秒杀商品的库存和已售数量（取消订单时调用）
+     */
+    private void restoreFlashStock(List<OmsOrderItem> orderItemList) {
+        for (OmsOrderItem orderItem : orderItemList) {
+            if (orderItem.getFlashPromotionRelationId() != null) {
+                flashPromotionProductRelationMapper.restoreStock(
+                        orderItem.getFlashPromotionRelationId(),
+                        orderItem.getProductQuantity()
+                );
+            }
+        }
+    }
+
     @Override
     @Transactional
     public Integer cancelTimeOutOrder() {
@@ -418,6 +432,8 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         for (OmsOrderDetail timeOutOrder : timeOutOrders) {
             //解除订单商品库存锁定
             portalOrderDao.releaseSkuStockLock(timeOutOrder.getOrderItemList());
+            //恢复秒杀商品库存和已售数量
+            restoreFlashStock(timeOutOrder.getOrderItemList());
             //修改优惠券使用状态
             updateCouponStatus(timeOutOrder.getCouponId(), timeOutOrder.getMemberId(), 0);
             //返还使用积分
@@ -455,6 +471,8 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             //解除订单商品库存锁定
             if (!CollectionUtils.isEmpty(orderItemList)) {
                 portalOrderDao.releaseSkuStockLock(orderItemList);
+                //恢复秒杀商品库存和已售数量
+                restoreFlashStock(orderItemList);
             }
             //修改优惠券使用状态
             updateCouponStatus(cancelOrder.getCouponId(), cancelOrder.getMemberId(), 0);
