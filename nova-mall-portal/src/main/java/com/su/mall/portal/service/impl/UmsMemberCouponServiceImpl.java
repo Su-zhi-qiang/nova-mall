@@ -121,6 +121,10 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
         List<SmsCouponHistoryDetail> enableList = new ArrayList<>();
         List<SmsCouponHistoryDetail> disableList = new ArrayList<>();
         for (SmsCouponHistoryDetail couponHistoryDetail : allList) {
+            // 跳过已被删除的优惠券
+            if (couponHistoryDetail.getCoupon() == null) {
+                continue;
+            }
             Integer useType = couponHistoryDetail.getCoupon().getUseType();
             BigDecimal minPoint = couponHistoryDetail.getCoupon().getMinPoint();
             Date endTime = couponHistoryDetail.getCoupon().getEndTime();

@@ -304,17 +304,19 @@ public class PmsProductServiceImpl implements PmsProductService {
         }
         
         //修改完审核状态后插入审核记录
-        List<PmsProductVerifyRecord> list = new ArrayList<>();
-        for (Long id : ids) {
-            PmsProductVerifyRecord record = new PmsProductVerifyRecord();
-            record.setProductId(id);
-            record.setCreateTime(LocalDateTime.now());
-            record.setDetail(detail);
-            record.setStatus(verifyStatus);
-            record.setVerifyMan("test");
-            list.add(record);
+        if (ids != null && !ids.isEmpty()) {
+            List<PmsProductVerifyRecord> list = new ArrayList<>();
+            for (Long id : ids) {
+                PmsProductVerifyRecord record = new PmsProductVerifyRecord();
+                record.setProductId(id);
+                record.setCreateTime(LocalDateTime.now());
+                record.setDetail(detail);
+                record.setStatus(verifyStatus);
+                record.setVerifyMan("test");
+                list.add(record);
+            }
+            productVertifyRecordDao.insertList(list);
         }
-        productVertifyRecordDao.insertList(list);
         return count;
     }
 

@@ -215,6 +215,9 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         order.setOrderType(hasFlashPromotion ? 1 : 0);
         //收货人信息：姓名、电话、邮编、地址
         UmsMemberReceiveAddress address = memberReceiveAddressService.getItem(orderParam.getMemberReceiveAddressId());
+        if (address == null) {
+            Asserts.fail("收货地址不存在");
+        }
         order.setReceiverName(address.getName());
         order.setReceiverPhone(address.getPhoneNumber());
         order.setReceiverPostCode(address.getPostCode());
@@ -450,12 +453,15 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     @Override
     @Transactional
     public void cancelOrder(Long orderId) {
-        UmsMember member = memberService.getCurrentMember();
-        //查询未付款的取消订单（增加会员id校验，防止越权操作）
+        OmsOrder order = orderMapper.selectById(orderId);
+        if (order == null || order.getDeleteStatus() == 1) {
+            return;
+        }
+        Long memberId = order.getMemberId();
         List<OmsOrder> cancelOrderList = orderMapper.selectList(
                 new LambdaQueryWrapper<OmsOrder>()
                         .eq(OmsOrder::getId, orderId)
-                        .eq(OmsOrder::getMemberId, member.getId())
+                        .eq(OmsOrder::getMemberId, memberId)
                         .eq(OmsOrder::getStatus, 0)
                         .eq(OmsOrder::getDeleteStatus, 0));
         if (CollectionUtils.isEmpty(cancelOrderList)) {
@@ -773,6 +779,9 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         }
         //根据积分使用规则判断是否可用
         UmsIntegrationConsumeSetting integrationConsumeSetting = integrationConsumeSettingMapper.selectById(1L);
+        if (integrationConsumeSetting == null) {
+            return zeroAmount;
+        }
         if (hasCoupon && integrationConsumeSetting.getCouponStatus().equals(0)) {
             //不可与优惠券共用
             return zeroAmount;
@@ -795,6 +804,9 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
      */
     private void handleCouponAmount(List<OmsOrderItem> orderItemList, SmsCouponHistoryDetail couponHistoryDetail) {
         SmsCoupon coupon = couponHistoryDetail.getCoupon();
+        if (coupon == null) {
+            return;
+        }
         if (coupon.getUseType().equals(0)) {
             //全场通用
             calcPerCouponAmount(orderItemList, coupon);

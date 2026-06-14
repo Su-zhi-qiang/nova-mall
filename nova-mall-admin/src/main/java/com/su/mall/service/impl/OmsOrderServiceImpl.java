@@ -40,6 +40,9 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     @Override
     @Transactional
     public int delivery(List<OmsOrderDeliveryParam> deliveryParamList) {
+        if (deliveryParamList == null || deliveryParamList.isEmpty()) {
+            return 0;
+        }
         //批量发货
         int count = orderDao.delivery(deliveryParamList);
         //添加操作记录
@@ -60,6 +63,9 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     @Override
     @Transactional
     public int close(List<Long> ids, String note) {
+        if (ids == null || ids.isEmpty()) {
+            return 0;
+        }
         OmsOrder record = new OmsOrder();
         record.setStatus(4);
         // ✅ 改造：updateByExampleSelective → update + LambdaUpdateWrapper

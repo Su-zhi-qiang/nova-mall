@@ -113,6 +113,9 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
         PmsPortalProductDetail result = new PmsPortalProductDetail();
         //获取商品信息
         PmsProduct product = productMapper.selectById(id);
+        if (product == null) {
+            return null;
+        }
         result.setProduct(product);
         //获取品牌信息
         PmsBrand brand = brandMapper.selectById(product.getBrandId());
@@ -136,13 +139,13 @@ public class PmsPortalProductServiceImpl implements PmsPortalProductService {
                 new LambdaQueryWrapper<PmsSkuStock>().eq(PmsSkuStock::getProductId, product.getId()));
         result.setSkuStockList(skuStockList);
         //商品阶梯价格设置
-        if(product.getPromotionType()==3){
+        if(product.getPromotionType() != null && product.getPromotionType() == 3){
             List<PmsProductLadder> productLadderList = productLadderMapper.selectList(
                     new LambdaQueryWrapper<PmsProductLadder>().eq(PmsProductLadder::getProductId, product.getId()));
             result.setProductLadderList(productLadderList);
         }
         //商品满减价格设置
-        if(product.getPromotionType()==4){
+        if(product.getPromotionType() != null && product.getPromotionType() == 4){
             List<PmsProductFullReduction> productFullReductionList = productFullReductionMapper.selectList(
                     new LambdaQueryWrapper<PmsProductFullReduction>().eq(PmsProductFullReduction::getProductId, product.getId()));
             result.setProductFullReductionList(productFullReductionList);

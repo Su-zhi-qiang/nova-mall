@@ -132,8 +132,10 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         loginLog.setAdminId(admin.getId());
         loginLog.setCreateTime(new Date());
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = attributes.getRequest();
-        loginLog.setIp(RequestUtil.getRequestIp(request));
+        if (attributes != null) {
+            HttpServletRequest request = attributes.getRequest();
+            loginLog.setIp(RequestUtil.getRequestIp(request));
+        }
         // ✅ 改造：insert 替代 insert
         loginLogMapper.insert(loginLog);
     }
@@ -185,7 +187,7 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         if(rawAdmin == null){
             return 0;
         }
-        if(rawAdmin.getPassword().equals(admin.getPassword())){
+        if(rawAdmin.getPassword() != null && rawAdmin.getPassword().equals(admin.getPassword())){
             //与原加密密码相同的不需要修改
             admin.setPassword(null);
         }else{

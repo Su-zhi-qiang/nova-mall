@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -148,8 +149,14 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public Page<PmsProduct> hotProductList(Integer pageNum, Integer pageSize) {
+        if (pageNum == null || pageSize == null || pageNum < 1) {
+            return new Page<>(1, 10);
+        }
         int offset = pageSize * (pageNum - 1);
         List<PmsProduct> productList = homeDao.getHotProductList(offset, pageSize);
+        if (productList == null) {
+            productList = new ArrayList<>();
+        }
         Page<PmsProduct> page = new Page<>(pageNum, pageSize);
         page.setRecords(productList);
         page.setTotal(productList.size());
@@ -159,8 +166,14 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public Page<PmsProduct> newProductList(Integer pageNum, Integer pageSize) {
+        if (pageNum == null || pageSize == null || pageNum < 1) {
+            return new Page<>(1, 10);
+        }
         int offset = pageSize * (pageNum - 1);
         List<PmsProduct> productList = homeDao.getNewProductList(offset, pageSize);
+        if (productList == null) {
+            productList = new ArrayList<>();
+        }
         Page<PmsProduct> page = new Page<>(pageNum, pageSize);
         page.setRecords(productList);
         page.setTotal(productList.size());
