@@ -462,7 +462,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
                 new LambdaQueryWrapper<OmsOrder>()
                         .eq(OmsOrder::getId, orderId)
                         .eq(OmsOrder::getMemberId, memberId)
-                        .eq(OmsOrder::getStatus, 0)
+                        .in(OmsOrder::getStatus, 0, 1)
                         .eq(OmsOrder::getDeleteStatus, 0));
         if (CollectionUtils.isEmpty(cancelOrderList)) {
             return;
