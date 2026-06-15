@@ -67,6 +67,9 @@ public class OmsOrderItem implements Serializable {
     @Schema(title = "秒杀关联ID")
     private Long flashPromotionRelationId;
 
+    @Schema(title = "是否已评价(0未评价/1已评价)")
+    private Integer isCommented;
+
     @Serial
     private static final long serialVersionUID = 1L;
 }
