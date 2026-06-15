@@ -8,6 +8,12 @@ import org.apache.ibatis.annotations.Update;
 public interface SmsFlashPromotionProductRelationMapper extends BaseMapper<SmsFlashPromotionProductRelation> {
 
     @Update("UPDATE sms_flash_promotion_product_relation " +
+            "SET flash_promotion_count = flash_promotion_count + #{quantity}, " +
+            "flash_promotion_sold = GREATEST(COALESCE(flash_promotion_sold, 0) - #{quantity}, 0) " +
+            "WHERE id = #{relationId}")
+    int restoreStock(@Param("relationId") Long relationId, @Param("quantity") Integer quantity);
+
+    @Update("UPDATE sms_flash_promotion_product_relation " +
             "SET flash_promotion_count = flash_promotion_count - #{quantity}, " +
             "flash_promotion_sold = COALESCE(flash_promotion_sold, 0) + #{quantity} " +
             "WHERE id = #{relationId} " +

@@ -9,6 +9,7 @@ import com.su.mall.model.OmsOrderReturnApply;
 import com.su.mall.portal.domain.OmsOrderReturnApplyParam;
 import com.su.mall.portal.service.UmsMemberService;
 import com.su.mall.portal.service.OmsPortalOrderReturnApplyService;
+import com.su.mall.common.exception.Asserts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,15 @@ public class OmsPortalOrderReturnApplyServiceImpl implements OmsPortalOrderRetur
 
     @Override
     public int create(OmsOrderReturnApplyParam returnApply) {
+        // 检查该订单是否已有退货申请（status: 0待处理 1退货中）
+        Long existingCount = returnApplyMapper.selectCount(
+            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<OmsOrderReturnApply>()
+                .eq(OmsOrderReturnApply::getOrderId, returnApply.getOrderId())
+                .in(OmsOrderReturnApply::getStatus, 0, 1));
+        if (existingCount > 0) {
+            Asserts.fail("该订单已有退货申请，请勿重复提交");
+        }
+
         OmsOrderReturnApply realApply = new OmsOrderReturnApply();
         BeanUtils.copyProperties(returnApply, realApply);
         
@@ -40,6 +50,9 @@ public class OmsPortalOrderReturnApplyServiceImpl implements OmsPortalOrderRetur
             if (order != null) {
                 realApply.setOrderSn(order.getOrderSn());
                 realApply.setMemberUsername(order.getMemberUsername());
+                // 从订单收货地址获取退货人信息
+                realApply.setReturnName(order.getReceiverName());
+                realApply.setReturnPhone(order.getReceiverPhone());
                 
                 // 获取订单中的第一个商品信息
                 List<OmsOrderItem> orderItems = orderItemMapper.selectList(

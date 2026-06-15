@@ -22,6 +22,11 @@ public interface PortalOrderDao {
     int updateSkuStock(@Param("itemList") List<OmsOrderItem> orderItemList);
 
     /**
+     * 修改 pms_product表的商品库存
+     */
+    int updateProductStock(@Param("itemList") List<OmsOrderItem> orderItemList);
+
+    /**
      * 获取超时订单
      * @param minute 超时时间（分）
      */
@@ -36,6 +41,16 @@ public interface PortalOrderDao {
      * 解除取消订单的库存锁定
      */
     int releaseSkuStockLock(@Param("itemList") List<OmsOrderItem> orderItemList);
+
+    /**
+     * 恢复SKU库存（已支付订单取消时）
+     */
+    int restoreSkuStock(@Param("itemList") List<OmsOrderItem> orderItemList);
+
+    /**
+     * 恢复商品表库存（已支付订单取消/退货时）
+     */
+    int restoreProductStock(@Param("itemList") List<OmsOrderItem> orderItemList);
 
     /**
      * 更新商品销量

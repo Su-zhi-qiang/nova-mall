@@ -62,13 +62,25 @@
             END,
             lock_stock = CASE id
             <foreach collection="itemList" item="item">
-                WHEN #{item.productSkuId} THEN lock_stock - #{item.productQuantity}
+                WHEN #{item.productSkuId} THEN GREATEST(lock_stock - #{item.productQuantity}, 0)
             </foreach>
             END
         WHERE
             id IN
         <foreach collection="itemList" item="item" separator="," open="(" close=")">
             #{item.productSkuId}
+        </foreach>
+    </update>
+    <update id="updateProductStock">
+        UPDATE pms_product
+        SET stock = stock - CASE id
+        <foreach collection="itemList" item="item">
+            WHEN #{item.productId} THEN #{item.productQuantity}
+        </foreach>
+        END
+        WHERE id IN
+        <foreach collection="itemList" item="item" separator="," open="(" close=")">
+            #{item.productId}
         </foreach>
     </update>
     <update id="updateOrderStatus">
@@ -91,6 +103,37 @@
             id IN
         <foreach collection="itemList" item="item" separator="," open="(" close=")">
             #{item.productSkuId}
+        </foreach>
+    </update>
+    <update id="restoreSkuStock">
+        UPDATE pms_sku_stock
+        SET
+            stock = stock + CASE id
+            <foreach collection="itemList" item="item">
+                WHEN #{item.productSkuId} THEN #{item.productQuantity}
+            </foreach>
+            END,
+            lock_stock = GREATEST(lock_stock - CASE id
+            <foreach collection="itemList" item="item">
+                WHEN #{item.productSkuId} THEN #{item.productQuantity}
+            </foreach>
+            END, 0)
+        WHERE
+            id IN
+        <foreach collection="itemList" item="item" separator="," open="(" close=")">
+            #{item.productSkuId}
+        </foreach>
+    </update>
+    <update id="restoreProductStock">
+        UPDATE pms_product
+        SET stock = stock + CASE id
+        <foreach collection="itemList" item="item">
+            WHEN #{item.productId} THEN #{item.productQuantity}
+        </foreach>
+        END
+        WHERE id IN
+        <foreach collection="itemList" item="item" separator="," open="(" close=")">
+            #{item.productId}
         </foreach>
     </update>
     <update id="updateProductSale">

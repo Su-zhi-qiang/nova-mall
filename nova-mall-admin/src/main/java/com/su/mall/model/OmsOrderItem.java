@@ -64,6 +64,9 @@ public class OmsOrderItem implements Serializable {
     @Schema(title = "商品销售属性:[{'key':'颜色','value':'颜色'},{'key':'容量','value':'4G'}]")
     private String productAttr;
 
+    @Schema(title = "秒杀活动关联ID")
+    private Long flashPromotionRelationId;
+
     @Serial
     private static final long serialVersionUID = 1L;
 }

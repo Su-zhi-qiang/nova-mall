@@ -346,6 +346,8 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
                 }
                 // 秒杀订单同时扣减商品 SKU 真实库存
                 portalOrderDao.updateSkuStock(orderItemList);
+                // 扣减商品表库存
+                portalOrderDao.updateProductStock(orderItemList);
                 // 清除秒杀列表缓存，确保前端获取最新库存
                 clearFlashPromotionCache();
             } finally {
@@ -354,6 +356,8 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         } else {
             // 普通订单：扣减真实库存，释放锁定库存
             resultCount = portalOrderDao.updateSkuStock(orderItemList);
+            // 扣减商品表库存
+            portalOrderDao.updateProductStock(orderItemList);
         }
 
         // 统一更新销量和清除缓存（消除重复代码）
@@ -413,6 +417,20 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         }
     }
 
+    /**
+     * 恢复SKU库存（已支付订单取消时）
+     */
+    private void restoreSkuStock(List<OmsOrderItem> orderItemList) {
+        portalOrderDao.restoreSkuStock(orderItemList);
+    }
+
+    /**
+     * 恢复商品表库存（已支付订单取消时）
+     */
+    private void restoreProductStock(List<OmsOrderItem> orderItemList) {
+        portalOrderDao.restoreProductStock(orderItemList);
+    }
+
     @Override
     @Transactional
     public Integer cancelTimeOutOrder() {
@@ -469,14 +487,22 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         }
         OmsOrder cancelOrder = cancelOrderList.get(0);
         if (cancelOrder != null) {
+            // 保存原始状态
+            Integer originalStatus = cancelOrder.getStatus();
             //修改订单状态为取消
             cancelOrder.setStatus(4);
             orderMapper.updateById(cancelOrder);
             List<OmsOrderItem> orderItemList = orderItemMapper.selectList(
                     new LambdaQueryWrapper<OmsOrderItem>().eq(OmsOrderItem::getOrderId, orderId));
-            //解除订单商品库存锁定
             if (!CollectionUtils.isEmpty(orderItemList)) {
-                portalOrderDao.releaseSkuStockLock(orderItemList);
+                if (originalStatus != null && originalStatus == 1) {
+                    // 已支付的订单：恢复真实库存 + 商品表库存
+                    restoreSkuStock(orderItemList);
+                    restoreProductStock(orderItemList);
+                } else {
+                    // 未支付的订单：只释放锁定库存
+                    portalOrderDao.releaseSkuStockLock(orderItemList);
+                }
                 //恢复秒杀商品库存和已售数量
                 restoreFlashStock(orderItemList);
             }
