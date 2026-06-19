@@ -3,6 +3,9 @@ package com.su.mall.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.api.CommonResult;
+import com.su.mall.dto.OmsOrderDetail;
+import com.su.mall.dto.OmsOrderQueryParam;
+import com.su.mall.dto.PmsProductQueryParam;
 import com.su.mall.mapper.UmsMemberMapper;
 import com.su.mall.model.*;
 import com.su.mall.service.*;
@@ -13,6 +16,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,7 +32,6 @@ public class AgentQueryController {
 
     private final PmsProductService productService;
     private final OmsOrderService orderService;
-    private final UmsMemberService memberService;
     private final UmsMemberMapper memberMapper;
     private final UmsAdminService adminService;
     private final UmsRoleService roleService;
@@ -176,7 +179,8 @@ public class AgentQueryController {
 
         Page<UmsMember> page = memberMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
 
-        List<Map<String, Object>> list = page.getRecords().stream().map(m -> {
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("list", page.getRecords().stream().map(m -> {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("id", m.getId());
             item.put("username", m.getUsername());
@@ -187,10 +191,7 @@ public class AgentQueryController {
             item.put("growth", m.getGrowth());
             item.put("createTime", m.getCreateTime());
             return item;
-        }).collect(Collectors.toList());
-
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("list", list);
+        }).collect(Collectors.toList()));
         result.put("total", page.getTotal());
         result.put("pageNum", page.getCurrent());
         result.put("pageSize", page.getSize());
@@ -218,7 +219,7 @@ public class AgentQueryController {
 
         List<OmsOrder> recentOrders = allOrders.stream()
                 .filter(o -> o.getCreateTime() != null && o.getCreateTime().after(startDate))
-                .collect(Collectors.toList());
+                .toList();
 
         int totalOrders = recentOrders.size();
         BigDecimal totalSales = recentOrders.stream()
@@ -226,7 +227,7 @@ public class AgentQueryController {
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal avgAmount = totalOrders > 0
-                ? totalSales.divide(BigDecimal.valueOf(totalOrders), 2, BigDecimal.ROUND_HALF_UP)
+                ? totalSales.divide(BigDecimal.valueOf(totalOrders), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
         long completedCount = recentOrders.stream().filter(o -> o.getStatus() != null && o.getStatus() == 3).count();
         long closedCount = recentOrders.stream().filter(o -> o.getStatus() != null && o.getStatus() == 4).count();
@@ -314,15 +315,9 @@ public class AgentQueryController {
         todayWrapper.ge(UmsMember::getCreateTime, todayStart);
         long newMembersToday = memberMapper.selectCount(todayWrapper);
 
-        LambdaQueryWrapper<UmsMember> activeWrapper = new LambdaQueryWrapper<>();
-        activeWrapper.isNotNull(UmsMember::getLoginTime);
-        activeWrapper.ge(UmsMember::getLoginTime, todayStart);
-        long activeMembers = memberMapper.selectCount(activeWrapper);
-
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("totalMembers", totalMembers);
         result.put("newMembersToday", newMembersToday);
-        result.put("activeMembers", activeMembers);
         return CommonResult.success(result);
     }
 
@@ -412,7 +407,6 @@ public class AgentQueryController {
             item.put("email", a.getEmail());
             item.put("status", a.getStatus());
             item.put("createTime", a.getCreateTime());
-            item.put("loginTime", a.getLoginTime());
             return item;
         }).collect(Collectors.toList());
 

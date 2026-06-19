@@ -1,5 +1,6 @@
 package com.su.mall.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -52,6 +53,7 @@ public class SmsCoupon implements Serializable {
     private Integer receiveCount;
 
     @Schema(title = "可以领取的日期")
+    @JsonFormat(timezone = "Asia/Shanghai")
     private Date enableTime;
 
     @Schema(title = "优惠码")

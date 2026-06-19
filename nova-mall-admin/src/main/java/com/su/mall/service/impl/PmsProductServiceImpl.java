@@ -235,10 +235,13 @@ public class PmsProductServiceImpl implements PmsProductService {
             countWrapper.eq(PmsProduct::getVerifyStatus, productQueryParam.getVerifyStatus());
         }
         if (!StrUtil.isEmpty(productQueryParam.getKeyword())) {
-            countWrapper.like(PmsProduct::getName, productQueryParam.getKeyword());
+            // keyword 同时按商品名称和货号进行模糊查询
+            countWrapper.and(w -> w.like(PmsProduct::getName, productQueryParam.getKeyword())
+                    .or()
+                    .like(PmsProduct::getProductSn, productQueryParam.getKeyword()));
         }
         if (!StrUtil.isEmpty(productQueryParam.getProductSn())) {
-            countWrapper.eq(PmsProduct::getProductSn, productQueryParam.getProductSn());
+            countWrapper.like(PmsProduct::getProductSn, productQueryParam.getProductSn());
         }
         if (productQueryParam.getBrandId() != null) {
             countWrapper.eq(PmsProduct::getBrandId, productQueryParam.getBrandId());
@@ -260,10 +263,13 @@ public class PmsProductServiceImpl implements PmsProductService {
             wrapper.eq(PmsProduct::getVerifyStatus, productQueryParam.getVerifyStatus());
         }
         if (!StrUtil.isEmpty(productQueryParam.getKeyword())) {
-            wrapper.like(PmsProduct::getName, productQueryParam.getKeyword());
+            // keyword 同时按商品名称和货号进行模糊查询
+            wrapper.and(w -> w.like(PmsProduct::getName, productQueryParam.getKeyword())
+                    .or()
+                    .like(PmsProduct::getProductSn, productQueryParam.getKeyword()));
         }
         if (!StrUtil.isEmpty(productQueryParam.getProductSn())) {
-            wrapper.eq(PmsProduct::getProductSn, productQueryParam.getProductSn());
+            wrapper.like(PmsProduct::getProductSn, productQueryParam.getProductSn());
         }
         if (productQueryParam.getBrandId() != null) {
             wrapper.eq(PmsProduct::getBrandId, productQueryParam.getBrandId());

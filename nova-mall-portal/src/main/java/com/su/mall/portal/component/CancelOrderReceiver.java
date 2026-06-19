@@ -20,7 +20,11 @@ public class CancelOrderReceiver {
     private final OmsPortalOrderService portalOrderService;
     @RabbitHandler
     public void handle(Long orderId){
-        portalOrderService.cancelOrder(orderId);
-        LOGGER.info("process orderId:{}",orderId);
+        try {
+            portalOrderService.cancelOrder(orderId);
+            LOGGER.info("process orderId:{}",orderId);
+        } catch (Exception e) {
+            LOGGER.info("Order {} has been processed or does not exist, skip cancel: {}", orderId, e.getMessage());
+        }
     }
 }

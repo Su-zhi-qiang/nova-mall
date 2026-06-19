@@ -12,7 +12,7 @@ spring:
       matching-strategy: ant_path_matcher
   jackson:
     time-zone: Asia/Shanghai
-    date-format: yyyy-MM-dd HH:mm:ss
+    default-property-inclusion: non_null
 
 # MyBatis-Plus配置
 mybatis-plus:
