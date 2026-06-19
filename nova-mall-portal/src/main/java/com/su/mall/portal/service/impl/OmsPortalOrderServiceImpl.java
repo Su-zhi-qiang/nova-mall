@@ -473,7 +473,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     public void cancelOrder(Long orderId) {
         OmsOrder order = orderMapper.selectById(orderId);
         if (order == null || order.getDeleteStatus() == 1) {
-            return;
+            Asserts.fail("订单不存在！");
         }
         Long memberId = order.getMemberId();
         List<OmsOrder> cancelOrderList = orderMapper.selectList(
@@ -483,7 +483,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
                         .in(OmsOrder::getStatus, 0, 1)
                         .eq(OmsOrder::getDeleteStatus, 0));
         if (CollectionUtils.isEmpty(cancelOrderList)) {
-            return;
+            Asserts.fail("该订单状态不支持取消！");
         }
         OmsOrder cancelOrder = cancelOrderList.get(0);
         if (cancelOrder != null) {
