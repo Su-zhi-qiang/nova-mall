@@ -73,4 +73,11 @@ public class UmsMemberCouponController {
         List<SmsCoupon> couponHistoryList = memberCouponService.listByProduct(productId);
         return CommonResult.success(couponHistoryList);
     }
+
+    @Operation(summary = "获取可领取的优惠券列表")
+    @RequestMapping(value = "/available", method = RequestMethod.GET)
+    public CommonResult<List<SmsCoupon>> listAvailable() {
+        List<SmsCoupon> couponList = memberCouponService.listAvailable();
+        return CommonResult.success(couponList);
+    }
 }

@@ -244,6 +244,60 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
         return couponHistoryDao.getCouponList(member.getId(),useStatus);
     }
 
+    @Override
+    public List<SmsCoupon> listAvailable() {
+        UmsMember currentMember = memberService.getCurrentMember();
+        Date now = new Date();
+        
+        // 查询所有优惠券（先不做严格过滤，看看数据情况）
+        LambdaQueryWrapper<SmsCoupon> wrapper = new LambdaQueryWrapper<>();
+        
+        List<SmsCoupon> allCoupons = couponMapper.selectList(wrapper);
+        System.out.println("[CouponDebug] 所有优惠券数量: " + allCoupons.size());
+        
+        for (SmsCoupon coupon : allCoupons) {
+            System.out.println("[CouponDebug] 优惠券: id=" + coupon.getId() + ", name=" + coupon.getName() 
+                    + ", type=" + coupon.getType() + ", count=" + coupon.getCount()
+                    + ", perLimit=" + coupon.getPerLimit() + ", enableTime=" + coupon.getEnableTime()
+                    + ", startTime=" + coupon.getStartTime() + ", endTime=" + coupon.getEndTime()
+                    + ", platform=" + coupon.getPlatform());
+        }
+        
+        // 仅返回用户可主动领取的优惠券：全场赠券(0) 或 会员赠券(1)
+        wrapper.in(SmsCoupon::getType, 0, 1);
+        // 允许count为null或大于0
+        wrapper.and(w -> w.isNull(SmsCoupon::getCount).or().gt(SmsCoupon::getCount, 0));
+        // 允许enableTime为null或已到时间
+        wrapper.and(w -> w.isNull(SmsCoupon::getEnableTime).or().le(SmsCoupon::getEnableTime, now));
+        // startTime可为空表示无限制
+        wrapper.and(w -> w.isNull(SmsCoupon::getStartTime).or().le(SmsCoupon::getStartTime, now));
+        // 允许endTime为null或未过期
+        wrapper.and(w -> w.isNull(SmsCoupon::getEndTime).or().gt(SmsCoupon::getEndTime, now));
+        // 平台兼容：全平台(0) 或 移动端(1)
+        wrapper.in(SmsCoupon::getPlatform, 0, 1);
+        
+        List<SmsCoupon> filteredCoupons = couponMapper.selectList(wrapper);
+        System.out.println("[CouponDebug] 过滤后数量: " + filteredCoupons.size());
+        
+        // 过滤掉用户已达到领取上限的优惠券
+        List<SmsCoupon> availableCoupons = new ArrayList<>();
+        for (SmsCoupon coupon : filteredCoupons) {
+            long receivedCount = couponHistoryMapper.selectCount(
+                    new LambdaQueryWrapper<SmsCouponHistory>()
+                            .eq(SmsCouponHistory::getCouponId, coupon.getId())
+                            .eq(SmsCouponHistory::getMemberId, currentMember.getId()));
+            if (receivedCount < coupon.getPerLimit()) {
+                availableCoupons.add(coupon);
+                System.out.println("[CouponDebug] 保留可领取: id=" + coupon.getId() + ", name=" + coupon.getName() + ", received=" + receivedCount + ", perLimit=" + coupon.getPerLimit());
+            } else {
+                System.out.println("[CouponDebug] 过滤已达上限: id=" + coupon.getId() + ", name=" + coupon.getName() + ", received=" + receivedCount + ", perLimit=" + coupon.getPerLimit());
+            }
+        }
+        
+        System.out.println("[CouponDebug] 最终可领取数量: " + availableCoupons.size());
+        return availableCoupons;
+    }
+
     private BigDecimal calcTotalAmount(List<CartPromotionItem> cartItemList) {
         BigDecimal total = new BigDecimal("0");
         for (CartPromotionItem item : cartItemList) {

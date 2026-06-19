@@ -38,4 +38,9 @@ public interface UmsMemberCouponService {
      * 获取用户优惠券列表
      */
     List<SmsCoupon> list(Integer useStatus);
+
+    /**
+     * 获取可领取的优惠券列表（用户尚未领取或未达到领取上限的优惠券）
+     */
+    List<SmsCoupon> listAvailable();
 }
