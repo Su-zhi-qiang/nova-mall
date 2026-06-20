@@ -332,11 +332,13 @@ public class AgentQueryController {
             item.put("name", c.getName());
             item.put("amount", c.getAmount());
             item.put("publishCount", c.getPublishCount());
-            item.put("useCount", c.getUseCount());
+            item.put("useCount", c.getUseCount() != null ? c.getUseCount() : 0);
             item.put("receiveCount", c.getReceiveCount());
-            int usageRate = (c.getPublishCount() != null && c.getPublishCount() > 0)
-                    ? (c.getUseCount() * 100 / c.getPublishCount()) : 0;
-            item.put("usageRate", usageRate + "%");
+            // 使用率 = 使用量 / 发放量 * 100，保留1位小数
+            int useCount = c.getUseCount() != null ? c.getUseCount() : 0;
+            int publishCount = c.getPublishCount() != null ? c.getPublishCount() : 0;
+            double usageRate = (publishCount > 0) ? (useCount * 100.0 / publishCount) : 0;
+            item.put("usageRate", String.format("%.1f%%", usageRate));
             return item;
         }).collect(Collectors.toList());
 

@@ -46,6 +46,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     private final OmsOrderMapper orderMapper;
     private final PortalOrderItemDao orderItemDao;
     private final SmsCouponHistoryMapper couponHistoryMapper;
+    private final SmsCouponMapper couponMapper;
     private final RedisService redisService;
     private final SmsFlashPromotionProductRelationMapper flashPromotionProductRelationMapper;
     @Value("${redis.key.orderId}")
@@ -249,7 +250,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         orderItemDao.insertList(orderItemList);
         //如使用优惠券更新优惠券使用状态
         if (orderParam.getCouponId() != null) {
-            updateCouponStatus(orderParam.getCouponId(), currentMember.getId(), 1);
+            updateCouponStatus(orderParam.getCouponId(), currentMember.getId(), 1, order.getId(), order.getOrderSn());
         }
         //如使用积分需要扣除积分
         if (orderParam.getUseIntegration() != null) {
@@ -455,8 +456,8 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
             portalOrderDao.releaseSkuStockLock(timeOutOrder.getOrderItemList());
             //恢复秒杀商品库存和已售数量
             restoreFlashStock(timeOutOrder.getOrderItemList());
-            //修改优惠券使用状态
-            updateCouponStatus(timeOutOrder.getCouponId(), timeOutOrder.getMemberId(), 0);
+            //修改优惠券使用状态（恢复为未使用）
+            updateCouponStatus(timeOutOrder.getCouponId(), timeOutOrder.getMemberId(), 0, null, null);
             //返还使用积分
             if (timeOutOrder.getUseIntegration() != null) {
                 UmsMember member = memberService.getById(timeOutOrder.getMemberId());
@@ -506,8 +507,8 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
                 //恢复秒杀商品库存和已售数量
                 restoreFlashStock(orderItemList);
             }
-            //修改优惠券使用状态
-            updateCouponStatus(cancelOrder.getCouponId(), cancelOrder.getMemberId(), 0);
+            //修改优惠券使用状态（恢复为未使用）
+            updateCouponStatus(cancelOrder.getCouponId(), cancelOrder.getMemberId(), 0, null, null);
             //返还使用积分
             if (cancelOrder.getUseIntegration() != null) {
                 UmsMember returnMember = memberService.getById(cancelOrder.getMemberId());
@@ -700,6 +701,13 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
      * 将优惠券信息更改为指定状态
      */
     private void updateCouponStatus(Long couponId, Long memberId, Integer useStatus) {
+        updateCouponStatus(couponId, memberId, useStatus, null, null);
+    }
+
+    /**
+     * 将优惠券信息更改为指定状态（带订单编号）
+     */
+    private void updateCouponStatus(Long couponId, Long memberId, Integer useStatus, Long orderId, String orderSn) {
         if (couponId == null) {
             return;
         }
@@ -710,9 +718,38 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
                         .eq(SmsCouponHistory::getUseStatus, useStatus == 0 ? 1 : 0));
         if (!CollectionUtils.isEmpty(couponHistoryList)) {
             SmsCouponHistory couponHistory = couponHistoryList.get(0);
-            couponHistory.setUseTime(new Date());
-            couponHistory.setUseStatus(useStatus);
+            if (useStatus == 1) {
+                // 使用优惠券
+                couponHistory.setUseTime(new Date());
+                couponHistory.setUseStatus(useStatus);
+                couponHistory.setOrderId(orderId);
+                couponHistory.setOrderSn(orderSn);
+            } else {
+                // 取消使用，恢复为未使用状态，清除订单编号
+                couponHistory.setUseStatus(useStatus);
+                couponHistory.setOrderId(null);
+                couponHistory.setOrderSn(null);
+            }
             couponHistoryMapper.updateById(couponHistory);
+            // 更新优惠券的使用数量统计
+            updateCouponUseCount(couponId, useStatus);
+        }
+    }
+
+    /**
+     * 更新优惠券的使用数量统计
+     */
+    private void updateCouponUseCount(Long couponId, Integer useStatus) {
+        SmsCoupon coupon = couponMapper.selectById(couponId);
+        if (coupon != null) {
+            if (useStatus == 1) {
+                // 使用优惠券，useCount+1
+                coupon.setUseCount(coupon.getUseCount() == null ? 1 : coupon.getUseCount() + 1);
+            } else {
+                // 取消使用，useCount-1
+                coupon.setUseCount(coupon.getUseCount() == null ? 0 : Math.max(0, coupon.getUseCount() - 1));
+            }
+            couponMapper.updateById(coupon);
         }
     }
 
