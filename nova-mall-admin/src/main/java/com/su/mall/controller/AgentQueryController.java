@@ -6,6 +6,8 @@ import com.su.mall.common.api.CommonResult;
 import com.su.mall.dto.OmsOrderDetail;
 import com.su.mall.dto.OmsOrderQueryParam;
 import com.su.mall.dto.PmsProductQueryParam;
+import com.su.mall.mapper.OmsOrderMapper;
+import com.su.mall.mapper.OmsOrderReturnApplyMapper;
 import com.su.mall.mapper.UmsMemberMapper;
 import com.su.mall.model.*;
 import com.su.mall.service.*;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,10 +35,12 @@ public class AgentQueryController {
 
     private final PmsProductService productService;
     private final OmsOrderService orderService;
+    private final OmsOrderMapper orderMapper;
     private final UmsMemberMapper memberMapper;
     private final UmsAdminService adminService;
     private final UmsRoleService roleService;
     private final SmsCouponService couponService;
+    private final OmsOrderReturnApplyMapper returnApplyMapper;
 
     // ==================== 商品查询 ====================
 
@@ -439,5 +444,162 @@ public class AgentQueryController {
         result.put("list", list);
         result.put("total", list.size());
         return CommonResult.success(result);
+    }
+
+    // ==================== Dashboard统计 ====================
+
+    @Operation(summary = "Dashboard首页统计")
+    @GetMapping("/dashboard")
+    public CommonResult<Map<String, Object>> getDashboard() {
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        // 获取所有订单（包括已删除的软删除订单）
+        List<OmsOrder> allOrders = orderMapper.selectList(null);
+
+        // 今日时间范围
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR_OF_DAY, 0);
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+        today.set(Calendar.MILLISECOND, 0);
+        Date todayStart = today.getTime();
+
+        // 昨日时间范围
+        Calendar yesterday = Calendar.getInstance();
+        yesterday.add(Calendar.DAY_OF_MONTH, -1);
+        yesterday.set(Calendar.HOUR_OF_DAY, 0);
+        yesterday.set(Calendar.MINUTE, 0);
+        yesterday.set(Calendar.SECOND, 0);
+        yesterday.set(Calendar.MILLISECOND, 0);
+        Date yesterdayStart = yesterday.getTime();
+
+        // 今日订单统计
+        List<OmsOrder> todayOrders = allOrders.stream()
+                .filter(o -> o.getCreateTime() != null && !o.getCreateTime().before(todayStart))
+                .collect(Collectors.toList());
+        long todayOrderCount = todayOrders.size();
+
+        // 今日销售额
+        BigDecimal todaySales = todayOrders.stream()
+                .map(OmsOrder::getPayAmount)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // 昨日销售额
+        BigDecimal yesterdaySales = allOrders.stream()
+                .filter(o -> o.getCreateTime() != null && !o.getCreateTime().before(yesterdayStart) && o.getCreateTime().before(todayStart))
+                .map(OmsOrder::getPayAmount)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // 各状态订单数（所有订单，用于待处理事务统计）
+        Map<Integer, Long> allStatusCount = allOrders.stream()
+                .filter(o -> o.getStatus() != null)
+                .collect(Collectors.groupingBy(OmsOrder::getStatus, Collectors.counting()));
+
+        result.put("todayOrderCount", todayOrderCount);
+        result.put("todaySales", todaySales);
+        result.put("yesterdaySales", yesterdaySales);
+        result.put("pendingPayment", allStatusCount.getOrDefault(0, 0L));  // 待付款
+        result.put("pendingShipment", allStatusCount.getOrDefault(1, 0L)); // 待发货
+        result.put("shipped", allStatusCount.getOrDefault(2, 0L));        // 已发货
+        result.put("completed", allStatusCount.getOrDefault(3, 0L));      // 已完成
+
+        // 商品统计
+        PmsProductQueryParam productParam = new PmsProductQueryParam();
+        Page<PmsProduct> productPage = productService.listPage(productParam, 10000, 1);
+        List<PmsProduct> allProducts = productPage.getRecords();
+        long totalProducts = productPage.getTotal();
+        long onSale = allProducts.stream().filter(p -> p.getPublishStatus() != null && p.getPublishStatus() == 1).count();
+        long offSale = allProducts.stream().filter(p -> p.getPublishStatus() != null && p.getPublishStatus() == 0).count();
+        long lowStock = allProducts.stream().filter(p -> p.getStock() != null && p.getStock() <= 10).count();
+
+        result.put("totalProducts", totalProducts);
+        result.put("onSaleProducts", onSale);
+        result.put("offSaleProducts", offSale);
+        result.put("lowStockProducts", lowStock);
+
+        // 会员统计
+        long totalMembers = memberMapper.selectCount(null);
+
+        Calendar todayMember = Calendar.getInstance();
+        todayMember.set(Calendar.HOUR_OF_DAY, 0);
+        todayMember.set(Calendar.MINUTE, 0);
+        todayMember.set(Calendar.SECOND, 0);
+        todayMember.set(Calendar.MILLISECOND, 0);
+        LambdaQueryWrapper<UmsMember> todayMemberWrapper = new LambdaQueryWrapper<>();
+        todayMemberWrapper.ge(UmsMember::getCreateTime, todayMember.getTime());
+        long newMembersToday = memberMapper.selectCount(todayMemberWrapper);
+
+        Calendar yesterdayMember = Calendar.getInstance();
+        yesterdayMember.add(Calendar.DAY_OF_MONTH, -1);
+        yesterdayMember.set(Calendar.HOUR_OF_DAY, 0);
+        yesterdayMember.set(Calendar.MINUTE, 0);
+        yesterdayMember.set(Calendar.SECOND, 0);
+        yesterdayMember.set(Calendar.MILLISECOND, 0);
+        LambdaQueryWrapper<UmsMember> yesterdayMemberWrapper = new LambdaQueryWrapper<>();
+        yesterdayMemberWrapper.ge(UmsMember::getCreateTime, yesterdayMember.getTime());
+        yesterdayMemberWrapper.lt(UmsMember::getCreateTime, todayMember.getTime());
+        long newMembersYesterday = memberMapper.selectCount(yesterdayMemberWrapper);
+
+        Calendar monthStart = Calendar.getInstance();
+        monthStart.set(Calendar.DAY_OF_MONTH, 1);
+        monthStart.set(Calendar.HOUR_OF_DAY, 0);
+        monthStart.set(Calendar.MINUTE, 0);
+        monthStart.set(Calendar.SECOND, 0);
+        monthStart.set(Calendar.MILLISECOND, 0);
+        LambdaQueryWrapper<UmsMember> monthMemberWrapper = new LambdaQueryWrapper<>();
+        monthMemberWrapper.ge(UmsMember::getCreateTime, monthStart.getTime());
+        long newMembersMonth = memberMapper.selectCount(monthMemberWrapper);
+
+        result.put("totalMembers", totalMembers);
+        result.put("newMembersToday", newMembersToday);
+        result.put("newMembersYesterday", newMembersYesterday);
+        result.put("newMembersMonth", newMembersMonth);
+
+        // 退货申请统计（待处理）
+        LambdaQueryWrapper<OmsOrderReturnApply> returnApplyWrapper = new LambdaQueryWrapper<>();
+        returnApplyWrapper.eq(OmsOrderReturnApply::getStatus, 0);
+        long returnApply = returnApplyMapper.selectCount(returnApplyWrapper);
+        result.put("returnApply", returnApply);
+
+        return CommonResult.success(result);
+    }
+
+    @Operation(summary = "Dashboard订单趋势")
+    @GetMapping("/dashboard/order-trend")
+    public CommonResult<List<Map<String, Object>>> getOrderTrend(
+            @RequestParam(defaultValue = "7") int days) {
+        
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_MONTH, -days);
+        Date startDate = cal.getTime();
+
+        // 获取所有订单（包括已删除的软删除订单）
+        List<OmsOrder> allOrders = orderMapper.selectList(null);
+
+        // 按日期分组统计
+        Map<String, int[]> dailyStats = new LinkedHashMap<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        for (OmsOrder order : allOrders) {
+            if (order.getCreateTime() != null && order.getCreateTime().after(startDate)) {
+                String date = sdf.format(order.getCreateTime());
+                dailyStats.computeIfAbsent(date, k -> new int[]{0, 0});
+                dailyStats.get(date)[0]++;
+                dailyStats.get(date)[1] += order.getPayAmount() != null ? order.getPayAmount().intValue() : 0;
+            }
+        }
+
+        List<Map<String, Object>> trend = new ArrayList<>();
+        for (Map.Entry<String, int[]> entry : dailyStats.entrySet()) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("date", entry.getKey());
+            item.put("orderCount", entry.getValue()[0]);
+            item.put("orderAmount", entry.getValue()[1]);
+            trend.add(item);
+        }
+
+        return CommonResult.success(trend);
     }
 }

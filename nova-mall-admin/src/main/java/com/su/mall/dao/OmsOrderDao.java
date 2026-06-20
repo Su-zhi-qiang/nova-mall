@@ -22,7 +22,7 @@ public interface OmsOrderDao {
     /**
      * 批量发货
      */
-    int delivery(@Param("list") List<OmsOrderDeliveryParam> deliveryParamList);
+    int delivery(@Param("list") List<OmsOrderDeliveryParam> deliveryParamList, @Param("deliveryTime") java.util.Date deliveryTime);
 
     /**
      * 获取订单详情（订单信息 + 商品列表 + 操作记录）

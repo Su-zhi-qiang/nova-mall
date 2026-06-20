@@ -1,16 +1,19 @@
 package com.su.mall.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dao.OmsOrderDao;
 import com.su.mall.dao.OmsOrderOperateHistoryDao;
 import com.su.mall.dto.*;
+import com.su.mall.mapper.OmsOrderItemMapper;
 import com.su.mall.mapper.OmsOrderMapper;
 import com.su.mall.mapper.OmsOrderOperateHistoryMapper;
 import com.su.mall.model.OmsOrder;
 import com.su.mall.model.OmsOrderOperateHistory;
 import com.su.mall.service.OmsOrderService;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,7 @@ import java.util.stream.Collectors;
 public class OmsOrderServiceImpl implements OmsOrderService {
     private final OmsOrderMapper orderMapper;
     private final OmsOrderDao orderDao;
+    private final OmsOrderItemMapper omsOrderItemMapper;
     private final OmsOrderOperateHistoryDao orderOperateHistoryDao;
     private final OmsOrderOperateHistoryMapper orderOperateHistoryMapper;
 
@@ -43,8 +47,8 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         if (deliveryParamList == null || deliveryParamList.isEmpty()) {
             return 0;
         }
-        //批量发货
-        int count = orderDao.delivery(deliveryParamList);
+        //批量发货（使用Java时区时间，避免数据库时区不一致）
+        int count = orderDao.delivery(deliveryParamList, new java.util.Date());
         //添加操作记录
         List<OmsOrderOperateHistory> operateHistoryList = deliveryParamList.stream()
                 .map(omsOrderDeliveryParam -> {
@@ -88,12 +92,32 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     @Override
     @Transactional
     public int delete(List<Long> ids) {
-        OmsOrder record = new OmsOrder();
-        record.setDeleteStatus(1);
-        // ✅ 改造：updateByExampleSelective → update + LambdaUpdateWrapper
-        return orderMapper.update(record, new LambdaUpdateWrapper<OmsOrder>()
-                .eq(OmsOrder::getDeleteStatus, 0)
-                .in(OmsOrder::getId, ids));
+        if (ids == null || ids.isEmpty()) {
+            return 0;
+        }
+        
+        // 查询要删除的订单，只允许删除未支付或已关闭的订单
+        List<OmsOrder> orders = orderMapper.selectByIds(ids);
+        List<Long> deletableIds = orders.stream()
+                .filter(o -> o.getStatus() == 0 || o.getStatus() == 4)  // 未支付或已关闭
+                .map(OmsOrder::getId)
+                .collect(java.util.stream.Collectors.toList());
+        
+        if (deletableIds.isEmpty()) {
+            return 0;
+        }
+        
+        // 级联删除关联数据
+        // 1. 删除订单项
+        omsOrderItemMapper.delete(new LambdaQueryWrapper<com.su.mall.model.OmsOrderItem>()
+                .in(com.su.mall.model.OmsOrderItem::getOrderId, deletableIds));
+        
+        // 2. 删除操作历史
+        orderOperateHistoryMapper.delete(new LambdaQueryWrapper<OmsOrderOperateHistory>()
+                .in(OmsOrderOperateHistory::getOrderId, deletableIds));
+        
+        // 3. 硬删除订单
+        return orderMapper.deleteByIds(deletableIds);
     }
 
     @Override
@@ -104,16 +128,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     @Override
     @Transactional
     public int updateReceiverInfo(OmsReceiverInfoParam receiverInfoParam) {
-        OmsOrder order = new OmsOrder();
-        order.setId(receiverInfoParam.getOrderId());
-        order.setReceiverName(receiverInfoParam.getReceiverName());
-        order.setReceiverPhone(receiverInfoParam.getReceiverPhone());
-        order.setReceiverPostCode(receiverInfoParam.getReceiverPostCode());
-        order.setReceiverDetailAddress(receiverInfoParam.getReceiverDetailAddress());
-        order.setReceiverProvince(receiverInfoParam.getReceiverProvince());
-        order.setReceiverCity(receiverInfoParam.getReceiverCity());
-        order.setReceiverRegion(receiverInfoParam.getReceiverRegion());
-        order.setModifyTime(new Date());
+        OmsOrder order = getOmsOrder(receiverInfoParam);
         // ✅ 改造：updateByPrimaryKeySelective → updateById
         int count = orderMapper.updateById(order);
         //插入操作记录
@@ -125,6 +140,20 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         history.setNote("修改收货人信息");
         orderOperateHistoryMapper.insert(history);
         return count;
+    }
+
+    private static @NonNull OmsOrder getOmsOrder(OmsReceiverInfoParam receiverInfoParam) {
+        OmsOrder order = new OmsOrder();
+        order.setId(receiverInfoParam.getOrderId());
+        order.setReceiverName(receiverInfoParam.getReceiverName());
+        order.setReceiverPhone(receiverInfoParam.getReceiverPhone());
+        order.setReceiverPostCode(receiverInfoParam.getReceiverPostCode());
+        order.setReceiverDetailAddress(receiverInfoParam.getReceiverDetailAddress());
+        order.setReceiverProvince(receiverInfoParam.getReceiverProvince());
+        order.setReceiverCity(receiverInfoParam.getReceiverCity());
+        order.setReceiverRegion(receiverInfoParam.getReceiverRegion());
+        order.setModifyTime(new Date());
+        return order;
     }
 
     @Override

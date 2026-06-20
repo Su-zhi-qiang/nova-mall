@@ -7,13 +7,19 @@ import com.su.mall.dto.OmsOrderReturnApplyResult;
 import com.su.mall.dto.OmsReturnApplyQueryParam;
 import com.su.mall.dto.OmsUpdateStatusParam;
 import com.su.mall.mapper.OmsOrderItemMapper;
+import com.su.mall.mapper.OmsOrderMapper;
 import com.su.mall.mapper.OmsOrderReturnApplyMapper;
 import com.su.mall.mapper.PmsProductMapper;
 import com.su.mall.mapper.PmsSkuStockMapper;
+import com.su.mall.mapper.SmsCouponHistoryMapper;
+import com.su.mall.mapper.SmsCouponMapper;
+import com.su.mall.model.OmsOrder;
 import com.su.mall.model.OmsOrderItem;
 import com.su.mall.model.OmsOrderReturnApply;
 import com.su.mall.model.PmsProduct;
 import com.su.mall.model.PmsSkuStock;
+import com.su.mall.model.SmsCoupon;
+import com.su.mall.model.SmsCouponHistory;
 import com.su.mall.service.OmsOrderReturnApplyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,6 +41,9 @@ public class OmsOrderReturnApplyServiceImpl implements OmsOrderReturnApplyServic
     private final OmsOrderItemMapper orderItemMapper;
     private final PmsSkuStockMapper skuStockMapper;
     private final PmsProductMapper productMapper;
+    private final SmsCouponHistoryMapper couponHistoryMapper;
+    private final SmsCouponMapper couponMapper;
+    private final OmsOrderMapper orderMapper;
 
     @Override
     public Page<OmsOrderReturnApply> list(OmsReturnApplyQueryParam queryParam, Integer pageSize, Integer pageNum) {
@@ -71,6 +80,7 @@ public class OmsOrderReturnApplyServiceImpl implements OmsOrderReturnApplyServic
             returnApply.setReceiveMan(statusParam.getReceiveMan());
             returnApply.setReceiveNote(statusParam.getReceiveNote());
             restoreStock(id);
+            restoreCoupon(id);  // 退货成功时退还优惠券
         }else if(status.equals(3)){
             returnApply.setId(id);
             returnApply.setStatus(3);
@@ -113,6 +123,45 @@ public class OmsOrderReturnApplyServiceImpl implements OmsOrderReturnApplyServic
                     product.setStock(product.getStock() + item.getProductQuantity());
                     productMapper.updateById(product);
                 }
+            }
+        }
+    }
+
+    /**
+     * 退货完成后退还优惠券
+     */
+    private void restoreCoupon(Long returnApplyId) {
+        OmsOrderReturnApply returnApply = returnApplyMapper.selectById(returnApplyId);
+        if (returnApply == null || returnApply.getOrderId() == null) {
+            return;
+        }
+        
+        // 查询关联的订单
+        OmsOrder order = orderMapper.selectById(returnApply.getOrderId());
+        if (order == null || order.getCouponId() == null) {
+            return; // 订单不存在或未使用优惠券
+        }
+        
+        // 查询优惠券使用记录
+        List<SmsCouponHistory> couponHistoryList = couponHistoryMapper.selectList(
+                new LambdaQueryWrapper<SmsCouponHistory>()
+                        .eq(SmsCouponHistory::getMemberId, order.getMemberId())
+                        .eq(SmsCouponHistory::getCouponId, order.getCouponId())
+                        .eq(SmsCouponHistory::getUseStatus, 1));  // 已使用的
+        
+        if (!CollectionUtils.isEmpty(couponHistoryList)) {
+            SmsCouponHistory couponHistory = couponHistoryList.get(0);
+            couponHistory.setUseStatus(0);  // 恢复为未使用
+            couponHistory.setUseTime(null);
+            couponHistory.setOrderId(null);
+            couponHistory.setOrderSn(null);
+            couponHistoryMapper.updateById(couponHistory);
+            
+            // 更新优惠券使用数量统计
+            SmsCoupon coupon = couponMapper.selectById(order.getCouponId());
+            if (coupon != null) {
+                coupon.setUseCount(coupon.getUseCount() == null ? 0 : Math.max(0, coupon.getUseCount() - 1));
+                couponMapper.updateById(coupon);
             }
         }
     }

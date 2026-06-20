@@ -18,7 +18,7 @@
         FROM
         oms_order
         WHERE
-        delete_status = 0
+        1=1
         <if test="queryParam.orderSn!=null and queryParam.orderSn!=''">
             AND order_sn LIKE concat("%",#{queryParam.orderSn},"%")
         </if>
@@ -55,11 +55,7 @@
             WHEN #{item.orderId} THEN #{item.deliveryCompany}
         </foreach>
         END,
-        delivery_time = CASE id
-        <foreach collection="list" item="item">
-            WHEN #{item.orderId} THEN now()
-        </foreach>
-        END,
+        delivery_time = #{deliveryTime},
         `status` = CASE id
         <foreach collection="list" item="item">
             WHEN #{item.orderId} THEN 2
