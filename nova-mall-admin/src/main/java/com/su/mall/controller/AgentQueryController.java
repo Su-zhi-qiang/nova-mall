@@ -563,6 +563,14 @@ public class AgentQueryController {
         long returnApply = returnApplyMapper.selectCount(returnApplyWrapper);
         result.put("returnApply", returnApply);
 
+        // 本月销售总额（复用上面的monthStart变量）
+        BigDecimal monthSales = allOrders.stream()
+                .filter(o -> o.getCreateTime() != null && !o.getCreateTime().before(monthStart.getTime()))
+                .map(OmsOrder::getPayAmount)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        result.put("monthSales", monthSales);
+
         return CommonResult.success(result);
     }
 
