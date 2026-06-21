@@ -603,6 +603,7 @@ CREATE TABLE `oms_order_return_apply` (
   `receive_man` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL COMMENT '收货人',
   `receive_time` datetime DEFAULT NULL COMMENT '收货时间',
   `receive_note` varchar(500) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL COMMENT '收货备注',
+  `delete_status` int DEFAULT 0 COMMENT '删除状态：0->未删除；1->已删除',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC COMMENT='订单退货申请';
 /*!40101 SET character_set_client = @saved_cs_client */;

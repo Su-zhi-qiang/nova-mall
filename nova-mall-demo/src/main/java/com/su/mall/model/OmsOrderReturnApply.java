@@ -89,6 +89,9 @@ public class OmsOrderReturnApply implements Serializable {
     @Schema(title = "收货备注")
     private String receiveNote;
 
+    @Schema(title = "删除状态：0->未删除；1->已删除")
+    private Integer deleteStatus;
+
     @Serial
     private static final long serialVersionUID = 1L;
 }

@@ -1,22 +1,25 @@
 package com.su.mall.portal.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.mapper.OmsOrderItemMapper;
 import com.su.mall.mapper.OmsOrderMapper;
 import com.su.mall.mapper.OmsOrderReturnApplyMapper;
 import com.su.mall.model.OmsOrder;
 import com.su.mall.model.OmsOrderItem;
 import com.su.mall.model.OmsOrderReturnApply;
+import com.su.mall.model.UmsMember;
 import com.su.mall.portal.domain.OmsOrderReturnApplyParam;
 import com.su.mall.portal.service.UmsMemberService;
 import com.su.mall.portal.service.OmsPortalOrderReturnApplyService;
+import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.exception.Asserts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 订单退货管理Service实现类
@@ -76,5 +79,51 @@ public class OmsPortalOrderReturnApplyServiceImpl implements OmsPortalOrderRetur
         realApply.setCreateTime(new Date());
         realApply.setStatus(0);
         return returnApplyMapper.insert(realApply);
+    }
+
+    @Override
+    public CommonPage<OmsOrderReturnApply> list(Integer pageNum, Integer pageSize) {
+        UmsMember member = memberService.getCurrentMember();
+        Page<OmsOrderReturnApply> page = new Page<>(pageNum, pageSize);
+        page = returnApplyMapper.selectPage(page,
+            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<OmsOrderReturnApply>()
+                .eq(OmsOrderReturnApply::getMemberUsername, member.getUsername())
+                .eq(OmsOrderReturnApply::getDeleteStatus, 0)
+                .orderByDesc(OmsOrderReturnApply::getCreateTime));
+        return CommonPage.restPage(page);
+    }
+
+    @Override
+    public Map<Long, Integer> getReturnStatusByOrderIds(Long memberId) {
+        UmsMember member = memberService.getCurrentMember();
+        List<OmsOrderReturnApply> applies = returnApplyMapper.selectList(
+            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<OmsOrderReturnApply>()
+                .eq(OmsOrderReturnApply::getMemberUsername, member.getUsername())
+                .eq(OmsOrderReturnApply::getDeleteStatus, 0)
+                .in(OmsOrderReturnApply::getStatus, 0, 1));
+        if (CollectionUtils.isEmpty(applies)) {
+            return Collections.emptyMap();
+        }
+        return applies.stream().collect(Collectors.toMap(
+            OmsOrderReturnApply::getOrderId,
+            OmsOrderReturnApply::getStatus,
+            (existing, replacement) -> existing));
+    }
+
+    @Override
+    public int delete(Long id) {
+        UmsMember member = memberService.getCurrentMember();
+        OmsOrderReturnApply apply = returnApplyMapper.selectById(id);
+        if (apply == null) {
+            Asserts.fail("退货申请不存在");
+        }
+        if (!member.getUsername().equals(apply.getMemberUsername())) {
+            Asserts.fail("不能删除他人的退货申请");
+        }
+        if (apply.getStatus() != 2 && apply.getStatus() != 3) {
+            Asserts.fail("只能删除已完成或已拒绝的退货申请");
+        }
+        apply.setDeleteStatus(1);
+        return returnApplyMapper.updateById(apply);
     }
 }
