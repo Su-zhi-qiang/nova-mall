@@ -167,6 +167,7 @@ private OmsCartItem getCartItem(OmsCartItem cartItem) {
         // ✅ 改造：updateByExampleSelective → update(new LambdaQueryWrapper<OmsCartItem>())
         return cartItemMapper.update(record,
                 new LambdaQueryWrapper<OmsCartItem>()
-                        .eq(OmsCartItem::getMemberId, memberId));
+                        .eq(OmsCartItem::getMemberId, memberId)
+                        .eq(OmsCartItem::getDeleteStatus, 0));
     }
 }

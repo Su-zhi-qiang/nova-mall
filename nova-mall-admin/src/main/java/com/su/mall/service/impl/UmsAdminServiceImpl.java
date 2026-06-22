@@ -93,6 +93,8 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         umsAdmin.setPassword(encodePassword);
         // ✅ 改造：insert 替代 insertSelective
         adminMapper.insert(umsAdmin);
+        // ✅ 新增：注册成功后设置缓存
+        getCacheService().setAdmin(umsAdmin);
         umsAdmin.setPassword(null);
         return umsAdmin;
     }

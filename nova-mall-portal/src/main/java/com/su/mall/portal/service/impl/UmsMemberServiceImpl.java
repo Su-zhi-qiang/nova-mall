@@ -106,6 +106,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         // ✅ 改造：insertSelective → insert
         memberMapper.insert(umsMember);
         umsMember.setPassword(null);
+        memberCacheService.setMember(umsMember);
     }
 
     @Override
