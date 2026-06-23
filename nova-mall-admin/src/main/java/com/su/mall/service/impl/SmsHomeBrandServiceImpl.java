@@ -7,6 +7,7 @@ import com.su.mall.mapper.SmsHomeBrandMapper;
 import com.su.mall.model.SmsHomeBrand;
 import com.su.mall.service.SmsHomeBrandService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +21,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SmsHomeBrandServiceImpl implements SmsHomeBrandService {
     private final SmsHomeBrandMapper homeBrandMapper;
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    private void clearHomeContentCache() {
+        try {
+            redisTemplate.delete("home:content");
+        } catch (Exception e) {
+            // 缓存清除失败不影响业务
+        }
+    }
     @Override
     public int create(List<SmsHomeBrand> homeBrandList) {
         for (SmsHomeBrand smsHomeBrand : homeBrandList) {
@@ -27,38 +37,41 @@ public class SmsHomeBrandServiceImpl implements SmsHomeBrandService {
             smsHomeBrand.setSort(0);
             homeBrandMapper.insert(smsHomeBrand);
         }
+        clearHomeContentCache();
         return homeBrandList.size();
     }
 
     @Override
     public int updateSort(Long id, Integer sort) {
-        // ✅ 改造：updateByPrimaryKeySelective → updateById
         SmsHomeBrand homeBrand = new SmsHomeBrand();
         homeBrand.setId(id);
         homeBrand.setSort(sort);
-        return homeBrandMapper.updateById(homeBrand);
+        int result = homeBrandMapper.updateById(homeBrand);
+        clearHomeContentCache();
+        return result;
     }
 
     @Override
     public int delete(List<Long> ids) {
-        // ✅ 改造：deleteByExample → delete(new LambdaQueryWrapper<>())
-        return homeBrandMapper.delete(new LambdaQueryWrapper<SmsHomeBrand>()
+        int result = homeBrandMapper.delete(new LambdaQueryWrapper<SmsHomeBrand>()
                 .in(SmsHomeBrand::getId, ids));
+        clearHomeContentCache();
+        return result;
     }
 
     @Override
     public int updateRecommendStatus(List<Long> ids, Integer recommendStatus) {
-        // ✅ 改造：updateByExampleSelective → update(new LambdaQueryWrapper<>().in(...))
         SmsHomeBrand record = new SmsHomeBrand();
         record.setRecommendStatus(recommendStatus);
-        return homeBrandMapper.update(record, new LambdaQueryWrapper<SmsHomeBrand>()
+        int result = homeBrandMapper.update(record, new LambdaQueryWrapper<SmsHomeBrand>()
                 .in(SmsHomeBrand::getId, ids));
+        clearHomeContentCache();
+        return result;
     }
 
     @Override
     public Page<SmsHomeBrand> list(String brandName, Integer recommendStatus, Integer pageSize, Integer pageNum) {
         Page<SmsHomeBrand> page = new Page<>(pageNum, pageSize);
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<>())
         LambdaQueryWrapper<SmsHomeBrand> wrapper = new LambdaQueryWrapper<>();
         if(!StrUtil.isEmpty(brandName)){
             wrapper.like(SmsHomeBrand::getBrandName, brandName);

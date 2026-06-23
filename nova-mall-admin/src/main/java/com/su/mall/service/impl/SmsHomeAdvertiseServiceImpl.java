@@ -7,6 +7,7 @@ import com.su.mall.mapper.SmsHomeAdvertiseMapper;
 import com.su.mall.model.SmsHomeAdvertise;
 import com.su.mall.service.SmsHomeAdvertiseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
@@ -23,46 +24,58 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SmsHomeAdvertiseServiceImpl implements SmsHomeAdvertiseService {
     private final SmsHomeAdvertiseMapper advertiseMapper;
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    private void clearHomeContentCache() {
+        try {
+            redisTemplate.delete("home:content");
+        } catch (Exception e) {
+            // 缓存清除失败不影响业务
+        }
+    }
 
     @Override
     public int create(SmsHomeAdvertise advertise) {
         advertise.setClickCount(0);
         advertise.setOrderCount(0);
-        return advertiseMapper.insert(advertise);
+        int result = advertiseMapper.insert(advertise);
+        clearHomeContentCache();
+        return result;
     }
 
     @Override
     public int delete(List<Long> ids) {
-        // ✅ 改造：deleteByExample → delete(new LambdaQueryWrapper<>())
-        return advertiseMapper.delete(new LambdaQueryWrapper<SmsHomeAdvertise>()
+        int result = advertiseMapper.delete(new LambdaQueryWrapper<SmsHomeAdvertise>()
                 .in(SmsHomeAdvertise::getId, ids));
+        clearHomeContentCache();
+        return result;
     }
 
     @Override
     public int updateStatus(Long id, Integer status) {
-        // ✅ 改造：updateByPrimaryKeySelective → updateById
         SmsHomeAdvertise record = new SmsHomeAdvertise();
         record.setId(id);
         record.setStatus(status);
-        return advertiseMapper.updateById(record);
+        int result = advertiseMapper.updateById(record);
+        clearHomeContentCache();
+        return result;
     }
 
     @Override
     public SmsHomeAdvertise getItem(Long id) {
-        // ✅ 改造：selectByPrimaryKey → selectById
         return advertiseMapper.selectById(id);
     }
 
     @Override
     public int update(Long id, SmsHomeAdvertise advertise) {
-        // ✅ 改造：updateByPrimaryKeySelective → updateById
         advertise.setId(id);
-        return advertiseMapper.updateById(advertise);
+        int result = advertiseMapper.updateById(advertise);
+        clearHomeContentCache();
+        return result;
     }
 
     @Override
     public Page<SmsHomeAdvertise> list(String name, Integer type, String endTime, Integer pageSize, Integer pageNum) {
-        // ✅ 改造：使用 MyBatis-Plus 分页
         Page<SmsHomeAdvertise> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<SmsHomeAdvertise> wrapper = new LambdaQueryWrapper<>();
         SmsHomeAdvertise temp = new SmsHomeAdvertise();
@@ -88,7 +101,6 @@ public class SmsHomeAdvertiseServiceImpl implements SmsHomeAdvertiseService {
             wrapper.le(SmsHomeAdvertise::getEndTime, end);
         }
         wrapper.orderByDesc(SmsHomeAdvertise::getSort);
-        // ✅ 改造：selectByExample → selectPage
         return advertiseMapper.selectPage(page, wrapper);
     }
 }

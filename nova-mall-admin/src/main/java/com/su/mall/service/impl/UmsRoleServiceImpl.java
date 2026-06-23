@@ -42,14 +42,12 @@ public class UmsRoleServiceImpl implements UmsRoleService {
     @Transactional
     public int update(Long id, UmsRole role) {
         role.setId(id);
-        // ✅ 改造：updateByPrimaryKeySelective → updateById
         return roleMapper.updateById(role);
     }
 
     @Override
     @Transactional
     public int delete(List<Long> ids) {
-        // ✅ 改造：deleteByExample → delete + LambdaQueryWrapper
         int count = roleMapper.delete(new LambdaQueryWrapper<UmsRole>().in(UmsRole::getId, ids));
         adminCacheService.delResourceListByRoleIds(ids);
         return count;
@@ -57,14 +55,12 @@ public class UmsRoleServiceImpl implements UmsRoleService {
 
     @Override
     public List<UmsRole> list() {
-        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         return roleMapper.selectList(new LambdaQueryWrapper<>());
     }
 
     @Override
     public Page<UmsRole> list(String keyword, Integer pageSize, Integer pageNum) {
         Page<UmsRole> page = new Page<>(pageNum, pageSize);
-        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         LambdaQueryWrapper<UmsRole> wrapper = new LambdaQueryWrapper<>();
         if (!StrUtil.isEmpty(keyword)) {
             wrapper.like(UmsRole::getName, keyword);
@@ -91,7 +87,6 @@ public class UmsRoleServiceImpl implements UmsRoleService {
     @Transactional
     public int allocMenu(Long roleId, List<Long> menuIds) {
         //先删除原有关系
-        // ✅ 改造：deleteByExample → delete + LambdaQueryWrapper
         roleMenuRelationMapper.delete(new LambdaQueryWrapper<UmsRoleMenuRelation>().eq(UmsRoleMenuRelation::getRoleId, roleId));
         //批量插入新关系
         for (Long menuId : menuIds) {
@@ -107,7 +102,6 @@ public class UmsRoleServiceImpl implements UmsRoleService {
     @Transactional
     public int allocResource(Long roleId, List<Long> resourceIds) {
         //先删除原有关系
-        // ✅ 改造：deleteByExample → delete + LambdaQueryWrapper
         roleResourceRelationMapper.delete(new LambdaQueryWrapper<UmsRoleResourceRelation>().eq(UmsRoleResourceRelation::getRoleId, roleId));
         //批量插入新关系
         for (Long resourceId : resourceIds) {

@@ -1,5 +1,7 @@
 package com.su.mall.portal.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
 import com.su.mall.model.SmsCoupon;
 import com.su.mall.model.SmsCouponHistory;
@@ -43,7 +45,8 @@ public class UmsMemberCouponController {
     @Parameter(name = "useStatus", description = "优惠券筛选类型:0->未使用；1->已使用；2->已过期",
             in = ParameterIn.QUERY,schema = @Schema(type = "integer",allowableValues = {"0","1","2"}))
     @RequestMapping(value = "/listHistory", method = RequestMethod.GET)
-    public CommonResult<List<SmsCouponHistory>> listHistory(@RequestParam(value = "useStatus", required = false) Integer useStatus) {
+    public CommonResult<List<SmsCouponHistory>> listHistory(
+            @RequestParam(value = "useStatus", required = false) Integer useStatus) {
         List<SmsCouponHistory> couponHistoryList = memberCouponService.listHistory(useStatus);
         return CommonResult.success(couponHistoryList);
     }
@@ -52,7 +55,8 @@ public class UmsMemberCouponController {
     @Parameter(name = "useStatus", description = "优惠券筛选类型:0->未使用；1->已使用；2->已过期",
             in = ParameterIn.QUERY,schema = @Schema(type = "integer",allowableValues = {"0","1","2"}))
     @RequestMapping(value = "/list", method = RequestMethod.GET)
-    public CommonResult<List<SmsCoupon>> list(@RequestParam(value = "useStatus", required = false) Integer useStatus) {
+    public CommonResult<List<SmsCoupon>> list(
+            @RequestParam(value = "useStatus", required = false) Integer useStatus) {
         List<SmsCoupon> couponList = memberCouponService.list(useStatus);
         return CommonResult.success(couponList);
     }

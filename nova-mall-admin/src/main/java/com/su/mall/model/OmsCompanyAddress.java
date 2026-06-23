@@ -6,6 +6,10 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 公司收发货地址
+ * @author Su
+ */
 @Data
 public class OmsCompanyAddress implements Serializable {
     private Long id;

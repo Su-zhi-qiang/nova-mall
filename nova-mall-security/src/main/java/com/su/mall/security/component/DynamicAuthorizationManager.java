@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ * 动态权限验证管理器，根据资源配置动态判断用户是否有访问权限
+ * @author Su
+ */
 @RequiredArgsConstructor
 public class DynamicAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
 

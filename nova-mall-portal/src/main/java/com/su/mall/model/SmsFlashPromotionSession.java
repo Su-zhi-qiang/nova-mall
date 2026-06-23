@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 限时购场次
+ * @author Su
+ */
 @Data
 public class SmsFlashPromotionSession implements Serializable {
     @Serial

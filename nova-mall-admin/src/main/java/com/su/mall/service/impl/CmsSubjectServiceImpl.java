@@ -22,14 +22,12 @@ public class CmsSubjectServiceImpl implements CmsSubjectService {
 
     @Override
     public List<CmsSubject> listAll() {
-        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         return subjectMapper.selectList(new LambdaQueryWrapper<>());
     }
 
     @Override
     public Page<CmsSubject> list(String keyword, Integer pageNum, Integer pageSize) {
         Page<CmsSubject> page = new Page<>(pageNum, pageSize);
-        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         LambdaQueryWrapper<CmsSubject> wrapper = new LambdaQueryWrapper<>();
         if (!StrUtil.isEmpty(keyword)) {
             wrapper.like(CmsSubject::getTitle, keyword);

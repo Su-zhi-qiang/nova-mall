@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 商品评价
+ * @author Su
+ */
 @Data
 public class PmsComment implements Serializable {
     private Long id;

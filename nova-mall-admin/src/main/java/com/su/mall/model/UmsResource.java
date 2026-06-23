@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 后台资源
+ * @author Su
+ */
 @Data
 public class UmsResource implements Serializable {
     private Long id;

@@ -6,6 +6,10 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 专题分类
+ * @author Su
+ */
 @Data
 public class CmsSubjectCategory implements Serializable {
     private Long id;

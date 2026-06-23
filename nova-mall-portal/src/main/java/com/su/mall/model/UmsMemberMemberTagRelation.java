@@ -5,6 +5,10 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 会员标签关系
+ * @author Su
+ */
 @Data
 public class UmsMemberMemberTagRelation implements Serializable {
     @Serial

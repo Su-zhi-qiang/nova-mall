@@ -77,7 +77,7 @@
             fr.flash_promotion_id,
             fr.flash_promotion_session_id,
             fr.flash_promotion_price,
-            fr.flash_promotion_count,
+            COALESCE(ds.stock, 0) flash_promotion_count,
             fr.flash_promotion_limit
         FROM
             pms_product p
@@ -85,7 +85,6 @@
             LEFT JOIN pms_product_ladder ladder ON p.id = ladder.product_id
             LEFT JOIN pms_product_full_reduction full_re ON p.id = full_re.product_id
             LEFT JOIN sms_flash_promotion_product_relation fr ON p.id = fr.product_id
-                AND fr.flash_promotion_count &gt; 0
                 AND EXISTS (
                     SELECT 1 FROM sms_flash_promotion fp
                     WHERE fp.id = fr.flash_promotion_id
@@ -100,6 +99,7 @@
                     AND fs.start_time &lt;= CURTIME()
                     AND fs.end_time &gt;= CURTIME()
                 )
+            LEFT JOIN sms_flash_promotion_daily_stock ds ON fr.id = ds.relation_id AND ds.batch_date = CURDATE()
         WHERE
             p.id IN
         <foreach collection="ids" open="(" close=")" item="id" separator=",">

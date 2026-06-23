@@ -8,6 +8,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * 商品信息
+ * @author Su
+ */
 @Data
 public class PmsProduct implements Serializable {
     private Long id;

@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+/**
+ * 会员等级
+ * @author Su
+ */
 @Data
 public class UmsMemberLevel implements Serializable {
     private Long id;

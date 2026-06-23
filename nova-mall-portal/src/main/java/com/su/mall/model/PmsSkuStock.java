@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+/**
+ * SKU库存
+ * @author Su
+ */
 @Data
 public class PmsSkuStock implements Serializable {
     private Long id;

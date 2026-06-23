@@ -49,6 +49,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     private final SmsCouponMapper couponMapper;
     private final RedisService redisService;
     private final SmsFlashPromotionProductRelationMapper flashPromotionProductRelationMapper;
+    private final SmsFlashPromotionDailyStockMapper dailyStockMapper;
     @Value("${redis.key.orderId}")
     private String REDIS_KEY_ORDER_ID;
     @Value("${redis.database}")
@@ -116,8 +117,9 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
                     if (relation == null) {
                         Asserts.fail("秒杀活动不存在");
                     }
-                    //秒杀库存校验
-                    if (relation.getFlashPromotionCount() == null || relation.getFlashPromotionCount() < cartPromotionItem.getQuantity()) {
+                    //秒杀库存校验（从每日快照表读取）
+                    Integer dailyStock = dailyStockMapper.getCurrentStock(cartPromotionItem.getFlashPromotionRelationId());
+                    if (dailyStock == null || dailyStock < cartPromotionItem.getQuantity()) {
                         Asserts.fail("秒杀库存不足");
                     }
                     //限购数量校验
@@ -324,18 +326,25 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         int resultCount = 0;
 
         if (fullOrder.getOrderType() != null && fullOrder.getOrderType() == 1) {
-            // 秒杀订单：使用分布式锁防止超卖
-            String lockKey = "flash:lock:" + orderId;
+            // 秒杀订单：按商品维度加锁，防止同一商品并发超卖
+            List<String> acquiredLocks = new ArrayList<>();
             String lockValue = UUID.randomUUID().toString();
             try {
-                Boolean locked = redisService.tryLock(lockKey, lockValue, 30);
-                if (!locked) {
-                    Asserts.fail("当前抢购人数过多，请稍后重试");
-                }
-                // 扣减秒杀库存
+                // 按每个秒杀商品分别加锁
                 for (OmsOrderItem orderItem : orderItemList) {
                     if (orderItem.getFlashPromotionRelationId() != null) {
-                        int result = flashPromotionProductRelationMapper.decreaseStock(
+                        String lockKey = "flash:lock:relation:" + orderItem.getFlashPromotionRelationId();
+                        Boolean locked = redisService.tryLock(lockKey, lockValue, 30);
+                        if (!locked) {
+                            Asserts.fail("当前抢购人数过多，请稍后重试");
+                        }
+                        acquiredLocks.add(lockKey);
+                    }
+                }
+                // 扣减秒杀库存（从每日快照表扣减）
+                for (OmsOrderItem orderItem : orderItemList) {
+                    if (orderItem.getFlashPromotionRelationId() != null) {
+                        int result = dailyStockMapper.decreaseStock(
                                 orderItem.getFlashPromotionRelationId(),
                                 orderItem.getProductQuantity()
                         );
@@ -350,9 +359,12 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
                 // 扣减商品表库存
                 portalOrderDao.updateProductStock(orderItemList);
                 // 清除秒杀列表缓存，确保前端获取最新库存
-                clearFlashPromotionCache();
+                clearFlashPromotionCache(orderItemList);
             } finally {
-                redisService.releaseLock(lockKey, lockValue);
+                // 释放所有已获取的锁
+                for (String lockKey : acquiredLocks) {
+                    redisService.releaseLock(lockKey, lockValue);
+                }
             }
         } else {
             // 普通订单：扣减真实库存，释放锁定库存
@@ -363,7 +375,12 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
 
         // 统一更新销量和清除缓存（消除重复代码）
         updateSalesAndClearCache(orderItemList);
-        
+
+        // 如使用优惠券更新优惠券使用状态为已使用
+        if (fullOrder.getCouponId() != null) {
+            updateCouponStatus(fullOrder.getCouponId(), fullOrder.getMemberId(), 1, fullOrder.getId(), fullOrder.getOrderSn());
+        }
+
         return resultCount;
     }
 
@@ -389,11 +406,17 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     /**
      * 清除秒杀列表缓存（支付成功后调用，确保库存实时更新）
      */
-    private void clearFlashPromotionCache() {
-        // 清除首页秒杀缓存（使用通配符匹配所有场次和小时）
-        Set<String> keys = redisService.keys("home:flashPromotion:*");
-        if (keys != null && !keys.isEmpty()) {
-            redisService.del(keys);
+    private void clearFlashPromotionCache(List<OmsOrderItem> orderItemList) {
+        // 精确删除该订单关联的秒杀活动缓存，避免使用 keys() 通配符
+        for (OmsOrderItem item : orderItemList) {
+            if (item.getFlashPromotionRelationId() != null) {
+                // 通过 relationId 查询关联的活动和场次ID，精确删除缓存
+                SmsFlashPromotionProductRelation relation = flashPromotionProductRelationMapper.selectById(item.getFlashPromotionRelationId());
+                if (relation != null) {
+                    String cacheKey = "home:flashPromotion:" + relation.getFlashPromotionId() + ":" + relation.getFlashPromotionSessionId();
+                    redisService.del(cacheKey);
+                }
+            }
         }
     }
 
@@ -410,7 +433,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     private void restoreFlashStock(List<OmsOrderItem> orderItemList) {
         for (OmsOrderItem orderItem : orderItemList) {
             if (orderItem.getFlashPromotionRelationId() != null) {
-                flashPromotionProductRelationMapper.restoreStock(
+                dailyStockMapper.restoreStock(
                         orderItem.getFlashPromotionRelationId(),
                         orderItem.getProductQuantity()
                 );
@@ -454,8 +477,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         for (OmsOrderDetail timeOutOrder : timeOutOrders) {
             //解除订单商品库存锁定
             portalOrderDao.releaseSkuStockLock(timeOutOrder.getOrderItemList());
-            //恢复秒杀商品库存和已售数量
-            restoreFlashStock(timeOutOrder.getOrderItemList());
+            //注意：未支付订单的秒杀库存无需恢复（库存仅在支付成功时才扣减）
             //修改优惠券使用状态（恢复为未使用）
             updateCouponStatus(timeOutOrder.getCouponId(), timeOutOrder.getMemberId(), 0, null, null);
             //返还使用积分

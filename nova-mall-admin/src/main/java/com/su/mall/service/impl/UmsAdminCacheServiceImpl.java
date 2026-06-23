@@ -55,7 +55,6 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
 
     @Override
     public void delResourceListByRole(Long roleId) {
-        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         List<UmsAdminRoleRelation> relationList = adminRoleRelationMapper.selectList(
                 new LambdaQueryWrapper<UmsAdminRoleRelation>().eq(UmsAdminRoleRelation::getRoleId, roleId));
         if (CollUtil.isNotEmpty(relationList)) {
@@ -67,7 +66,6 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
 
     @Override
     public void delResourceListByRoleIds(List<Long> roleIds) {
-        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         List<UmsAdminRoleRelation> relationList = adminRoleRelationMapper.selectList(
                 new LambdaQueryWrapper<UmsAdminRoleRelation>().in(UmsAdminRoleRelation::getRoleId, roleIds));
         if (CollUtil.isNotEmpty(relationList)) {

@@ -6,6 +6,10 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 话题分类
+ * @author Su
+ */
 @Data
 public class CmsTopicCategory implements Serializable {
     @Serial

@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 积分变化历史
+ * @author Su
+ */
 @Data
 public class UmsIntegrationChangeHistory implements Serializable {
     private Long id;

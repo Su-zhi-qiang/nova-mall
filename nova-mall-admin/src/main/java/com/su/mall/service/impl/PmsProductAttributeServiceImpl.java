@@ -42,17 +42,14 @@ public class PmsProductAttributeServiceImpl implements PmsProductAttributeServic
     public int create(PmsProductAttributeParam pmsProductAttributeParam) {
         PmsProductAttribute pmsProductAttribute = new PmsProductAttribute();
         BeanUtils.copyProperties(pmsProductAttributeParam, pmsProductAttribute);
-        // ✅ 改造：insert 替代 insertSelective
         int count = productAttributeMapper.insert(pmsProductAttribute);
         //新增商品属性以后需要更新商品属性分类数量
-        // ✅ 改造：selectById 替代 selectByPrimaryKey
         PmsProductAttributeCategory pmsProductAttributeCategory = productAttributeCategoryMapper.selectById(pmsProductAttribute.getProductAttributeCategoryId());
         if(pmsProductAttribute.getType()==0){
             pmsProductAttributeCategory.setAttributeCount(pmsProductAttributeCategory.getAttributeCount()+1);
         }else if(pmsProductAttribute.getType()==1){
             pmsProductAttributeCategory.setParamCount(pmsProductAttributeCategory.getParamCount()+1);
         }
-        // ✅ 改造：updateById 替代 updateByPrimaryKey
         productAttributeCategoryMapper.updateById(pmsProductAttributeCategory);
         return count;
     }
@@ -62,25 +59,20 @@ public class PmsProductAttributeServiceImpl implements PmsProductAttributeServic
         PmsProductAttribute pmsProductAttribute = new PmsProductAttribute();
         pmsProductAttribute.setId(id);
         BeanUtils.copyProperties(productAttributeParam, pmsProductAttribute);
-        // ✅ 改造：updateById 替代 updateByPrimaryKeySelective
         return productAttributeMapper.updateById(pmsProductAttribute);
     }
 
     @Override
     public PmsProductAttribute getItem(Long id) {
-        // ✅ 改造：selectById 替代 selectByPrimaryKey
         return productAttributeMapper.selectById(id);
     }
 
     @Override
     public int delete(List<Long> ids) {
         //获取分类
-        // ✅ 改造：selectById 替代 selectByPrimaryKey
         PmsProductAttribute pmsProductAttribute = productAttributeMapper.selectById(ids.get(0));
         Integer type = pmsProductAttribute.getType();
-        // ✅ 改造：selectById 替代 selectByPrimaryKey
         PmsProductAttributeCategory pmsProductAttributeCategory = productAttributeCategoryMapper.selectById(pmsProductAttribute.getProductAttributeCategoryId());
-        // ✅ 改造：delete + LambdaQueryWrapper 替代 deleteByExample
         int count = productAttributeMapper.delete(
             new LambdaQueryWrapper<PmsProductAttribute>().in(PmsProductAttribute::getId, ids)
         );
@@ -98,7 +90,6 @@ public class PmsProductAttributeServiceImpl implements PmsProductAttributeServic
                 pmsProductAttributeCategory.setParamCount(0);
             }
         }
-        // ✅ 改造：updateById 替代 updateByPrimaryKey
         productAttributeCategoryMapper.updateById(pmsProductAttributeCategory);
         return count;
     }

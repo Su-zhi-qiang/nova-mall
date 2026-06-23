@@ -6,6 +6,10 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 商品属性
+ * @author Su
+ */
 @Data
 public class PmsProductAttribute implements Serializable {
     private Long id;

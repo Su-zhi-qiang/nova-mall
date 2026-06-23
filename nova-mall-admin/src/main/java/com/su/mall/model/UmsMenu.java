@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 后台菜单
+ * @author Su
+ */
 @Data
 public class UmsMenu implements Serializable {
     private Long id;

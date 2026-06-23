@@ -32,7 +32,6 @@ public class UmsMemberReceiveAddressServiceImpl implements UmsMemberReceiveAddre
     @Override
     public int delete(Long id) {
         UmsMember currentMember = memberService.getCurrentMember();
-        // ✅ 改造：deleteByExample → delete(new LambdaQueryWrapper<UmsMemberReceiveAddress>())
         return addressMapper.delete(
                 new LambdaQueryWrapper<UmsMemberReceiveAddress>()
                         .eq(UmsMemberReceiveAddress::getMemberId, currentMember.getId())
@@ -50,13 +49,11 @@ public class UmsMemberReceiveAddressServiceImpl implements UmsMemberReceiveAddre
             //先将原来的默认地址去除
             UmsMemberReceiveAddress record= new UmsMemberReceiveAddress();
             record.setDefaultStatus(0);
-            // ✅ 改造：updateByExampleSelective → update(new LambdaQueryWrapper<UmsMemberReceiveAddress>())
             addressMapper.update(record,
                     new LambdaQueryWrapper<UmsMemberReceiveAddress>()
                             .eq(UmsMemberReceiveAddress::getMemberId, currentMember.getId())
                             .eq(UmsMemberReceiveAddress::getDefaultStatus, 1));
         }
-        // ✅ 改造：updateByExampleSelective → update(new LambdaQueryWrapper<UmsMemberReceiveAddress>())
         return addressMapper.update(address,
                 new LambdaQueryWrapper<UmsMemberReceiveAddress>()
                         .eq(UmsMemberReceiveAddress::getMemberId, currentMember.getId())
@@ -66,7 +63,6 @@ public class UmsMemberReceiveAddressServiceImpl implements UmsMemberReceiveAddre
     @Override
     public List<UmsMemberReceiveAddress> list() {
         UmsMember currentMember = memberService.getCurrentMember();
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<UmsMemberReceiveAddress>())
         return addressMapper.selectList(
                 new LambdaQueryWrapper<UmsMemberReceiveAddress>()
                         .eq(UmsMemberReceiveAddress::getMemberId, currentMember.getId()));
@@ -75,7 +71,6 @@ public class UmsMemberReceiveAddressServiceImpl implements UmsMemberReceiveAddre
     @Override
     public UmsMemberReceiveAddress getItem(Long id) {
         UmsMember currentMember = memberService.getCurrentMember();
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<UmsMemberReceiveAddress>())
         List<UmsMemberReceiveAddress> addressList = addressMapper.selectList(
                 new LambdaQueryWrapper<UmsMemberReceiveAddress>()
                         .eq(UmsMemberReceiveAddress::getMemberId, currentMember.getId())

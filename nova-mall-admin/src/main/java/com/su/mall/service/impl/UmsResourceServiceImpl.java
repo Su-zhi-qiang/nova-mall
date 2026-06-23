@@ -31,7 +31,6 @@ public class UmsResourceServiceImpl implements UmsResourceService {
     @Override
     public int update(Long id, UmsResource umsResource) {
         umsResource.setId(id);
-        // ✅ 改造：updateByPrimaryKeySelective → updateById
         int count = resourceMapper.updateById(umsResource);
         adminCacheService.delResourceListByResource(id);
         return count;
@@ -39,13 +38,11 @@ public class UmsResourceServiceImpl implements UmsResourceService {
 
     @Override
     public UmsResource getItem(Long id) {
-        // ✅ 改造：selectByPrimaryKey → selectById
         return resourceMapper.selectById(id);
     }
 
     @Override
     public int delete(Long id) {
-        // ✅ 改造：deleteByPrimaryKey → deleteById
         int count = resourceMapper.deleteById(id);
         adminCacheService.delResourceListByResource(id);
         return count;
@@ -54,7 +51,6 @@ public class UmsResourceServiceImpl implements UmsResourceService {
     @Override
     public Page<UmsResource> list(Long categoryId, String nameKeyword, String urlKeyword, Integer pageSize, Integer pageNum) {
         Page<UmsResource> page = new Page<>(pageNum, pageSize);
-        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         LambdaQueryWrapper<UmsResource> wrapper = new LambdaQueryWrapper<>();
         if(categoryId!=null){
             wrapper.eq(UmsResource::getCategoryId, categoryId);
@@ -70,7 +66,6 @@ public class UmsResourceServiceImpl implements UmsResourceService {
 
     @Override
     public List<UmsResource> listAll() {
-        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         return resourceMapper.selectList(new LambdaQueryWrapper<>());
     }
 }

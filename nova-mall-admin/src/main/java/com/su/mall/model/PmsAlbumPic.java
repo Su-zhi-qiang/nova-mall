@@ -6,6 +6,10 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 商品相册图片
+ * @author Su
+ */
 @Data
 public class PmsAlbumPic implements Serializable {
     private Long id;

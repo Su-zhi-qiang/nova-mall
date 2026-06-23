@@ -62,7 +62,6 @@ public class PmsProductServiceImpl implements PmsProductService {
         int count;
         //创建商品
         productParam.setId(null);
-        // ✅ 改造：insert 替代 insertSelective
         productMapper.insert(productParam);
         //根据促销类型设置价格：会员价格、阶梯价格、满减价格
         Long productId = productParam.getId();
@@ -126,7 +125,6 @@ public class PmsProductServiceImpl implements PmsProductService {
         
         //更新商品信息
         productParam.setId(id);
-        // ✅ 改造：updateById 替代 updateByPrimaryKeySelective
         int updateResult = productMapper.updateById(productParam);
         LOGGER.info("【商品更新】updateById结果: {}", updateResult);
         
@@ -146,29 +144,23 @@ public class PmsProductServiceImpl implements PmsProductService {
         }
         
         //会员价格
-        // ✅ 改造：delete + LambdaQueryWrapper 替代 deleteByExample
         memberPriceMapper.delete(new LambdaQueryWrapper<PmsMemberPrice>().eq(PmsMemberPrice::getProductId, id));
         relateAndInsertList(memberPriceDao, productParam.getMemberPriceList(), id);
         //阶梯价格
-        // ✅ 改造：delete + LambdaQueryWrapper 替代 deleteByExample
         productLadderMapper.delete(new LambdaQueryWrapper<PmsProductLadder>().eq(PmsProductLadder::getProductId, id));
         relateAndInsertList(productLadderDao, productParam.getProductLadderList(), id);
         //满减价格
-        // ✅ 改造：delete + LambdaQueryWrapper 替代 deleteByExample
         productFullReductionMapper.delete(new LambdaQueryWrapper<PmsProductFullReduction>().eq(PmsProductFullReduction::getProductId, id));
         relateAndInsertList(productFullReductionDao, productParam.getProductFullReductionList(), id);
         //修改sku库存信息
         handleUpdateSkuStockList(id, productParam);
         //修改商品参数,添加自定义商品规格
-        // ✅ 改造：delete + LambdaQueryWrapper 替代 deleteByExample
         productAttributeValueMapper.delete(new LambdaQueryWrapper<PmsProductAttributeValue>().eq(PmsProductAttributeValue::getProductId, id));
         relateAndInsertList(productAttributeValueDao, productParam.getProductAttributeValueList(), id);
         //关联专题
-        // ✅ 改造：delete + LambdaQueryWrapper 替代 deleteByExample
         subjectProductRelationMapper.delete(new LambdaQueryWrapper<CmsSubjectProductRelation>().eq(CmsSubjectProductRelation::getProductId, id));
         relateAndInsertList(subjectProductRelationDao, productParam.getSubjectProductRelationList(), id);
         //关联优选
-        // ✅ 改造：delete + LambdaQueryWrapper 替代 deleteByExample
         prefrenceAreaProductRelationMapper.delete(new LambdaQueryWrapper<CmsPrefrenceAreaProductRelation>().eq(CmsPrefrenceAreaProductRelation::getProductId, id));
         relateAndInsertList(prefrenceAreaProductRelationDao, productParam.getPrefrenceAreaProductRelationList(), id);
         count = 1;
@@ -180,12 +172,10 @@ public class PmsProductServiceImpl implements PmsProductService {
         List<PmsSkuStock> currSkuList = productParam.getSkuStockList();
         //当前没有sku直接删除
         if(CollUtil.isEmpty(currSkuList)){
-            // ✅ 改造：delete + LambdaQueryWrapper 替代 deleteByExample
             skuStockMapper.delete(new LambdaQueryWrapper<PmsSkuStock>().eq(PmsSkuStock::getProductId, id));
             return;
         }
         //获取初始sku信息
-        // ✅ 改造：selectList + LambdaQueryWrapper 替代 selectByExample
         List<PmsSkuStock> oriStuList = skuStockMapper.selectList(
             new LambdaQueryWrapper<PmsSkuStock>().eq(PmsSkuStock::getProductId, id)
         );
@@ -205,13 +195,11 @@ public class PmsProductServiceImpl implements PmsProductService {
         //删除sku
         if(CollUtil.isNotEmpty(removeSkuList)){
             List<Long> removeSkuIds = removeSkuList.stream().map(PmsSkuStock::getId).collect(Collectors.toList());
-            // ✅ 改造：deleteByIds 替代 deleteByExample
             skuStockMapper.deleteByIds(removeSkuIds);
         }
         //修改sku
         if(CollUtil.isNotEmpty(updateSkuList)){
             for (PmsSkuStock pmsSkuStock : updateSkuList) {
-                // ✅ 改造：updateById 替代 updateByPrimaryKeySelective
                 skuStockMapper.updateById(pmsSkuStock);
             }
         }
@@ -289,7 +277,6 @@ public class PmsProductServiceImpl implements PmsProductService {
     @Override
     @Transactional
     public int updateVerifyStatus(List<Long> ids, Integer verifyStatus, String detail) {
-        // ✅ 改造：update + LambdaUpdateWrapper 替代 updateByExampleSelective
         PmsProduct product = new PmsProduct();
         product.setVerifyStatus(verifyStatus);
         int count = productMapper.update(
@@ -330,7 +317,6 @@ public class PmsProductServiceImpl implements PmsProductService {
     public int updatePublishStatus(List<Long> ids, Integer publishStatus) {
         LOGGER.info("【商品上架/下架】开始 - ids={}, publishStatus={}", ids, publishStatus);
         
-        // ✅ 改造：update + LambdaUpdateWrapper 替代 updateByExampleSelective
         PmsProduct record = new PmsProduct();
         record.setPublishStatus(publishStatus);
         int count = productMapper.update(
@@ -359,7 +345,6 @@ public class PmsProductServiceImpl implements PmsProductService {
     public int updateRecommendStatus(List<Long> ids, Integer recommendStatus) {
         LOGGER.info("【商品推荐】开始 - ids={}, recommendStatus={}", ids, recommendStatus);
         
-        // ✅ 改造：update + LambdaUpdateWrapper 替代 updateByExampleSelective
         PmsProduct record = new PmsProduct();
         record.setRecommandStatus(recommendStatus);
         int count = productMapper.update(
@@ -388,7 +373,6 @@ public class PmsProductServiceImpl implements PmsProductService {
     public int updateNewStatus(List<Long> ids, Integer newStatus) {
         LOGGER.info("【商品新品】开始 - ids={}, newStatus={}", ids, newStatus);
         
-        // ✅ 改造：update + LambdaUpdateWrapper 替代 updateByExampleSelective
         PmsProduct record = new PmsProduct();
         record.setNewStatus(newStatus);
         int count = productMapper.update(
@@ -418,7 +402,6 @@ public class PmsProductServiceImpl implements PmsProductService {
     public int updateDeleteStatus(List<Long> ids, Integer deleteStatus) {
         LOGGER.info("【商品删除】开始 - ids={}, deleteStatus={}", ids, deleteStatus);
         
-        // ✅ 改造：update + LambdaUpdateWrapper 替代 updateByExampleSelective
         PmsProduct record = new PmsProduct();
         record.setDeleteStatus(deleteStatus);
         int count = productMapper.update(
@@ -445,7 +428,6 @@ public class PmsProductServiceImpl implements PmsProductService {
 
     @Override
     public List<PmsProduct> list(String keyword) {
-        // ✅ 改造：LambdaQueryWrapper 替代 Example（使用链式调用实现 OR 查询）
         LambdaQueryWrapper<PmsProduct> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(PmsProduct::getDeleteStatus, 0)
             .and(!StrUtil.isEmpty(keyword), 

@@ -35,7 +35,6 @@ public class PmsPortalBrandServiceImpl implements PmsPortalBrandService {
 
     @Override
     public PmsBrand detail(Long brandId) {
-        // ✅ 改造：selectByPrimaryKey → selectById
         return brandMapper.selectById(brandId);
     }
 

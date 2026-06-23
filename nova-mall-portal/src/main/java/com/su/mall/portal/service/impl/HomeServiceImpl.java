@@ -38,6 +38,7 @@ public class HomeServiceImpl implements HomeService {
     private final SmsFlashPromotionMapper flashPromotionMapper;
     private final SmsFlashPromotionSessionMapper promotionSessionMapper;
     private final SmsFlashPromotionProductRelationMapper flashPromotionProductRelationMapper;
+    private final SmsFlashPromotionDailyStockMapper dailyStockMapper;
     private final PmsProductMapper productMapper;
     private final PmsProductCategoryMapper productCategoryMapper;
     private final CmsSubjectMapper subjectMapper;
@@ -64,17 +65,6 @@ public class HomeServiceImpl implements HomeService {
         if (cached != null) {
             LOGGER.info("秒杀信息从缓存获取成功，cacheKey: {}", cacheKey);
             return cached;
-        }
-
-        String resetKey = "flash:reset:" + currentActivity.getId() + ":" + currentSession.getId();
-        if (!redisService.hasKey(resetKey)) {
-            try {
-                int resetCount = flashPromotionProductRelationMapper.resetFlashStock(currentActivity.getId(), currentSession.getId());
-                LOGGER.info("场次切换，已重置 {} 个秒杀商品的库存", resetCount);
-            } catch (Exception e) {
-                LOGGER.warn("重置秒杀库存失败（可能 original_count 字段尚未添加）：{}", e.getMessage());
-            }
-            redisService.set(resetKey, "1", 3600);
         }
 
         HomeFlashPromotion result = buildHomeFlashPromotion(currentActivity, currentSession, now);
@@ -121,7 +111,6 @@ public class HomeServiceImpl implements HomeService {
     public Page<PmsProduct> recommendProductList(Integer pageSize, Integer pageNum) {
         // TODO: 2019/1/29 暂时默认推荐所有商品
         Page<PmsProduct> page = new Page<>(pageNum, pageSize);
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<PmsProduct>())
         return productMapper.selectPage(page,
                 new LambdaQueryWrapper<PmsProduct>()
                         .eq(PmsProduct::getDeleteStatus, 0)
@@ -130,7 +119,6 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public List<PmsProductCategory> getProductCateList(Long parentId) {
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<PmsProductCategory>())
         return productCategoryMapper.selectList(
                 new LambdaQueryWrapper<PmsProductCategory>()
                         .eq(PmsProductCategory::getShowStatus, 1)
@@ -184,28 +172,37 @@ public class HomeServiceImpl implements HomeService {
     private HomeFlashPromotion buildHomeFlashPromotion(SmsFlashPromotion activity, SmsFlashPromotionSession session, Date now) {
         HomeFlashPromotion homeFlashPromotion = new HomeFlashPromotion();
 
-        long productCount = flashPromotionProductRelationMapper.selectCount(
+        // 查询该场次下所有商品关联
+        List<SmsFlashPromotionProductRelation> relations = flashPromotionProductRelationMapper.selectList(
             new LambdaQueryWrapper<SmsFlashPromotionProductRelation>()
                 .eq(SmsFlashPromotionProductRelation::getFlashPromotionId, activity.getId())
-                .eq(SmsFlashPromotionProductRelation::getFlashPromotionSessionId, session.getId())
-                .isNotNull(SmsFlashPromotionProductRelation::getFlashPromotionPrice)
-                .gt(SmsFlashPromotionProductRelation::getFlashPromotionCount, 0));
+                .eq(SmsFlashPromotionProductRelation::getFlashPromotionSessionId, session.getId()));
 
-        if (productCount <= 0) {
+        // 过滤出今日有库存的商品（从每日快照表查询）
+        List<SmsFlashPromotionProductRelation> activeRelations = new ArrayList<>();
+        for (SmsFlashPromotionProductRelation relation : relations) {
+            if (relation.getFlashPromotionPrice() == null) continue;
+            Integer dailyStock = dailyStockMapper.getCurrentStock(relation.getId());
+            if (dailyStock != null && dailyStock > 0) {
+                activeRelations.add(relation);
+            }
+        }
+
+        if (activeRelations.isEmpty()) {
             LOGGER.info("活动 {} (ID:{}) 当前场次无有效商品", activity.getTitle(), activity.getId());
             return homeFlashPromotion;
         }
 
-        Date startTimeToday = mergeDateAndTime(0, session.getStartTime());
-        Date endTimeToday = mergeDateAndTime(0, session.getEndTime());
+        Date startTimeToday = DateUtil.mergeDateAndTime(0, session.getStartTime());
+        Date endTimeToday = DateUtil.mergeDateAndTime(0, session.getEndTime());
 
         homeFlashPromotion.setStartTime(startTimeToday);
         homeFlashPromotion.setEndTime(endTimeToday);
 
         SmsFlashPromotionSession nextSession = getNextFlashPromotionSession(now);
         if (nextSession != null) {
-            homeFlashPromotion.setNextStartTime(mergeDateAndTime(1, nextSession.getStartTime()));
-            homeFlashPromotion.setNextEndTime(mergeDateAndTime(1, nextSession.getEndTime()));
+            homeFlashPromotion.setNextStartTime(DateUtil.mergeDateAndTime(1, nextSession.getStartTime()));
+            homeFlashPromotion.setNextEndTime(DateUtil.mergeDateAndTime(1, nextSession.getEndTime()));
         }
 
         List<FlashPromotionProduct> flashProductList = homeDao.getFlashProductList(
@@ -223,8 +220,8 @@ public class HomeServiceImpl implements HomeService {
         if (nextSession != null) {
             Date currTime = DateUtil.getTime(now);
             int dateOffset = nextSession.getStartTime().after(currTime) ? 0 : 1;
-            homeFlashPromotion.setNextStartTime(mergeDateAndTime(dateOffset, nextSession.getStartTime()));
-            homeFlashPromotion.setNextEndTime(mergeDateAndTime(dateOffset, nextSession.getEndTime()));
+            homeFlashPromotion.setNextStartTime(DateUtil.mergeDateAndTime(dateOffset, nextSession.getStartTime()));
+            homeFlashPromotion.setNextEndTime(DateUtil.mergeDateAndTime(dateOffset, nextSession.getEndTime()));
         }
         return homeFlashPromotion;
     }
@@ -245,30 +242,6 @@ public class HomeServiceImpl implements HomeService {
      * @param timeOnlyDate 只有时间部分的 Date（日期部分是1970-01-01）
      * @return 合并后的完整时间
      */
-    private Date mergeDateAndTime(int dateOffset, Date timeOnlyDate) {
-        if (timeOnlyDate == null) {
-            return null;
-        }
-
-        // 获取今天的日期部分
-        Calendar todayCal = Calendar.getInstance();
-        todayCal.setTime(new Date());
-        // 加上偏移量（0=今天，1=明天）
-        todayCal.add(Calendar.DAY_OF_MONTH, dateOffset);
-
-        // 获取时间部分
-        Calendar timeCal = Calendar.getInstance();
-        timeCal.setTime(timeOnlyDate);
-
-        // 合并：日期=今天（或明天），时间=场次时间
-        todayCal.set(Calendar.HOUR_OF_DAY, timeCal.get(Calendar.HOUR_OF_DAY));
-        todayCal.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE));
-        todayCal.set(Calendar.SECOND, timeCal.get(Calendar.SECOND));
-        todayCal.set(Calendar.MILLISECOND, 0);
-
-        return todayCal.getTime();
-    }
-
     //获取下一个场次信息
     private SmsFlashPromotionSession getNextFlashPromotionSession(Date date) {
         // 获取所有启用的场次
@@ -296,7 +269,6 @@ public class HomeServiceImpl implements HomeService {
     }
 
     private List<SmsHomeAdvertise> getHomeAdvertiseList() {
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<SmsHomeAdvertise>())
         return advertiseMapper.selectList(
                 new LambdaQueryWrapper<SmsHomeAdvertise>()
                         .eq(SmsHomeAdvertise::getType, 1)
@@ -317,7 +289,6 @@ public class HomeServiceImpl implements HomeService {
     //根据时间获取秒杀场次
     private SmsFlashPromotionSession getFlashPromotionSession(Date date) {
         Date currTime = DateUtil.getTime(date);
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<SmsFlashPromotionSession>())
         List<SmsFlashPromotionSession> promotionSessionList = promotionSessionMapper.selectList(
                 new LambdaQueryWrapper<SmsFlashPromotionSession>()
                         .eq(SmsFlashPromotionSession::getStatus, 1)  // 只查询启用状态的场次

@@ -6,6 +6,10 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 首页新品推荐
+ * @author Su
+ */
 @Data
 public class SmsHomeNewProduct implements Serializable {
     private Long id;

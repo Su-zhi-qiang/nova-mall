@@ -11,9 +11,12 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * 商品审核记录
+ * @author Su
+ */
 @Data
 @TableName("pms_product_vertify_record")
-// 商品审核记录, 实现Serializable接口是为了方便序列化
 public class PmsProductVerifyRecord implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;

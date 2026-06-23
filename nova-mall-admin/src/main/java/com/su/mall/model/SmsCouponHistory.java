@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 优惠券使用记录
+ * @author Su
+ */
 @Data
 public class SmsCouponHistory implements Serializable {
     private Long id;

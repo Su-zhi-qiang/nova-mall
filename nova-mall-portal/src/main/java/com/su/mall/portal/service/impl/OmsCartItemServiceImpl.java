@@ -3,8 +3,10 @@ package com.su.mall.portal.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.su.mall.mapper.OmsCartItemMapper;
+import com.su.mall.mapper.SmsFlashPromotionMapper;
 import com.su.mall.mapper.SmsFlashPromotionProductRelationMapper;
 import com.su.mall.model.OmsCartItem;
+import com.su.mall.model.SmsFlashPromotion;
 import com.su.mall.model.SmsFlashPromotionProductRelation;
 import com.su.mall.model.UmsMember;
 import com.su.mall.portal.dao.PortalProductDao;
@@ -35,6 +37,8 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
     private final OmsPromotionService promotionService;
     private final UmsMemberService memberService;
     private final SmsFlashPromotionProductRelationMapper flashPromotionProductRelationMapper;
+    private final com.su.mall.mapper.SmsFlashPromotionDailyStockMapper dailyStockMapper;
+    private final com.su.mall.mapper.SmsFlashPromotionMapper flashPromotionMapper;
 
     @Override
     @Transactional
@@ -45,13 +49,22 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
         cartItem.setMemberNickname(currentMember.getNickname());
         cartItem.setDeleteStatus(0);
 
-        // 如果是秒杀商品，自动使用秒杀价
+        // 如果是秒杀商品，校验活动有效性后自动使用秒杀价
         if (cartItem.getFlashPromotionRelationId() != null) {
             SmsFlashPromotionProductRelation flashRelation = flashPromotionProductRelationMapper.selectById(
                     cartItem.getFlashPromotionRelationId());
-            if (flashRelation != null && flashRelation.getFlashPromotionPrice() != null
-                    && flashRelation.getFlashPromotionCount() != null && flashRelation.getFlashPromotionCount() > 0) {
-                cartItem.setPrice(flashRelation.getFlashPromotionPrice());
+            if (flashRelation != null && flashRelation.getFlashPromotionPrice() != null) {
+                // 校验秒杀活动是否在有效期内
+                Date now = new Date();
+                SmsFlashPromotion promotion = flashPromotionMapper.selectById(flashRelation.getFlashPromotionId());
+                if (promotion != null && promotion.getStatus() != null && promotion.getStatus() == 1
+                        && promotion.getStartDate() != null && promotion.getEndDate() != null
+                        && !now.before(promotion.getStartDate()) && !now.after(promotion.getEndDate())) {
+                    Integer dailyStock = dailyStockMapper.getCurrentStock(flashRelation.getId());
+                    if (dailyStock != null && dailyStock > 0) {
+                        cartItem.setPrice(flashRelation.getFlashPromotionPrice());
+                    }
+                }
             }
         }
 
@@ -62,7 +75,6 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
         } else {
             cartItem.setModifyDate(new Date());
             existCartItem.setQuantity(existCartItem.getQuantity() + cartItem.getQuantity());
-            // ✅ 改造：updateByPrimaryKey → updateById
             count = cartItemMapper.updateById(existCartItem);
         }
         return count;
@@ -74,7 +86,6 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
  * @author Su
  */
 private OmsCartItem getCartItem(OmsCartItem cartItem) {
-    // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<OmsCartItem>())
     LambdaQueryWrapper<OmsCartItem> wrapper = new LambdaQueryWrapper<OmsCartItem>()
             .eq(OmsCartItem::getMemberId, cartItem.getMemberId())
             .eq(OmsCartItem::getProductId, cartItem.getProductId())
@@ -97,7 +108,6 @@ private OmsCartItem getCartItem(OmsCartItem cartItem) {
 
     @Override
     public List<OmsCartItem> list(Long memberId) {
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<OmsCartItem>())
         return cartItemMapper.selectList(
                 new LambdaQueryWrapper<OmsCartItem>()
                         .eq(OmsCartItem::getDeleteStatus, 0)
@@ -121,7 +131,6 @@ private OmsCartItem getCartItem(OmsCartItem cartItem) {
     public int updateQuantity(Long id, Long memberId, Integer quantity) {
         OmsCartItem cartItem = new OmsCartItem();
         cartItem.setQuantity(quantity);
-        // ✅ 改造：updateByExampleSelective → update(new LambdaQueryWrapper<OmsCartItem>())
         return cartItemMapper.update(cartItem,
                 new LambdaQueryWrapper<OmsCartItem>()
                         .eq(OmsCartItem::getDeleteStatus, 0)
@@ -133,7 +142,6 @@ private OmsCartItem getCartItem(OmsCartItem cartItem) {
     public int delete(Long memberId, List<Long> ids) {
         OmsCartItem record = new OmsCartItem();
         record.setDeleteStatus(1);
-        // ✅ 改造：updateByExampleSelective → update(new LambdaQueryWrapper<OmsCartItem>())
         return cartItemMapper.update(record,
                 new LambdaQueryWrapper<OmsCartItem>()
                         .in(OmsCartItem::getId, ids)
@@ -153,7 +161,6 @@ private OmsCartItem getCartItem(OmsCartItem cartItem) {
         updateCart.setId(cartItem.getId());
         updateCart.setModifyDate(new Date());
         updateCart.setDeleteStatus(1);
-        // ✅ 改造：updateByPrimaryKeySelective → updateById
         cartItemMapper.updateById(updateCart);
         cartItem.setId(null);
         add(cartItem);
@@ -164,7 +171,6 @@ private OmsCartItem getCartItem(OmsCartItem cartItem) {
     public int clear(Long memberId) {
         OmsCartItem record = new OmsCartItem();
         record.setDeleteStatus(1);
-        // ✅ 改造：updateByExampleSelective → update(new LambdaQueryWrapper<OmsCartItem>())
         return cartItemMapper.update(record,
                 new LambdaQueryWrapper<OmsCartItem>()
                         .eq(OmsCartItem::getMemberId, memberId)

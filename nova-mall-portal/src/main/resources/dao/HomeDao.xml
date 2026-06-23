@@ -15,7 +15,7 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <!-- 获取秒杀商品列表 - 使用 resultType 让 MyBatis-Plus 自动做驼峰映射 -->
+    <!-- 获取秒杀商品列表 - 从每日快照表读取库存 -->
     <select id="getFlashProductList" resultType="com.su.mall.portal.domain.FlashPromotionProduct">
         SELECT
             p.*,
@@ -23,18 +23,19 @@
             pr.flash_promotion_id,
             pr.flash_promotion_session_id,
             pr.flash_promotion_price,
-            pr.flash_promotion_count,
+            ds.stock flash_promotion_count,
             pr.flash_promotion_limit,
             pr.original_count flash_promotion_original_count,
-            pr.flash_promotion_sold flash_promotion_sold
+            ds.sold flash_promotion_sold
         FROM
             sms_flash_promotion_product_relation pr
             LEFT JOIN pms_product p ON pr.product_id = p.id
+            LEFT JOIN sms_flash_promotion_daily_stock ds ON pr.id = ds.relation_id AND ds.batch_date = CURDATE()
         WHERE
             pr.flash_promotion_id = #{flashPromotionId}
             AND pr.flash_promotion_session_id = #{sessionId}
             AND pr.flash_promotion_price IS NOT NULL
-            AND pr.flash_promotion_count > 0
+            AND COALESCE(ds.stock, 0) > 0
             AND p.delete_status = 0
             AND p.publish_status = 1
         ORDER BY

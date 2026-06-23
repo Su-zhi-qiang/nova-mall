@@ -20,7 +20,6 @@ public class UmsMemberLevelServiceImpl implements UmsMemberLevelService {
     
     @Override
     public List<UmsMemberLevel> list(Integer defaultStatus) {
-        // ✅ 改造：LambdaQueryWrapper 替代 Example
         LambdaQueryWrapper<UmsMemberLevel> wrapper = new LambdaQueryWrapper<>();
         if (defaultStatus != null) {
             wrapper.eq(UmsMemberLevel::getDefaultStatus, defaultStatus);

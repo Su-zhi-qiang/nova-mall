@@ -6,6 +6,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 帮助信息
+ * @author Su
+ */
 @Data
 public class CmsHelp implements Serializable {
     @Serial

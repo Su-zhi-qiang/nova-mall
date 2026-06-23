@@ -7,6 +7,7 @@ import com.su.mall.mapper.SmsHomeRecommendSubjectMapper;
 import com.su.mall.model.SmsHomeRecommendSubject;
 import com.su.mall.service.SmsHomeRecommendSubjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +21,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SmsHomeRecommendSubjectServiceImpl implements SmsHomeRecommendSubjectService {
     private final SmsHomeRecommendSubjectMapper smsHomeRecommendSubjectMapper;
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    private void clearHomeContentCache() {
+        try {
+            redisTemplate.delete("home:content");
+        } catch (Exception e) {
+            // 缓存清除失败不影响业务
+        }
+    }
     @Override
     public int create(List<SmsHomeRecommendSubject> recommendSubjectList) {
         for (SmsHomeRecommendSubject recommendSubject : recommendSubjectList) {
@@ -27,38 +37,41 @@ public class SmsHomeRecommendSubjectServiceImpl implements SmsHomeRecommendSubje
             recommendSubject.setSort(0);
             smsHomeRecommendSubjectMapper.insert(recommendSubject);
         }
+        clearHomeContentCache();
         return recommendSubjectList.size();
     }
 
     @Override
     public int updateSort(Long id, Integer sort) {
-        // ✅ 改造：updateByPrimaryKeySelective → updateById
         SmsHomeRecommendSubject recommendSubject = new SmsHomeRecommendSubject();
         recommendSubject.setId(id);
         recommendSubject.setSort(sort);
-        return smsHomeRecommendSubjectMapper.updateById(recommendSubject);
+        int result = smsHomeRecommendSubjectMapper.updateById(recommendSubject);
+        clearHomeContentCache();
+        return result;
     }
 
     @Override
     public int delete(List<Long> ids) {
-        // ✅ 改造：deleteByExample → delete(new LambdaQueryWrapper<>())
-        return smsHomeRecommendSubjectMapper.delete(new LambdaQueryWrapper<SmsHomeRecommendSubject>()
+        int result = smsHomeRecommendSubjectMapper.delete(new LambdaQueryWrapper<SmsHomeRecommendSubject>()
                 .in(SmsHomeRecommendSubject::getId, ids));
+        clearHomeContentCache();
+        return result;
     }
 
     @Override
     public int updateRecommendStatus(List<Long> ids, Integer recommendStatus) {
-        // ✅ 改造：updateByExampleSelective → update(new LambdaQueryWrapper<>().in(...))
         SmsHomeRecommendSubject record = new SmsHomeRecommendSubject();
         record.setRecommendStatus(recommendStatus);
-        return smsHomeRecommendSubjectMapper.update(record, new LambdaQueryWrapper<SmsHomeRecommendSubject>()
+        int result = smsHomeRecommendSubjectMapper.update(record, new LambdaQueryWrapper<SmsHomeRecommendSubject>()
                 .in(SmsHomeRecommendSubject::getId, ids));
+        clearHomeContentCache();
+        return result;
     }
 
     @Override
     public Page<SmsHomeRecommendSubject> list(String subjectName, Integer recommendStatus, Integer pageSize, Integer pageNum) {
         Page<SmsHomeRecommendSubject> page = new Page<>(pageNum, pageSize);
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<>())
         LambdaQueryWrapper<SmsHomeRecommendSubject> wrapper = new LambdaQueryWrapper<>();
         if(!StrUtil.isEmpty(subjectName)){
             wrapper.like(SmsHomeRecommendSubject::getSubjectName, subjectName);

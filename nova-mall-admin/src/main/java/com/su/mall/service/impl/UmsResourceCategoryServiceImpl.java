@@ -21,7 +21,6 @@ public class UmsResourceCategoryServiceImpl implements UmsResourceCategoryServic
 
     @Override
     public List<UmsResourceCategory> listAll() {
-        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         return resourceCategoryMapper.selectList(new LambdaQueryWrapper<UmsResourceCategory>().orderByDesc(UmsResourceCategory::getSort));
     }
 
@@ -34,13 +33,11 @@ public class UmsResourceCategoryServiceImpl implements UmsResourceCategoryServic
     @Override
     public int update(Long id, UmsResourceCategory umsResourceCategory) {
         umsResourceCategory.setId(id);
-        // ✅ 改造：updateByPrimaryKeySelective → updateById
         return resourceCategoryMapper.updateById(umsResourceCategory);
     }
 
     @Override
     public int delete(Long id) {
-        // ✅ 改造：deleteByPrimaryKey → deleteById
         return resourceCategoryMapper.deleteById(id);
     }
 }

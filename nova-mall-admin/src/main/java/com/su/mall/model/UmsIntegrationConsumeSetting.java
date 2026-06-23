@@ -6,6 +6,10 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 积分消耗设置
+ * @author Su
+ */
 @Data
 public class UmsIntegrationConsumeSetting implements Serializable {
     private Long id;

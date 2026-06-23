@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 用户举报
+ * @author Su
+ */
 @Data
 public class CmsMemberReport implements Serializable {
     @Serial

@@ -8,6 +8,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * 会员统计信息
+ * @author Su
+ */
 @Data
 public class UmsMemberStatisticsInfo implements Serializable {
     private Long id;

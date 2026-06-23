@@ -7,6 +7,10 @@ import org.springframework.util.PathMatcher;
 import jakarta.annotation.PostConstruct;
 import java.util.*;
 
+/**
+ * 动态安全元数据源，提供URL与权限配置的映射
+ * @author Su
+ */
 @RequiredArgsConstructor
 public class DynamicSecurityMetadataSource {
 

@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 退货原因
+ * @author Su
+ */
 @Data
 public class OmsOrderReturnReason implements Serializable {
     private Long id;

@@ -3,7 +3,6 @@ package com.su.mall.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.dto.SmsCouponParam;
 import com.su.mall.model.SmsCoupon;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,19 +14,16 @@ public interface SmsCouponService {
     /**
      * 添加优惠券
      */
-    @Transactional
     int create(SmsCouponParam couponParam);
 
     /**
      * 根据优惠券id删除优惠券
      */
-    @Transactional
     int delete(Long id);
 
     /**
      * 根据优惠券id更新优惠券信息
      */
-    @Transactional
     int update(Long id, SmsCouponParam couponParam);
 
     /**

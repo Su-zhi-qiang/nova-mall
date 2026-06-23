@@ -26,6 +26,10 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Elasticsearch客户端服务
+ * @author Su
+ */
 @Service
 @RequiredArgsConstructor
 public class EsClientService {

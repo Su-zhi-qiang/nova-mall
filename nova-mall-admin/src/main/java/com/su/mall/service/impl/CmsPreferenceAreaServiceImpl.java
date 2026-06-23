@@ -20,7 +20,6 @@ public class CmsPreferenceAreaServiceImpl implements CmsPreferenceAreaService {
 
     @Override
     public List<CmsPrefrenceArea> listAll() {
-        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         return preferenceAreaMapper.selectList(new LambdaQueryWrapper<>());
     }
 }

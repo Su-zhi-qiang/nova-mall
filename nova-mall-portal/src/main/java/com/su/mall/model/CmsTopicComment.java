@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 话题评论
+ * @author Su
+ */
 @Data
 public class CmsTopicComment implements Serializable {
     @Serial

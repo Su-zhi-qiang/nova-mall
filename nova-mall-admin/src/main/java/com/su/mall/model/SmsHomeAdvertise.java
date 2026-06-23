@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 首页轮播广告
+ * @author Su
+ */
 @Data
 public class SmsHomeAdvertise implements Serializable {
     private Long id;

@@ -24,9 +24,9 @@
         SELECT
             r.id,
             r.flash_promotion_price,
-            r.flash_promotion_count,
+            COALESCE(ds.stock, r.flash_promotion_count) flash_promotion_count,
             r.original_count,
-            r.flash_promotion_sold,
+            COALESCE(ds.sold, 0) flash_promotion_sold,
             r.flash_promotion_limit,
             r.flash_promotion_id,
             r.flash_promotion_session_id,
@@ -40,6 +40,7 @@
         FROM
             sms_flash_promotion_product_relation r
             LEFT JOIN pms_product p ON r.product_id = p.id
+            LEFT JOIN sms_flash_promotion_daily_stock ds ON r.id = ds.relation_id AND ds.batch_date = CURDATE()
         <where>
             <if test="flashPromotionId != null">
                 AND r.flash_promotion_id = #{flashPromotionId}

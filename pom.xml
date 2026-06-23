@@ -12,7 +12,6 @@
     <modules>
         <module>nova-mall-common</module>
         <module>nova-mall-security</module>
-        <module>nova-mall-demo</module>
         <module>nova-mall-admin</module>
         <module>nova-mall-search</module>
         <module>nova-mall-portal</module>

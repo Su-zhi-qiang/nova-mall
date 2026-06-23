@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 后台资源分类
+ * @author Su
+ */
 @Data
 public class UmsResourceCategory implements Serializable {
     @Serial

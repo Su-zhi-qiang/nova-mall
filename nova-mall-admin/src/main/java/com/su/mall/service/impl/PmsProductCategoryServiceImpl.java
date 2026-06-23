@@ -39,7 +39,6 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
         BeanUtils.copyProperties(pmsProductCategoryParam, productCategory);
         //没有父分类时为一级分类
         setCategoryLevel(productCategory);
-        // ✅ 改造：insert 替代 insertSelective
         int count = productCategoryMapper.insert(productCategory);
         //创建筛选属性关联
         List<Long> productAttributeIdList = pmsProductCategoryParam.getProductAttributeIdList();
@@ -74,33 +73,28 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
         //更新商品分类时要更新商品中的名称
         PmsProduct product = new PmsProduct();
         product.setProductCategoryName(productCategory.getName());
-        // ✅ 改造：LambdaQueryWrapper 替代 Example
         LambdaQueryWrapper<PmsProduct> productWrapper = new LambdaQueryWrapper<>();
         productWrapper.eq(PmsProduct::getProductCategoryId, id);
         productMapper.update(product, productWrapper);
         //同时更新筛选属性的信息
         if(!CollUtil.isEmpty(pmsProductCategoryParam.getProductAttributeIdList())){
-            // ✅ 改造：delete + LambdaQueryWrapper 替代 deleteByExample
             productCategoryAttributeRelationMapper.delete(
                 new LambdaQueryWrapper<PmsProductCategoryAttributeRelation>()
                     .eq(PmsProductCategoryAttributeRelation::getProductCategoryId, id)
             );
             insertRelationList(id,pmsProductCategoryParam.getProductAttributeIdList());
         }else{
-            // ✅ 改造：delete + LambdaQueryWrapper 替代 deleteByExample
             productCategoryAttributeRelationMapper.delete(
                 new LambdaQueryWrapper<PmsProductCategoryAttributeRelation>()
                     .eq(PmsProductCategoryAttributeRelation::getProductCategoryId, id)
             );
         }
-        // ✅ 改造：updateById 替代 updateByPrimaryKeySelective
         return productCategoryMapper.updateById(productCategory);
     }
 
     @Override
     public Page<PmsProductCategory> getList(Long parentId, Integer pageSize, Integer pageNum) {
         Page<PmsProductCategory> page = new Page<>(pageNum, pageSize);
-        // ✅ 改造：LambdaQueryWrapper 替代 Example
         return productCategoryMapper.selectPage(
             page,
             new LambdaQueryWrapper<PmsProductCategory>()
@@ -111,19 +105,16 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
 
     @Override
     public int delete(Long id) {
-        // ✅ 改造：deleteById 替代 deleteByPrimaryKey
         return productCategoryMapper.deleteById(id);
     }
 
     @Override
     public PmsProductCategory getItem(Long id) {
-        // ✅ 改造：selectById 替代 selectByPrimaryKey
         return productCategoryMapper.selectById(id);
     }
 
     @Override
     public int updateNavStatus(List<Long> ids, Integer navStatus) {
-        // ✅ 改造：update + LambdaQueryWrapper 替代 updateByExampleSelective
         PmsProductCategory productCategory = new PmsProductCategory();
         productCategory.setNavStatus(navStatus);
         return productCategoryMapper.update(
@@ -134,7 +125,6 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
 
     @Override
     public int updateShowStatus(List<Long> ids, Integer showStatus) {
-        // ✅ 改造：update + LambdaQueryWrapper 替代 updateByExampleSelective
         PmsProductCategory productCategory = new PmsProductCategory();
         productCategory.setShowStatus(showStatus);
         return productCategoryMapper.update(
@@ -157,7 +147,6 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
             productCategory.setLevel(0);
         } else {
             //有父分类时选择根据父分类level设置
-            // ✅ 改造：selectById 替代 selectByPrimaryKey
             PmsProductCategory parentCategory = productCategoryMapper.selectById(productCategory.getParentId());
             if (parentCategory != null) {
                 productCategory.setLevel(parentCategory.getLevel() + 1);

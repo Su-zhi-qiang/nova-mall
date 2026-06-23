@@ -8,6 +8,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * 订单信息
+ * @author Su
+ */
 @Data
 public class OmsOrder implements Serializable {
     @Schema(title = "订单id")

@@ -3,6 +3,7 @@ package com.su.mall.portal.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.su.mall.common.exception.Asserts;
 import com.su.mall.mapper.*;
 import com.su.mall.model.*;
@@ -19,8 +20,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
-import java.util.Objects;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -49,11 +50,23 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
         if(coupon==null){
             Asserts.fail("优惠券不存在");
         }
-        if(now.before(coupon.getEnableTime())){
+        if(coupon.getType() != null && coupon.getType() != 0 && coupon.getType() != 1){
+            Asserts.fail("该优惠券不可领取");
+        }
+        if(coupon.getPlatform() != null && coupon.getPlatform() != 0 && coupon.getPlatform() != 1){
+            Asserts.fail("该优惠券不支持当前平台");
+        }
+        if(coupon.getEnableTime() != null && now.before(coupon.getEnableTime())){
             Asserts.fail("优惠券还没到领取时间");
+        }
+        if(coupon.getStartTime() != null && now.before(coupon.getStartTime())){
+            Asserts.fail("优惠券还没到使用时间");
         }
         if(coupon.getEndTime() != null && !now.before(coupon.getEndTime())){
             Asserts.fail("优惠券已过期");
+        }
+        if(coupon.getCount() == null || coupon.getCount() <= 0){
+            Asserts.fail("优惠券已领完");
         }
         
         // 2. 判断用户已领取数量是否超过限制
@@ -65,15 +78,12 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
             Asserts.fail("您已达到该优惠券的领取上限");
         }
         
-        // 3. 使用乐观锁扣减库存（防止超领）
-        // 条件：count > 0，确保有库存
-        // 更新：count - 1, receiveCount + 1
+        // 3. 使用SQL原子操作扣减库存（防止超发）
         LambdaUpdateWrapper<SmsCoupon> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(SmsCoupon::getId, couponId)
-                    .gt(SmsCoupon::getCount, 0)  // 乐观锁条件：库存必须大于0
-                    .set(SmsCoupon::getCount, coupon.getCount() - 1)
-                    .set(SmsCoupon::getReceiveCount, 
-                         coupon.getReceiveCount() == null ? 1 : coupon.getReceiveCount() + 1);
+                    .gt(SmsCoupon::getCount, 0)
+                    .setSql("count = count - 1")
+                    .setSql("receive_count = COALESCE(receive_count, 0) + 1");
         
         int updateResult = couponMapper.update(null, updateWrapper);
         if(updateResult == 0){
@@ -115,10 +125,10 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
     @Override
     public List<SmsCouponHistory> listHistory(Integer useStatus) {
         UmsMember currentMember = memberService.getCurrentMember();
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<SmsCouponHistory>())
         return couponHistoryMapper.selectList(new LambdaQueryWrapper<SmsCouponHistory>()
                 .eq(SmsCouponHistory::getMemberId, currentMember.getId())
-                .eq(useStatus != null, SmsCouponHistory::getUseStatus, useStatus));
+                .eq(useStatus != null, SmsCouponHistory::getUseStatus, useStatus)
+                .orderByDesc(SmsCouponHistory::getCreateTime));
     }
 
     @Override
@@ -138,40 +148,45 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
             Integer useType = couponHistoryDetail.getCoupon().getUseType();
             BigDecimal minPoint = couponHistoryDetail.getCoupon().getMinPoint();
             Date endTime = couponHistoryDetail.getCoupon().getEndTime();
+            // 检查优惠券是否已过期
+            boolean isExpired = endTime != null && now.after(endTime);
+            // 检查是否满足最低消费
+            boolean isMinPointMet = minPoint == null || minPoint.compareTo(BigDecimal.ZERO) <= 0;
+            
             if (Objects.equals(0, useType)) {
                 //0->全场通用
-                //判断是否满足优惠起点
-                //计算购物车商品的总价
                 BigDecimal totalAmount = calcTotalAmount(cartItemList);
-                if(now.before(endTime)&&totalAmount.subtract(minPoint).intValue()>=0){
+                if (!isExpired && totalAmount.subtract(minPoint != null ? minPoint : BigDecimal.ZERO).compareTo(BigDecimal.ZERO) >= 0) {
                     enableList.add(couponHistoryDetail);
-                }else{
+                } else {
                     disableList.add(couponHistoryDetail);
                 }
             } else if (Objects.equals(1, useType)) {
                 //1->指定分类
-                //计算指定分类商品的总价
                 List<Long> productCategoryIds = new ArrayList<>();
-                for (SmsCouponProductCategoryRelation categoryRelation : couponHistoryDetail.getCategoryRelationList()) {
-                    productCategoryIds.add(categoryRelation.getProductCategoryId());
+                if (couponHistoryDetail.getCategoryRelationList() != null) {
+                    for (SmsCouponProductCategoryRelation categoryRelation : couponHistoryDetail.getCategoryRelationList()) {
+                        productCategoryIds.add(categoryRelation.getProductCategoryId());
+                    }
                 }
-                BigDecimal totalAmount = calcTotalAmountByproductCategoryId(cartItemList,productCategoryIds);
-                if(now.before(endTime)&&totalAmount.intValue()>0&&totalAmount.subtract(minPoint).intValue()>=0){
+                BigDecimal totalAmount = calcTotalAmountByproductCategoryId(cartItemList, productCategoryIds);
+                if (!isExpired && totalAmount.compareTo(BigDecimal.ZERO) > 0 && totalAmount.subtract(minPoint != null ? minPoint : BigDecimal.ZERO).compareTo(BigDecimal.ZERO) >= 0) {
                     enableList.add(couponHistoryDetail);
-                }else{
+                } else {
                     disableList.add(couponHistoryDetail);
                 }
             } else if (Objects.equals(2, useType)) {
                 //2->指定商品
-                //计算指定商品的总价
                 List<Long> productIds = new ArrayList<>();
-                for (SmsCouponProductRelation productRelation : couponHistoryDetail.getProductRelationList()) {
-                    productIds.add(productRelation.getProductId());
+                if (couponHistoryDetail.getProductRelationList() != null) {
+                    for (SmsCouponProductRelation productRelation : couponHistoryDetail.getProductRelationList()) {
+                        productIds.add(productRelation.getProductId());
+                    }
                 }
-                BigDecimal totalAmount = calcTotalAmountByProductId(cartItemList,productIds);
-                if(now.before(endTime)&&totalAmount.intValue()>0&&totalAmount.subtract(minPoint).intValue()>=0){
+                BigDecimal totalAmount = calcTotalAmountByProductId(cartItemList, productIds);
+                if (!isExpired && totalAmount.compareTo(BigDecimal.ZERO) > 0 && totalAmount.subtract(minPoint != null ? minPoint : BigDecimal.ZERO).compareTo(BigDecimal.ZERO) >= 0) {
                     enableList.add(couponHistoryDetail);
-                }else{
+                } else {
                     disableList.add(couponHistoryDetail);
                 }
             }
@@ -241,7 +256,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
     @Override
     public List<SmsCoupon> list(Integer useStatus) {
         UmsMember member = memberService.getCurrentMember();
-        return couponHistoryDao.getCouponList(member.getId(),useStatus);
+        return couponHistoryDao.getCouponList(member.getId(), useStatus);
     }
 
     @Override
@@ -249,82 +264,66 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
         UmsMember currentMember = memberService.getCurrentMember();
         Date now = new Date();
         
-        // 查询所有优惠券（先不做严格过滤，看看数据情况）
+        // 1. 一次查询所有符合条件的可领取优惠券
         LambdaQueryWrapper<SmsCoupon> wrapper = new LambdaQueryWrapper<>();
-        
-        List<SmsCoupon> allCoupons = couponMapper.selectList(wrapper);
-        System.out.println("[CouponDebug] 所有优惠券数量: " + allCoupons.size());
-        
-        for (SmsCoupon coupon : allCoupons) {
-            System.out.println("[CouponDebug] 优惠券: id=" + coupon.getId() + ", name=" + coupon.getName() 
-                    + ", type=" + coupon.getType() + ", count=" + coupon.getCount()
-                    + ", perLimit=" + coupon.getPerLimit() + ", enableTime=" + coupon.getEnableTime()
-                    + ", startTime=" + coupon.getStartTime() + ", endTime=" + coupon.getEndTime()
-                    + ", platform=" + coupon.getPlatform());
-        }
-        
-        // 仅返回用户可主动领取的优惠券：全场赠券(0) 或 会员赠券(1)
-        wrapper.in(SmsCoupon::getType, 0, 1);
-        // 允许count为null或大于0
-        wrapper.and(w -> w.isNull(SmsCoupon::getCount).or().gt(SmsCoupon::getCount, 0));
-        // 允许enableTime为null或已到时间
+        wrapper.in(SmsCoupon::getType, 0, 1);  // 全场赠券 或 会员赠券
+        wrapper.gt(SmsCoupon::getCount, 0);     // 仍有库存
         wrapper.and(w -> w.isNull(SmsCoupon::getEnableTime).or().le(SmsCoupon::getEnableTime, now));
-        // startTime可为空表示无限制
         wrapper.and(w -> w.isNull(SmsCoupon::getStartTime).or().le(SmsCoupon::getStartTime, now));
-        // 允许endTime为null或未过期
         wrapper.and(w -> w.isNull(SmsCoupon::getEndTime).or().gt(SmsCoupon::getEndTime, now));
-        // 平台兼容：全平台(0) 或 移动端(1)
         wrapper.in(SmsCoupon::getPlatform, 0, 1);
         
         List<SmsCoupon> filteredCoupons = couponMapper.selectList(wrapper);
-        System.out.println("[CouponDebug] 过滤后数量: " + filteredCoupons.size());
+        if (CollUtil.isEmpty(filteredCoupons)) {
+            return new ArrayList<>();
+        }
         
-        // 过滤掉用户已达到领取上限的优惠券
+        // 2. 批量查询用户对这些优惠券的已领取数量（解决N+1问题）
+        List<Long> couponIds = filteredCoupons.stream().map(SmsCoupon::getId).collect(Collectors.toList());
+        List<SmsCouponHistory> userHistory = couponHistoryMapper.selectList(
+                new LambdaQueryWrapper<SmsCouponHistory>()
+                        .in(SmsCouponHistory::getCouponId, couponIds)
+                        .eq(SmsCouponHistory::getMemberId, currentMember.getId()));
+        
+        // 统计每张优惠券的已领取数量
+        Map<Long, Long> receivedCountMap = userHistory.stream()
+                .collect(Collectors.groupingBy(SmsCouponHistory::getCouponId, Collectors.counting()));
+        
+        // 3. 过滤掉用户已达到领取上限的优惠券
         List<SmsCoupon> availableCoupons = new ArrayList<>();
         for (SmsCoupon coupon : filteredCoupons) {
-            long receivedCount = couponHistoryMapper.selectCount(
-                    new LambdaQueryWrapper<SmsCouponHistory>()
-                            .eq(SmsCouponHistory::getCouponId, coupon.getId())
-                            .eq(SmsCouponHistory::getMemberId, currentMember.getId()));
+            long receivedCount = receivedCountMap.getOrDefault(coupon.getId(), 0L);
             if (receivedCount < coupon.getPerLimit()) {
                 availableCoupons.add(coupon);
-                System.out.println("[CouponDebug] 保留可领取: id=" + coupon.getId() + ", name=" + coupon.getName() + ", received=" + receivedCount + ", perLimit=" + coupon.getPerLimit());
-            } else {
-                System.out.println("[CouponDebug] 过滤已达上限: id=" + coupon.getId() + ", name=" + coupon.getName() + ", received=" + receivedCount + ", perLimit=" + coupon.getPerLimit());
             }
         }
         
-        System.out.println("[CouponDebug] 最终可领取数量: " + availableCoupons.size());
         return availableCoupons;
     }
 
     private BigDecimal calcTotalAmount(List<CartPromotionItem> cartItemList) {
-        BigDecimal total = new BigDecimal("0");
+        return calcTotalAmountByFilter(cartItemList, null, null);
+    }
+
+    private BigDecimal calcTotalAmountByproductCategoryId(List<CartPromotionItem> cartItemList, List<Long> productCategoryIds) {
+        return calcTotalAmountByFilter(cartItemList, productCategoryIds, null);
+    }
+
+    private BigDecimal calcTotalAmountByProductId(List<CartPromotionItem> cartItemList, List<Long> productIds) {
+        return calcTotalAmountByFilter(cartItemList, null, productIds);
+    }
+
+    private BigDecimal calcTotalAmountByFilter(List<CartPromotionItem> cartItemList, List<Long> productCategoryIds, List<Long> productIds) {
+        BigDecimal total = BigDecimal.ZERO;
         for (CartPromotionItem item : cartItemList) {
+            if (productCategoryIds != null && !productCategoryIds.contains(item.getProductCategoryId())) {
+                continue;
+            }
+            if (productIds != null && !productIds.contains(item.getProductId())) {
+                continue;
+            }
             BigDecimal realPrice = item.getPrice().subtract(item.getReduceAmount());
-            total=total.add(realPrice.multiply(new BigDecimal(item.getQuantity())));
-        }
-        return total;
-    }
-
-    private BigDecimal calcTotalAmountByproductCategoryId(List<CartPromotionItem> cartItemList,List<Long> productCategoryIds) {
-        BigDecimal total = new BigDecimal("0");
-        for (CartPromotionItem item : cartItemList) {
-            if(productCategoryIds.contains(item.getProductCategoryId())){
-                BigDecimal realPrice = item.getPrice().subtract(item.getReduceAmount());
-                total=total.add(realPrice.multiply(new BigDecimal(item.getQuantity())));
-            }
-        }
-        return total;
-    }
-
-    private BigDecimal calcTotalAmountByProductId(List<CartPromotionItem> cartItemList,List<Long> productIds) {
-        BigDecimal total = new BigDecimal("0");
-        for (CartPromotionItem item : cartItemList) {
-            if(productIds.contains(item.getProductId())){
-                BigDecimal realPrice = item.getPrice().subtract(item.getReduceAmount());
-                total=total.add(realPrice.multiply(new BigDecimal(item.getQuantity())));
-            }
+            total = total.add(realPrice.multiply(new BigDecimal(item.getQuantity())));
         }
         return total;
     }

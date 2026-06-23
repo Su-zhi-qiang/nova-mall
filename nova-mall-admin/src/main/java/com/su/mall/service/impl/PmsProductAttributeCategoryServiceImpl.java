@@ -27,7 +27,6 @@ public class PmsProductAttributeCategoryServiceImpl implements PmsProductAttribu
     public int create(String name) {
         PmsProductAttributeCategory productAttributeCategory = new PmsProductAttributeCategory();
         productAttributeCategory.setName(name);
-        // ✅ 改造：insert 替代 insertSelective
         return productAttributeCategoryMapper.insert(productAttributeCategory);
     }
 
@@ -36,26 +35,22 @@ public class PmsProductAttributeCategoryServiceImpl implements PmsProductAttribu
         PmsProductAttributeCategory productAttributeCategory = new PmsProductAttributeCategory();
         productAttributeCategory.setName(name);
         productAttributeCategory.setId(id);
-        // ✅ 改造：updateById 替代 updateByPrimaryKeySelective
         return productAttributeCategoryMapper.updateById(productAttributeCategory);
     }
 
     @Override
     public int delete(Long id) {
-        // ✅ 改造：deleteById 替代 deleteByPrimaryKey
         return productAttributeCategoryMapper.deleteById(id);
     }
 
     @Override
     public PmsProductAttributeCategory getItem(Long id) {
-        // ✅ 改造：selectById 替代 selectByPrimaryKey
         return productAttributeCategoryMapper.selectById(id);
     }
 
     @Override
     public Page<PmsProductAttributeCategory> getList(Integer pageSize, Integer pageNum) {
         Page<PmsProductAttributeCategory> page = new Page<>(pageNum, pageSize);
-        // ✅ 改造：selectPage 替代 selectList + PageHelper
         return productAttributeCategoryMapper.selectPage(page, new LambdaQueryWrapper<PmsProductAttributeCategory>());
     }
 

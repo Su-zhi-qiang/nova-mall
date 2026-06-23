@@ -5,6 +5,10 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 管理员权限关系
+ * @author Su
+ */
 @Data
 public class UmsAdminPermissionRelation implements Serializable {
     @Serial

@@ -20,7 +20,6 @@ public class SmsCouponHistoryServiceImpl implements SmsCouponHistoryService {
     @Override
     public Page<SmsCouponHistory> list(Long couponId, Integer useStatus, String orderSn, Integer pageSize, Integer pageNum) {
         Page<SmsCouponHistory> page = new Page<>(pageNum, pageSize);
-        // ✅ 改造：selectByExample → selectList(new LambdaQueryWrapper<>())
         LambdaQueryWrapper<SmsCouponHistory> wrapper = new LambdaQueryWrapper<>();
         if(couponId!=null){
             wrapper.eq(SmsCouponHistory::getCouponId, couponId);

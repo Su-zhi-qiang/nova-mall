@@ -20,7 +20,6 @@ public class OmsCompanyAddressServiceImpl implements OmsCompanyAddressService {
     
     @Override
     public List<OmsCompanyAddress> list() {
-        // ✅ 改造：selectList 替代 selectByExample
         return companyAddressMapper.selectList(new LambdaQueryWrapper<OmsCompanyAddress>());
     }
 }

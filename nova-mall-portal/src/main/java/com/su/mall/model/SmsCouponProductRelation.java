@@ -6,6 +6,10 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 优惠券商品关系
+ * @author Su
+ */
 @Data
 public class SmsCouponProductRelation implements Serializable {
     private Long id;

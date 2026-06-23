@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 商品审核记录
+ * @author Su
+ */
 @Data
 public class PmsProductVertifyRecord implements Serializable {
     @Serial

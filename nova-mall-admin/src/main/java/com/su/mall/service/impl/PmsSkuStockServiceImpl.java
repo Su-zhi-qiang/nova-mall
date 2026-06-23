@@ -24,7 +24,6 @@ public class PmsSkuStockServiceImpl implements PmsSkuStockService {
 
     @Override
     public List<PmsSkuStock> getList(Long pid, String keyword) {
-        // ✅ 改造：selectByExample → selectList
         LambdaQueryWrapper<PmsSkuStock> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(PmsSkuStock::getProductId, pid);
         if (!StrUtil.isEmpty(keyword)) {

@@ -6,6 +6,10 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 角色资源关系
+ * @author Su
+ */
 @Data
 public class UmsRoleResourceRelation implements Serializable {
     @Serial

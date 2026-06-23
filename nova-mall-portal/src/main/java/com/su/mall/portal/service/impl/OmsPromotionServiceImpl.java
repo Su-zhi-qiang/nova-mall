@@ -25,6 +25,7 @@ import java.util.*;
 public class OmsPromotionServiceImpl implements OmsPromotionService {
     private final PortalProductDao portalProductDao;
     private final com.su.mall.mapper.SmsFlashPromotionProductRelationMapper flashPromotionProductRelationMapper;
+    private final com.su.mall.mapper.SmsFlashPromotionDailyStockMapper dailyStockMapper;
 
     @Override
     public List<CartPromotionItem> calcCartPromotion(List<OmsCartItem> cartItemList) {
@@ -38,7 +39,11 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
             Long productId = entry.getKey();
             PromotionProduct promotionProduct = getPromotionProductById(productId, promotionProductList);
             List<OmsCartItem> itemList = entry.getValue();
-            assert promotionProduct != null;
+            if (promotionProduct == null) {
+                // 商品无促销信息，按无优惠处理
+                handleNoReduce(cartPromotionItemList, itemList, null);
+                continue;
+            }
             Integer promotionType = promotionProduct.getPromotionType();
 
             // 拆分秒杀项和普通项：秒杀商品优先使用购物车中已保存的 flashPromotionRelationId 直接查询
@@ -50,10 +55,13 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
                 if (item.getFlashPromotionRelationId() != null) {
                     com.su.mall.model.SmsFlashPromotionProductRelation flashRelation =
                             flashPromotionProductRelationMapper.selectById(item.getFlashPromotionRelationId());
-                    if (flashRelation != null && flashRelation.getFlashPromotionCount() != null && flashRelation.getFlashPromotionCount() > 0) {
-                        flashItemList.add(item);
-                        flashRelationMap.put(item.getFlashPromotionRelationId(), flashRelation);
-                        continue;
+                    if (flashRelation != null && flashRelation.getFlashPromotionPrice() != null) {
+                        Integer dailyStock = dailyStockMapper.getCurrentStock(item.getFlashPromotionRelationId());
+                        if (dailyStock != null && dailyStock > 0) {
+                            flashItemList.add(item);
+                            flashRelationMap.put(item.getFlashPromotionRelationId(), flashRelation);
+                            continue;
+                        }
                     }
                 }
                 normalItemList.add(item);
@@ -73,11 +81,12 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
                 cartPromotionItem.setFlashPromotionRelationId(flashRelation.getId());
 
                 PmsSkuStock skuStock = getOriginalPrice(promotionProduct, item.getProductSkuId());
-                assert skuStock != null;
+                if (skuStock == null) continue;
                 BigDecimal originalPrice = skuStock.getPrice();
                 cartPromotionItem.setPrice(originalPrice);
                 cartPromotionItem.setReduceAmount(originalPrice.subtract(flashRelation.getFlashPromotionPrice()));
-                int realStock = flashRelation.getFlashPromotionCount();
+                Integer dailyStock = dailyStockMapper.getCurrentStock(flashRelation.getId());
+                int realStock = dailyStock != null ? dailyStock : 0;
                 cartPromotionItem.setRealStock(realStock);
                 cartPromotionItem.setIntegration(promotionProduct.getGiftPoint());
                 cartPromotionItem.setGrowth(promotionProduct.getGiftGrowth());
@@ -94,7 +103,7 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
                     cartPromotionItem.setPromotionMessage("单品促销");
                     //商品原价-促销价
                     PmsSkuStock skuStock = getOriginalPrice(promotionProduct, item.getProductSkuId());
-                    assert skuStock != null;
+                    if (skuStock == null) continue;
                     BigDecimal originalPrice = skuStock.getPrice();
                     //单品促销使用原价
                     cartPromotionItem.setPrice(originalPrice);
@@ -118,7 +127,7 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
                         cartPromotionItem.setPromotionMessage(message);
                         //商品原价-折扣*商品原价
                         PmsSkuStock skuStock = getOriginalPrice(promotionProduct,item.getProductSkuId());
-                        assert skuStock != null;
+                        if (skuStock == null) continue;
                         BigDecimal originalPrice = skuStock.getPrice();
                         BigDecimal reduceAmount = originalPrice.subtract(ladder.getDiscount().multiply(originalPrice));
                         cartPromotionItem.setReduceAmount(reduceAmount);
@@ -144,7 +153,7 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
                         cartPromotionItem.setPromotionMessage(message);
                         //(商品原价/总价)*满减金额
                         PmsSkuStock skuStock= getOriginalPrice(promotionProduct, item.getProductSkuId());
-                        assert skuStock != null;
+                        if (skuStock == null) continue;
                         BigDecimal originalPrice = skuStock.getPrice();
                         BigDecimal reduceAmount = originalPrice.divide(totalAmount,RoundingMode.HALF_EVEN).multiply(fullReduction.getReducePrice());
                         cartPromotionItem.setReduceAmount(reduceAmount);
@@ -300,9 +309,9 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
         for (OmsCartItem item : itemList) {
             //计算出商品原价
             PromotionProduct promotionProduct = getPromotionProductById(item.getProductId(), promotionProductList);
-            assert promotionProduct != null;
+            if (promotionProduct == null) continue;
             PmsSkuStock skuStock = getOriginalPrice(promotionProduct,item.getProductSkuId());
-            assert skuStock != null;
+            if (skuStock == null) continue;
             amount = amount.add(skuStock.getPrice().multiply(new BigDecimal(item.getQuantity())));
         }
         return amount;

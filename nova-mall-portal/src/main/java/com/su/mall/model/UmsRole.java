@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 后台角色
+ * @author Su
+ */
 @Data
 public class UmsRole implements Serializable {
     @Serial

@@ -6,6 +6,10 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 优选专区和产品关系
+ * @author Su
+ */
 @Data
 public class CmsPrefrenceAreaProductRelation implements Serializable {
     @Serial

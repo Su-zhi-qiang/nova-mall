@@ -8,6 +8,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * 购物车
+ * @author Su
+ */
 @Data
 public class OmsCartItem implements Serializable {
     private Long id;

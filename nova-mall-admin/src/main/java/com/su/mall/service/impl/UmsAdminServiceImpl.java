@@ -61,7 +61,6 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         UmsAdmin admin = getCacheService().getAdmin(username);
         if (admin != null) return admin;
         //缓存中没有从数据库中获取
-        // ✅ 改造：LambdaQueryWrapper 替代 Example
         UmsAdmin adminDB = adminMapper.selectOne(
             new LambdaQueryWrapper<UmsAdmin>().eq(UmsAdmin::getUsername, username)
         );
@@ -81,7 +80,6 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         umsAdmin.setCreateTime(new Date());
         umsAdmin.setStatus(1);
         //查询是否有相同用户名的用户
-        // ✅ 改造：LambdaQueryWrapper 替代 Example
         UmsAdmin existAdmin = adminMapper.selectOne(
             new LambdaQueryWrapper<UmsAdmin>().eq(UmsAdmin::getUsername, umsAdmin.getUsername())
         );
@@ -91,9 +89,7 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         //将密码进行加密操作
         String encodePassword = passwordEncoder.encode(umsAdmin.getPassword());
         umsAdmin.setPassword(encodePassword);
-        // ✅ 改造：insert 替代 insertSelective
         adminMapper.insert(umsAdmin);
-        // ✅ 新增：注册成功后设置缓存
         getCacheService().setAdmin(umsAdmin);
         umsAdmin.setPassword(null);
         return umsAdmin;
@@ -138,7 +134,6 @@ public class UmsAdminServiceImpl implements UmsAdminService {
             HttpServletRequest request = attributes.getRequest();
             loginLog.setIp(RequestUtil.getRequestIp(request));
         }
-        // ✅ 改造：insert 替代 insert
         loginLogMapper.insert(loginLog);
     }
 
@@ -148,7 +143,6 @@ public class UmsAdminServiceImpl implements UmsAdminService {
      * @author Su
      */
     private void updateLoginTimeByUsername(String username) {
-        // ✅ 改造：使用 update + LambdaUpdateWrapper 替代 updateByExampleSelective
         adminMapper.update(null,
             new LambdaUpdateWrapper<UmsAdmin>()
                 .set(UmsAdmin::getLoginTime, new Date())
@@ -163,13 +157,11 @@ public class UmsAdminServiceImpl implements UmsAdminService {
 
     @Override
     public UmsAdmin getItem(Long id) {
-        // ✅ 改造：selectById 替代 selectByPrimaryKey
         return adminMapper.selectById(id);
     }
 
     @Override
     public Page<UmsAdmin> list(String keyword, Integer pageSize, Integer pageNum) {
-        // ✅ 改造：使用 MyBatis-Plus 分页
         LambdaQueryWrapper<UmsAdmin> wrapper = new LambdaQueryWrapper<>();
         if (!StrUtil.isEmpty(keyword)) {
             wrapper.like(UmsAdmin::getUsername, keyword)
@@ -184,7 +176,6 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     @Transactional
     public int update(Long id, UmsAdmin admin) {
         admin.setId(id);
-        // ✅ 改造：selectById 替代 selectByPrimaryKey
         UmsAdmin rawAdmin = adminMapper.selectById(id);
         if(rawAdmin == null){
             return 0;
@@ -200,7 +191,6 @@ public class UmsAdminServiceImpl implements UmsAdminService {
                 admin.setPassword(passwordEncoder.encode(admin.getPassword()));
             }
         }
-        // ✅ 改造：updateById 替代 updateByPrimaryKeySelective
         int count = adminMapper.updateById(admin);
         getCacheService().delAdmin(id);
         return count;
@@ -209,7 +199,6 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     @Override
     @Transactional
     public int delete(Long id) {
-        // ✅ 改造：deleteById 替代 deleteByPrimaryKey
         int count = adminMapper.deleteById(id);
         getCacheService().delAdmin(id);
         getCacheService().delResourceList(id);
@@ -221,7 +210,6 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     public int updateRole(Long adminId, List<Long> roleIds) {
         int count = roleIds == null ? 0 : roleIds.size();
         //先删除原来的关系
-        // ✅ 改造：delete + LambdaQueryWrapper 替代 deleteByExample
         adminRoleRelationMapper.delete(
             new LambdaQueryWrapper<UmsAdminRoleRelation>().eq(UmsAdminRoleRelation::getAdminId, adminId)
         );
@@ -269,7 +257,6 @@ public class UmsAdminServiceImpl implements UmsAdminService {
                 ||StrUtil.isEmpty(param.getNewPassword())){
             return -1;
         }
-        // ✅ 改造：LambdaQueryWrapper 替代 Example
         UmsAdmin umsAdmin = adminMapper.selectOne(
             new LambdaQueryWrapper<UmsAdmin>().eq(UmsAdmin::getUsername, param.getUsername())
         );
@@ -280,7 +267,6 @@ public class UmsAdminServiceImpl implements UmsAdminService {
             return -3;
         }
         umsAdmin.setPassword(passwordEncoder.encode(param.getNewPassword()));
-        // ✅ 改造：updateById 替代 updateByPrimaryKey
         adminMapper.updateById(umsAdmin);
         getCacheService().delAdmin(umsAdmin.getId());
         return 1;

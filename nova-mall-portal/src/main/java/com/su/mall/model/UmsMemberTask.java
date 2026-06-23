@@ -6,6 +6,10 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 会员任务
+ * @author Su
+ */
 @Data
 public class UmsMemberTask implements Serializable {
     @Serial

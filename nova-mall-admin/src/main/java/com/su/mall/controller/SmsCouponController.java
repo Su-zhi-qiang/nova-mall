@@ -69,6 +69,9 @@ public class SmsCouponController {
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public CommonResult<SmsCouponParam> getItem(@PathVariable Long id) {
         SmsCouponParam couponParam = couponService.getItem(id);
+        if(couponParam == null){
+            return CommonResult.failed("优惠券不存在");
+        }
         return CommonResult.success(couponParam);
     }
 }

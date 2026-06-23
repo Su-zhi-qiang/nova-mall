@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 管理员登录日志
+ * @author Su
+ */
 @Data
 public class UmsAdminLoginLog implements Serializable {
     @Serial

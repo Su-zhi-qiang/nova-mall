@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 会员
+ * @author Su
+ */
 @Data
 public class UmsMember implements Serializable {
     private Long id;

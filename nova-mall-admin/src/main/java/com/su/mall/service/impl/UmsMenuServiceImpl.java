@@ -41,7 +41,6 @@ public class UmsMenuServiceImpl implements UmsMenuService {
             umsMenu.setLevel(0);
         } else {
             //有父菜单时选择根据父菜单level设置
-            // ✅ 改造：selectByPrimaryKey → selectById
             UmsMenu parentMenu = menuMapper.selectById(umsMenu.getParentId());
             if (parentMenu != null) {
                 umsMenu.setLevel(parentMenu.getLevel() + 1);
@@ -56,27 +55,23 @@ public class UmsMenuServiceImpl implements UmsMenuService {
     public int update(Long id, UmsMenu umsMenu) {
         umsMenu.setId(id);
         updateLevel(umsMenu);
-        // ✅ 改造：updateByPrimaryKeySelective → updateById
         return menuMapper.updateById(umsMenu);
     }
 
     @Override
     public UmsMenu getItem(Long id) {
-        // ✅ 改造：selectByPrimaryKey → selectById
         return menuMapper.selectById(id);
     }
 
     @Override
     @Transactional
     public int delete(Long id) {
-        // ✅ 改造：deleteByPrimaryKey → deleteById
         return menuMapper.deleteById(id);
     }
 
     @Override
     public Page<UmsMenu> list(Long parentId, Integer pageSize, Integer pageNum) {
         Page<UmsMenu> page = new Page<>(pageNum, pageSize);
-        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         return menuMapper.selectPage(page, new LambdaQueryWrapper<UmsMenu>()
                 .eq(UmsMenu::getParentId, parentId)
                 .orderByDesc(UmsMenu::getSort));
@@ -84,7 +79,6 @@ public class UmsMenuServiceImpl implements UmsMenuService {
 
     @Override
     public List<UmsMenuNode> treeList() {
-        // ✅ 改造：selectByExample → selectList + LambdaQueryWrapper
         List<UmsMenu> menuList = menuMapper.selectList(new LambdaQueryWrapper<>());
         List<UmsMenuNode> result = menuList.stream()
                 .filter(menu -> menu.getParentId().equals(0L))
@@ -99,7 +93,6 @@ public class UmsMenuServiceImpl implements UmsMenuService {
         UmsMenu umsMenu = new UmsMenu();
         umsMenu.setId(id);
         umsMenu.setHidden(hidden);
-        // ✅ 改造：updateByPrimaryKeySelective → updateById
         return menuMapper.updateById(umsMenu);
     }
 

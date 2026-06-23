@@ -7,6 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+/**
+ * 商品会员价格
+ * @author Su
+ */
 @Data
 public class PmsMemberPrice implements Serializable {
     @Serial

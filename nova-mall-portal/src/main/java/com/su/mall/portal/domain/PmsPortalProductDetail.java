@@ -44,6 +44,9 @@ public class PmsPortalProductDetail{
     @Schema(title = "秒杀剩余库存")
     private Integer flashPromotionCount;
 
+    @Schema(title = "秒杀已售数量")
+    private Integer flashPromotionSold;
+
     @Schema(title = "限购数量")
     private Integer flashPromotionLimit;
 
