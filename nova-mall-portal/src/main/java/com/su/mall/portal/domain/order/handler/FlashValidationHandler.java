@@ -60,6 +60,9 @@ public class FlashValidationHandler extends OrderHandler {
                         Asserts.fail("超出限购数量，您已购买" + buyCount + "件，每人限购" + relation.getFlashPromotionLimit() + "件");
                     }
 
+                    // 确保Redis中有库存（首次访问时从DB同步）
+                    ensureSeckillRedisStock(relationId);
+
                     // Redis预减库存（Lua原子操作，毫秒级拦截）
                     Boolean success = redisService.deductSeckillStock(relationId);
                     if (success == null) {
@@ -82,6 +85,17 @@ public class FlashValidationHandler extends OrderHandler {
                 redisService.restoreSeckillStock(preDeductedRelationIds.get(i), preDeductedQuantities.get(i));
             }
             throw e;
+        }
+    }
+
+    /**
+     * 确保Redis中有秒杀库存（首次访问时从DB同步）
+     */
+    private void ensureSeckillRedisStock(Long relationId) {
+        String redisKey = "seckill:stock:" + relationId;
+        if (!Boolean.TRUE.equals(redisService.hasKey(redisKey))) {
+            Integer stock = dailyStockMapper.getCurrentStock(relationId);
+            redisService.set(redisKey, stock != null ? stock.toString() : "0");
         }
     }
 }
