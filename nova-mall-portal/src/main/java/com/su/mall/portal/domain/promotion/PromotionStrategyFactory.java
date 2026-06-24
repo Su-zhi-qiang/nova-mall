@@ -50,6 +50,6 @@ public class PromotionStrategyFactory implements ApplicationContextAware {
      * 获取秒杀策略
      */
     public PromotionStrategy getFlashStrategy() {
-        return strategyPool.get("-1");
+        return strategyPool.get("flash");
     }
 }

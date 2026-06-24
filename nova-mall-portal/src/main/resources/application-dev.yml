@@ -53,7 +53,7 @@ alipay:
 # 促销策略映射：promotionType值 -> 策略Bean名称
 promotion:
   types:
-    "-1": flashPromotionStrategy
+    "flash": flashPromotionStrategy
     "0": noPromotionStrategy
     "1": singleItemPromotionStrategy
     "3": ladderDiscountPromotionStrategy
