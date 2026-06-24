@@ -227,4 +227,52 @@ public class RedisServiceImpl implements RedisService {
             redisTemplate.delete(keys);
         }
     }
+
+    private static final String SECKILL_STOCK_DEDUCT_SCRIPT =
+            "local stock = tonumber(redis.call('get', KEYS[1])) " +
+            "if stock == nil then return -1 end " +
+            "if stock <= 0 then return 0 end " +
+            "redis.call('decrby', KEYS[1], ARGV[1]) " +
+            "return 1";
+
+    private static final String COUPON_STOCK_DEDUCT_SCRIPT =
+            "local stock = tonumber(redis.call('get', KEYS[1])) " +
+            "if stock == nil then return -1 end " +
+            "if stock <= 0 then return 0 end " +
+            "redis.call('decr', KEYS[1]) " +
+            "return 1";
+
+    @Override
+    public Boolean deductSeckillStock(Long relationId) {
+        String key = "seckill:stock:" + relationId;
+        DefaultRedisScript<Long> script = new DefaultRedisScript<>(SECKILL_STOCK_DEDUCT_SCRIPT, Long.class);
+        Long result = redisTemplate.execute(script, Collections.singletonList(key), 1);
+        if (result == null || result == -1) {
+            return null;
+        }
+        return result == 1;
+    }
+
+    @Override
+    public void restoreSeckillStock(Long relationId, int quantity) {
+        String key = "seckill:stock:" + relationId;
+        redisTemplate.opsForValue().increment(key, quantity);
+    }
+
+    @Override
+    public Boolean deductCouponStock(Long couponId) {
+        String key = "coupon:stock:" + couponId;
+        DefaultRedisScript<Long> script = new DefaultRedisScript<>(COUPON_STOCK_DEDUCT_SCRIPT, Long.class);
+        Long result = redisTemplate.execute(script, Collections.singletonList(key));
+        if (result == null || result == -1) {
+            return null;
+        }
+        return result == 1;
+    }
+
+    @Override
+    public void restoreCouponStock(Long couponId) {
+        String key = "coupon:stock:" + couponId;
+        redisTemplate.opsForValue().increment(key);
+    }
 }

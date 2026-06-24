@@ -1,6 +1,7 @@
 package com.su.mall.portal.domain.order.handler;
 
 import com.su.mall.common.exception.Asserts;
+import com.su.mall.common.service.RedisService;
 import com.su.mall.portal.domain.order.OrderHandler;
 import com.su.mall.portal.domain.order.OrderHandlerContext;
 import com.su.mall.portal.domain.CartPromotionItem;
@@ -10,14 +11,20 @@ import com.su.mall.mapper.SmsFlashPromotionProductRelationMapper;
 import com.su.mall.model.SmsFlashPromotionProductRelation;
 import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 秒杀校验：Redis预减库存 + 活动/限购校验
+ * Redis预减成功后，库存由DB原子SQL兜底扣减
+ */
 @RequiredArgsConstructor
 public class FlashValidationHandler extends OrderHandler {
 
     private final SmsFlashPromotionProductRelationMapper flashPromotionProductRelationMapper;
     private final SmsFlashPromotionDailyStockMapper dailyStockMapper;
     private final PortalOrderDao portalOrderDao;
+    private final RedisService redisService;
 
     @Override
     public void handle(OrderHandlerContext context) {
@@ -27,30 +34,54 @@ public class FlashValidationHandler extends OrderHandler {
         }
 
         List<CartPromotionItem> cartPromotionItemList = context.getCartPromotionItemList();
-        for (CartPromotionItem cartPromotionItem : cartPromotionItemList) {
-            if (cartPromotionItem.getFlashPromotion() != null && cartPromotionItem.getFlashPromotion()) {
-                if (cartPromotionItem.getFlashPromotionRelationId() == null) {
-                    Asserts.fail("秒杀商品信息异常");
-                }
-                SmsFlashPromotionProductRelation relation = flashPromotionProductRelationMapper.selectById(
-                        cartPromotionItem.getFlashPromotionRelationId());
-                if (relation == null) {
-                    Asserts.fail("秒杀活动不存在");
-                }
-                Integer dailyStock = dailyStockMapper.getCurrentStock(cartPromotionItem.getFlashPromotionRelationId());
-                if (dailyStock == null || dailyStock < cartPromotionItem.getQuantity()) {
-                    Asserts.fail("秒杀库存不足");
-                }
-                if (relation.getFlashPromotionLimit() != null && cartPromotionItem.getQuantity() > relation.getFlashPromotionLimit()) {
-                    Asserts.fail("超出限购数量，每人限购" + relation.getFlashPromotionLimit() + "件");
-                }
-                int buyCount = portalOrderDao.getMemberFlashBuyCount(
-                        context.getCurrentMember().getId(), cartPromotionItem.getFlashPromotionRelationId());
-                if (relation.getFlashPromotionLimit() != null && buyCount + cartPromotionItem.getQuantity() > relation.getFlashPromotionLimit()) {
-                    Asserts.fail("超出限购数量，您已购买" + buyCount + "件，每人限购" + relation.getFlashPromotionLimit() + "件");
+        List<Long> preDeductedRelationIds = new ArrayList<>();
+        List<Integer> preDeductedQuantities = new ArrayList<>();
+
+        try {
+            for (CartPromotionItem cartPromotionItem : cartPromotionItemList) {
+                if (cartPromotionItem.getFlashPromotion() != null && cartPromotionItem.getFlashPromotion()) {
+                    Long relationId = cartPromotionItem.getFlashPromotionRelationId();
+                    if (relationId == null) {
+                        Asserts.fail("秒杀商品信息异常");
+                    }
+
+                    SmsFlashPromotionProductRelation relation = flashPromotionProductRelationMapper.selectById(relationId);
+                    if (relation == null) {
+                        Asserts.fail("秒杀活动不存在");
+                    }
+
+                    // 限购校验
+                    if (relation.getFlashPromotionLimit() != null && cartPromotionItem.getQuantity() > relation.getFlashPromotionLimit()) {
+                        Asserts.fail("超出限购数量，每人限购" + relation.getFlashPromotionLimit() + "件");
+                    }
+                    int buyCount = portalOrderDao.getMemberFlashBuyCount(
+                            context.getCurrentMember().getId(), relationId);
+                    if (relation.getFlashPromotionLimit() != null && buyCount + cartPromotionItem.getQuantity() > relation.getFlashPromotionLimit()) {
+                        Asserts.fail("超出限购数量，您已购买" + buyCount + "件，每人限购" + relation.getFlashPromotionLimit() + "件");
+                    }
+
+                    // Redis预减库存（Lua原子操作，毫秒级拦截）
+                    Boolean success = redisService.deductSeckillStock(relationId);
+                    if (success == null) {
+                        Asserts.fail("秒杀库存不足");
+                    }
+                    if (!success) {
+                        Asserts.fail("秒杀库存已售罄");
+                    }
+                    preDeductedRelationIds.add(relationId);
+                    preDeductedQuantities.add(cartPromotionItem.getQuantity());
                 }
             }
+            // 记录预扣信息，用于取消订单时恢复Redis库存
+            context.putAttribute("preDeductedRelationIds", preDeductedRelationIds);
+            context.putAttribute("preDeductedQuantities", preDeductedQuantities);
+            handleNext(context);
+        } catch (Exception e) {
+            // 预减成功但后续步骤失败，恢复Redis库存
+            for (int i = 0; i < preDeductedRelationIds.size(); i++) {
+                redisService.restoreSeckillStock(preDeductedRelationIds.get(i), preDeductedQuantities.get(i));
+            }
+            throw e;
         }
-        handleNext(context);
     }
 }

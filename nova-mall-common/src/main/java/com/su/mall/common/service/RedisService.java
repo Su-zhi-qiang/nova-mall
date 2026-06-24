@@ -209,4 +209,26 @@ public interface RedisService {
      * @param keys 要删除的key集合
      */
     void del(Set<String> keys);
+
+    /**
+     * 秒杀库存预减（Lua原子操作）
+     * @return true=预减成功, false=库存不足, null=库存key不存在
+     */
+    Boolean deductSeckillStock(Long relationId);
+
+    /**
+     * 秒杀库存恢复
+     */
+    void restoreSeckillStock(Long relationId, int quantity);
+
+    /**
+     * 优惠券库存预减（Lua原子操作）
+     * @return true=预减成功, false=库存不足
+     */
+    Boolean deductCouponStock(Long couponId);
+
+    /**
+     * 优惠券库存恢复
+     */
+    void restoreCouponStock(Long couponId);
 }

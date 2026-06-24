@@ -12,12 +12,12 @@ import com.su.mall.model.OmsOrderItem;
 import com.su.mall.model.SmsFlashPromotionProductRelation;
 import lombok.RequiredArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 扣减库存（秒杀/普通）
+ * 秒杀：已通过Redis预减库存拦截大部分请求，此处仅做DB原子扣减（兜底）
+ * 普通：直接扣减SKU和商品库存
  */
 @RequiredArgsConstructor
 public class DeductStockHandler extends OrderHandler {
@@ -33,39 +33,25 @@ public class DeductStockHandler extends OrderHandler {
         List<OmsOrderItem> orderItemList = context.getAttribute("orderItemList");
 
         if (fullOrder.getOrderType() != null && fullOrder.getOrderType() == 1) {
-            // 秒杀订单
-            List<String> acquiredLocks = new ArrayList<>();
-            String lockValue = UUID.randomUUID().toString();
-            try {
-                for (OmsOrderItem orderItem : orderItemList) {
-                    if (orderItem.getFlashPromotionRelationId() != null) {
-                        String lockKey = "flash:lock:relation:" + orderItem.getFlashPromotionRelationId();
-                        Boolean locked = redisService.tryLock(lockKey, lockValue, 30);
-                        if (!locked) {
-                            Asserts.fail("当前抢购人数过多，请稍后重试");
-                        }
-                        acquiredLocks.add(lockKey);
-                    }
-                }
-                for (OmsOrderItem orderItem : orderItemList) {
-                    if (orderItem.getFlashPromotionRelationId() != null) {
-                        int result = dailyStockMapper.decreaseStock(
+            // 秒杀订单：原子SQL扣减数据库库存（兜底，Redis已预减）
+            for (OmsOrderItem orderItem : orderItemList) {
+                if (orderItem.getFlashPromotionRelationId() != null) {
+                    int result = dailyStockMapper.decreaseStock(
+                            orderItem.getFlashPromotionRelationId(),
+                            orderItem.getProductQuantity()
+                    );
+                    if (result == 0) {
+                        // DB库存不足，恢复Redis库存
+                        redisService.restoreSeckillStock(
                                 orderItem.getFlashPromotionRelationId(),
-                                orderItem.getProductQuantity()
-                        );
-                        if (result == 0) {
-                            Asserts.fail("秒杀库存不足");
-                        }
+                                orderItem.getProductQuantity());
+                        Asserts.fail("秒杀库存不足");
                     }
-                }
-                portalOrderDao.updateSkuStock(orderItemList);
-                portalOrderDao.updateProductStock(orderItemList);
-                clearFlashPromotionCache(orderItemList);
-            } finally {
-                for (String lockKey : acquiredLocks) {
-                    redisService.releaseLock(lockKey, lockValue);
                 }
             }
+            portalOrderDao.updateSkuStock(orderItemList);
+            portalOrderDao.updateProductStock(orderItemList);
+            clearFlashPromotionCache(orderItemList);
         } else {
             // 普通订单
             portalOrderDao.updateSkuStock(orderItemList);

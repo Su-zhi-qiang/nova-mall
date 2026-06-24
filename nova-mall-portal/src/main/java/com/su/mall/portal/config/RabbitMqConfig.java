@@ -76,4 +76,27 @@ public class RabbitMqConfig {
                 .with(QueueEnum.QUEUE_TTL_ORDER_CANCEL.getRouteKey());
     }
 
+    // ==================== 优惠券领取队列 ====================
+
+    @Bean
+    DirectExchange couponDirect() {
+        return ExchangeBuilder
+                .directExchange(QueueEnum.QUEUE_COUPON_CLAIM.getExchange())
+                .durable(true)
+                .build();
+    }
+
+    @Bean
+    public Queue couponClaimQueue() {
+        return new Queue(QueueEnum.QUEUE_COUPON_CLAIM.getName());
+    }
+
+    @Bean
+    Binding couponBinding(DirectExchange couponDirect, Queue couponClaimQueue) {
+        return BindingBuilder
+                .bind(couponClaimQueue)
+                .to(couponDirect)
+                .with(QueueEnum.QUEUE_COUPON_CLAIM.getRouteKey());
+    }
+
 }

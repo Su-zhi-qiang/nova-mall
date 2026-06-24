@@ -122,7 +122,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         OrderCreationChain chain = new OrderCreationChain();
         chain.addHandler(new com.su.mall.portal.domain.order.handler.ValidateAddressHandler(memberReceiveAddressService));
         chain.addHandler(new com.su.mall.portal.domain.order.handler.LoadCartHandler(memberService, cartItemService));
-        chain.addHandler(new com.su.mall.portal.domain.order.handler.FlashValidationHandler(flashPromotionProductRelationMapper, dailyStockMapper, portalOrderDao));
+        chain.addHandler(new com.su.mall.portal.domain.order.handler.FlashValidationHandler(flashPromotionProductRelationMapper, dailyStockMapper, portalOrderDao, redisService));
         chain.addHandler(new com.su.mall.portal.domain.order.handler.BuildOrderItemsHandler());
         chain.addHandler(new com.su.mall.portal.domain.order.handler.CheckStockHandler());
         chain.addHandler(new com.su.mall.portal.domain.order.handler.HandleCouponHandler(memberCouponService, couponScopeStrategyFactory));
@@ -279,7 +279,14 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         for (OmsOrderDetail timeOutOrder : timeOutOrders) {
             //解除订单商品库存锁定
             portalOrderDao.releaseSkuStockLock(timeOutOrder.getOrderItemList());
-            //注意：未支付订单的秒杀库存无需恢复（库存仅在支付成功时才扣减）
+            //恢复Redis预减的秒杀库存（Redis在下单时预减，超时需恢复）
+            for (OmsOrderItem orderItem : timeOutOrder.getOrderItemList()) {
+                if (orderItem.getFlashPromotionRelationId() != null) {
+                    redisService.restoreSeckillStock(
+                            orderItem.getFlashPromotionRelationId(),
+                            orderItem.getProductQuantity());
+                }
+            }
             //修改优惠券使用状态（恢复为未使用）
             updateCouponStatus(timeOutOrder.getCouponId(), timeOutOrder.getMemberId(), 0, null, null);
             //返还使用积分
@@ -303,7 +310,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         OrderCreationChain chain = new OrderCreationChain();
         chain.addHandler(new com.su.mall.portal.domain.order.handler.LoadAndValidateCancelOrderHandler(orderMapper));
         chain.addHandler(new com.su.mall.portal.domain.order.handler.UpdateCancelStatusHandler(orderMapper, orderItemMapper));
-        chain.addHandler(new com.su.mall.portal.domain.order.handler.RestoreStockForCancelHandler(portalOrderDao, dailyStockMapper));
+        chain.addHandler(new com.su.mall.portal.domain.order.handler.RestoreStockForCancelHandler(portalOrderDao, dailyStockMapper, redisService));
         chain.addHandler(new com.su.mall.portal.domain.order.handler.RestoreCouponForCancelHandler(couponHistoryMapper, couponMapper));
         chain.addHandler(new com.su.mall.portal.domain.order.handler.ReturnIntegrationHandler(memberService));
         chain.execute(context);

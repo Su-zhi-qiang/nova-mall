@@ -8,6 +8,9 @@ import com.su.mall.common.exception.Asserts;
 import com.su.mall.mapper.*;
 import com.su.mall.model.*;
 import com.su.mall.portal.dao.SmsCouponHistoryDao;
+import com.su.mall.common.service.RedisService;
+import com.su.mall.portal.component.CouponClaimSender;
+import com.su.mall.portal.domain.CouponClaimMessage;
 import com.su.mall.portal.domain.CartPromotionItem;
 import com.su.mall.portal.domain.SmsCouponHistoryDetail;
 import com.su.mall.portal.service.UmsMemberCouponService;
@@ -43,6 +46,8 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
     private final SmsCouponProductCategoryRelationMapper couponProductCategoryRelationMapper;
     private final PmsProductMapper productMapper;
     private final CouponScopeStrategyFactory couponScopeStrategyFactory;
+    private final RedisService redisService;
+    private final CouponClaimSender couponClaimSender;
     @Override
     @Transactional
     public void add(Long couponId) {
@@ -82,28 +87,21 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
             Asserts.fail("您已达到该优惠券的领取上限");
         }
         
-        // 3. 使用SQL原子操作扣减库存（防止超发）
-        LambdaUpdateWrapper<SmsCoupon> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(SmsCoupon::getId, couponId)
-                    .gt(SmsCoupon::getCount, 0)
-                    .setSql("count = count - 1")
-                    .setSql("receive_count = COALESCE(receive_count, 0) + 1");
-        
-        int updateResult = couponMapper.update(null, updateWrapper);
-        if(updateResult == 0){
-            Asserts.fail("优惠券已领完，请稍后再试");
+        // 3. Redis预减库存（Lua原子操作，毫秒级拦截）
+        Boolean success = redisService.deductCouponStock(couponId);
+        if(success == null){
+            Asserts.fail("优惠券已领完");
         }
-        
-        // 4. 生成领取记录
-        SmsCouponHistory couponHistory = new SmsCouponHistory();
-        couponHistory.setCouponId(couponId);
-        couponHistory.setCouponCode(generateCouponCode(currentMember.getId()));
-        couponHistory.setCreateTime(now);
-        couponHistory.setMemberId(currentMember.getId());
-        couponHistory.setMemberNickname(currentMember.getNickname());
-        couponHistory.setGetType(1);  // 主动领取
-        couponHistory.setUseStatus(0);  // 未使用
-        couponHistoryMapper.insert(couponHistory);
+        if(!success){
+            Asserts.fail("优惠券库存不足，请稍后再试");
+        }
+
+        // 4. 发送MQ消息，异步执行DB扣减 + 生成领取记录
+        CouponClaimMessage message = new CouponClaimMessage();
+        message.setCouponId(couponId);
+        message.setMemberId(currentMember.getId());
+        message.setMemberNickname(currentMember.getNickname());
+        couponClaimSender.sendMessage(message);
     }
 
     /**
