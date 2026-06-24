@@ -5,6 +5,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -242,11 +248,20 @@ public class RedisServiceImpl implements RedisService {
             "redis.call('decr', KEYS[1]) " +
             "return 1";
 
+    private static final StringRedisSerializer stringSerializer = new StringRedisSerializer();
+
     @Override
     public Boolean deductSeckillStock(Long relationId) {
         String key = "seckill:stock:" + relationId;
-        DefaultRedisScript<Long> script = new DefaultRedisScript<>(SECKILL_STOCK_DEDUCT_SCRIPT, Long.class);
-        Long result = redisTemplate.execute(script, Collections.singletonList(key), 1);
+        Long result = redisTemplate.execute((RedisCallback<Long>) connection -> {
+            byte[] scriptBytes = SECKILL_STOCK_DEDUCT_SCRIPT.getBytes();
+            byte[] keyBytes = stringSerializer.serialize(key);
+            byte[] argBytes = stringSerializer.serialize("1");
+            Object raw = connection.eval(scriptBytes,
+                    org.springframework.data.redis.connection.ReturnType.INTEGER,
+                    1, keyBytes, argBytes);
+            return raw instanceof Long ? (Long) raw : null;
+        });
         if (result == null || result == -1) {
             return null;
         }
@@ -262,8 +277,14 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public Boolean deductCouponStock(Long couponId) {
         String key = "coupon:stock:" + couponId;
-        DefaultRedisScript<Long> script = new DefaultRedisScript<>(COUPON_STOCK_DEDUCT_SCRIPT, Long.class);
-        Long result = redisTemplate.execute(script, Collections.singletonList(key));
+        Long result = redisTemplate.execute((RedisCallback<Long>) connection -> {
+            byte[] scriptBytes = COUPON_STOCK_DEDUCT_SCRIPT.getBytes();
+            byte[] keyBytes = stringSerializer.serialize(key);
+            Object raw = connection.eval(scriptBytes,
+                    org.springframework.data.redis.connection.ReturnType.INTEGER,
+                    1, keyBytes);
+            return raw instanceof Long ? (Long) raw : null;
+        });
         if (result == null || result == -1) {
             return null;
         }

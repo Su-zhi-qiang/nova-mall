@@ -64,6 +64,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     private final OmsOrderItemMapper orderItemMapper;
     private final CancelOrderSender cancelOrderSender;
     private final CouponScopeStrategyFactory couponScopeStrategyFactory;
+    private final org.springframework.data.redis.core.RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public ConfirmOrderResult generateConfirmOrder(List<Long> cartIds) {
@@ -122,7 +123,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
         OrderCreationChain chain = new OrderCreationChain();
         chain.addHandler(new com.su.mall.portal.domain.order.handler.ValidateAddressHandler(memberReceiveAddressService));
         chain.addHandler(new com.su.mall.portal.domain.order.handler.LoadCartHandler(memberService, cartItemService));
-        chain.addHandler(new com.su.mall.portal.domain.order.handler.FlashValidationHandler(flashPromotionProductRelationMapper, dailyStockMapper, portalOrderDao, redisService));
+        chain.addHandler(new com.su.mall.portal.domain.order.handler.FlashValidationHandler(flashPromotionProductRelationMapper, dailyStockMapper, portalOrderDao, redisService, redisTemplate));
         chain.addHandler(new com.su.mall.portal.domain.order.handler.BuildOrderItemsHandler());
         chain.addHandler(new com.su.mall.portal.domain.order.handler.CheckStockHandler());
         chain.addHandler(new com.su.mall.portal.domain.order.handler.HandleCouponHandler(memberCouponService, couponScopeStrategyFactory));

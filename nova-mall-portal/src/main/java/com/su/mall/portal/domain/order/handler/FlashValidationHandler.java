@@ -10,6 +10,8 @@ import com.su.mall.mapper.SmsFlashPromotionDailyStockMapper;
 import com.su.mall.mapper.SmsFlashPromotionProductRelationMapper;
 import com.su.mall.model.SmsFlashPromotionProductRelation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,7 @@ public class FlashValidationHandler extends OrderHandler {
     private final SmsFlashPromotionDailyStockMapper dailyStockMapper;
     private final PortalOrderDao portalOrderDao;
     private final RedisService redisService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public void handle(OrderHandlerContext context) {
@@ -90,12 +93,18 @@ public class FlashValidationHandler extends OrderHandler {
 
     /**
      * 确保Redis中有秒杀库存（首次访问时从DB同步）
+     * 使用StringRedisSerializer存储，避免Jackson序列化导致Lua脚本无法解析
      */
     private void ensureSeckillRedisStock(Long relationId) {
         String redisKey = "seckill:stock:" + relationId;
         if (!Boolean.TRUE.equals(redisService.hasKey(redisKey))) {
             Integer stock = dailyStockMapper.getCurrentStock(relationId);
-            redisService.set(redisKey, stock != null ? stock.toString() : "0");
+            String stockStr = stock != null ? stock.toString() : "0";
+            StringRedisSerializer serializer = new StringRedisSerializer();
+            redisTemplate.execute((org.springframework.data.redis.core.RedisCallback<Object>) connection -> {
+                connection.set(serializer.serialize(redisKey), serializer.serialize(stockStr));
+                return null;
+            });
         }
     }
 }

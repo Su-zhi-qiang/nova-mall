@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.su.mall.portal.domain.coupon.CouponScopeStrategy;
 import com.su.mall.portal.domain.coupon.CouponScopeStrategyFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -46,6 +48,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
     private final SmsCouponProductCategoryRelationMapper couponProductCategoryRelationMapper;
     private final PmsProductMapper productMapper;
     private final CouponScopeStrategyFactory couponScopeStrategyFactory;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final RedisService redisService;
     private final CouponClaimSender couponClaimSender;
     @Override
@@ -106,14 +109,18 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
 
     /**
      * 确保Redis中有优惠券库存（首次访问时从DB同步）
+     * 使用StringRedisSerializer存储，避免Jackson序列化导致Lua脚本无法解析
      */
     private void ensureCouponRedisStock(Long couponId, Integer dbStock) {
         String redisKey = "coupon:stock:" + couponId;
         if (!Boolean.TRUE.equals(redisService.hasKey(redisKey))) {
-            // 从DB读取当前剩余库存并同步到Redis
             SmsCoupon coupon = couponMapper.selectById(couponId);
             int stock = (coupon != null && coupon.getCount() != null) ? coupon.getCount() : 0;
-            redisService.set(redisKey, String.valueOf(stock));
+            StringRedisSerializer serializer = new StringRedisSerializer();
+            redisTemplate.execute((org.springframework.data.redis.core.RedisCallback<Object>) connection -> {
+                connection.set(serializer.serialize(redisKey), serializer.serialize(String.valueOf(stock)));
+                return null;
+            });
         }
     }
 

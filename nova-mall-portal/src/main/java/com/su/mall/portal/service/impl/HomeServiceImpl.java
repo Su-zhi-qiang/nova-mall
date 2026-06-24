@@ -14,6 +14,8 @@ import com.su.mall.portal.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -43,6 +45,7 @@ public class HomeServiceImpl implements HomeService {
     private final PmsProductCategoryMapper productCategoryMapper;
     private final CmsSubjectMapper subjectMapper;
     private final RedisService redisService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public HomeFlashPromotion getFlashPromotion() {
@@ -303,23 +306,30 @@ public class HomeServiceImpl implements HomeService {
     /**
      * 确保今日快照存在，不存在则批量补建（兜底定时任务未执行的场景）
      * 同时同步DB库存到Redis（首次访问时初始化Redis库存）
+     * 使用StringRedisSerializer存储，避免Jackson序列化导致Lua脚本无法解析
      */
     private Integer ensureDailyStock(SmsFlashPromotionProductRelation relation) {
         Integer stock = dailyStockMapper.getCurrentStock(relation.getId());
         if (stock != null) {
-            // 同步DB库存到Redis（仅在Redis中不存在时初始化）
             String redisKey = "seckill:stock:" + relation.getId();
             if (!Boolean.TRUE.equals(redisService.hasKey(redisKey))) {
-                redisService.set(redisKey, stock.toString());
+                StringRedisSerializer serializer = new StringRedisSerializer();
+                redisTemplate.execute((org.springframework.data.redis.core.RedisCallback<Object>) connection -> {
+                    connection.set(serializer.serialize(redisKey), serializer.serialize(stock.toString()));
+                    return null;
+                });
             }
             return stock;
         }
-        // 今日快照不存在，先尝试批量补建当天全部快照
         ensureAllDailyStock();
-        // 再次查询
         Integer newStock = dailyStockMapper.getCurrentStock(relation.getId());
         if (newStock != null) {
-            redisService.set("seckill:stock:" + relation.getId(), newStock.toString());
+            String redisKey = "seckill:stock:" + relation.getId();
+            StringRedisSerializer serializer = new StringRedisSerializer();
+            redisTemplate.execute((org.springframework.data.redis.core.RedisCallback<Object>) connection -> {
+                connection.set(serializer.serialize(redisKey), serializer.serialize(newStock.toString()));
+                return null;
+            });
         }
         return newStock;
     }
