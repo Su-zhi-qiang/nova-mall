@@ -178,11 +178,11 @@ public class HomeServiceImpl implements HomeService {
                 .eq(SmsFlashPromotionProductRelation::getFlashPromotionId, activity.getId())
                 .eq(SmsFlashPromotionProductRelation::getFlashPromotionSessionId, session.getId()));
 
-        // 过滤出今日有库存的商品（从每日快照表查询）
+        // 过滤出今日有库存的商品（从每日快照表查询，不存在则自动补建）
         List<SmsFlashPromotionProductRelation> activeRelations = new ArrayList<>();
         for (SmsFlashPromotionProductRelation relation : relations) {
             if (relation.getFlashPromotionPrice() == null) continue;
-            Integer dailyStock = dailyStockMapper.getCurrentStock(relation.getId());
+            Integer dailyStock = ensureDailyStock(relation);
             if (dailyStock != null && dailyStock > 0) {
                 activeRelations.add(relation);
             }
@@ -298,5 +298,67 @@ public class HomeServiceImpl implements HomeService {
             return promotionSessionList.get(0);
         }
         return null;
+    }
+
+    /**
+     * 确保今日快照存在，不存在则批量补建（兜底定时任务未执行的场景）
+     */
+    private Integer ensureDailyStock(SmsFlashPromotionProductRelation relation) {
+        Integer stock = dailyStockMapper.getCurrentStock(relation.getId());
+        if (stock != null) {
+            return stock;
+        }
+        // 今日快照不存在，先尝试批量补建当天全部快照
+        ensureAllDailyStock();
+        // 再次查询
+        return dailyStockMapper.getCurrentStock(relation.getId());
+    }
+
+    /**
+     * 批量补建当天全部秒杀商品快照（仅执行一次，通过Redis防止并发）
+     */
+    private void ensureAllDailyStock() {
+        String lockKey = "flash:dailyStock:ensure:" + new java.text.SimpleDateFormat("yyyyMMdd").format(new Date());
+        Boolean locked = redisService.tryLock(lockKey, "1", 60);
+        if (!Boolean.TRUE.equals(locked)) {
+            return; // 已有其他请求在补建
+        }
+        try {
+            // 查询所有有效活动
+            List<SmsFlashPromotion> activePromotions = flashPromotionMapper.selectList(
+                    new LambdaQueryWrapper<SmsFlashPromotion>()
+                            .eq(SmsFlashPromotion::getStatus, 1)
+                            .le(SmsFlashPromotion::getStartDate, new Date())
+                            .ge(SmsFlashPromotion::getEndDate, new Date()));
+            int totalCreated = 0;
+            for (SmsFlashPromotion promotion : activePromotions) {
+                List<SmsFlashPromotionSession> sessions = promotionSessionMapper.selectList(
+                        new LambdaQueryWrapper<SmsFlashPromotionSession>()
+                                .eq(SmsFlashPromotionSession::getStatus, 1));
+                for (SmsFlashPromotionSession session : sessions) {
+                    List<SmsFlashPromotionProductRelation> relations = flashPromotionProductRelationMapper.selectList(
+                            new LambdaQueryWrapper<SmsFlashPromotionProductRelation>()
+                                    .eq(SmsFlashPromotionProductRelation::getFlashPromotionId, promotion.getId())
+                                    .eq(SmsFlashPromotionProductRelation::getFlashPromotionSessionId, session.getId()));
+                    for (SmsFlashPromotionProductRelation relation : relations) {
+                        try {
+                            SmsFlashPromotionDailyStock dailyStock = new SmsFlashPromotionDailyStock();
+                            dailyStock.setRelationId(relation.getId());
+                            dailyStock.setBatchDate(new Date());
+                            dailyStock.setStock(relation.getOriginalCount() != null ? relation.getOriginalCount() : 0);
+                            dailyStock.setSold(0);
+                            dailyStock.setCreateTime(new Date());
+                            dailyStockMapper.insert(dailyStock);
+                            totalCreated++;
+                        } catch (Exception e) {
+                            // UNIQUE KEY 冲突，已存在，跳过
+                        }
+                    }
+                }
+            }
+            LOGGER.info("兜底批量补建今日快照完成，共创建{}条记录", totalCreated);
+        } catch (Exception e) {
+            LOGGER.warn("兜底批量补建快照失败: {}", e.getMessage());
+        }
     }
 }
