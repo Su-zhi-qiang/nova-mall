@@ -18,4 +18,9 @@ public interface OmsOrderCommentService {
      * 获取商品评价列表
      */
     Map<String, Object> listByProductId(Long productId);
+
+    /**
+     * 获取用户的评价历史列表
+     */
+    List<Map<String, Object>> listByMemberId();
 }

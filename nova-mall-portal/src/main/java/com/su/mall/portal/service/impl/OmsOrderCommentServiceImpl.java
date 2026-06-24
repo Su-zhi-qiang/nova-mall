@@ -92,4 +92,37 @@ public class OmsOrderCommentServiceImpl implements OmsOrderCommentService {
         result.put("list", comments);
         return result;
     }
+
+    @Override
+    public List<Map<String, Object>> listByMemberId() {
+        Long memberId = memberService.getCurrentMember().getId();
+        
+        List<OmsOrderComment> comments = commentMapper.selectList(
+            new LambdaQueryWrapper<OmsOrderComment>()
+                .eq(OmsOrderComment::getMemberId, memberId)
+                .orderByDesc(OmsOrderComment::getCreateTime));
+        
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (OmsOrderComment comment : comments) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", comment.getId());
+            item.put("orderId", comment.getOrderId());
+            item.put("productId", comment.getProductId());
+            item.put("star", comment.getStar());
+            item.put("content", comment.getContent());
+            item.put("pics", comment.getPics());
+            item.put("createTime", comment.getCreateTime());
+            
+            // 查询商品信息
+            OmsOrderItem orderItem = orderItemMapper.selectById(comment.getOrderItemId());
+            if (orderItem != null) {
+                item.put("productName", orderItem.getProductName());
+                item.put("productPic", orderItem.getProductPic());
+                item.put("productAttr", orderItem.getProductAttr());
+            }
+            
+            result.add(item);
+        }
+        return result;
+    }
 }

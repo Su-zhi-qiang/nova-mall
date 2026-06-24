@@ -38,4 +38,11 @@ public class OmsOrderCommentController {
         Map<String, Object> result = commentService.listByProductId(productId);
         return CommonResult.success(result);
     }
+
+    @Operation(summary = "获取用户评价历史")
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public CommonResult<List<Map<String, Object>>> listByMember() {
+        List<Map<String, Object>> result = commentService.listByMemberId();
+        return CommonResult.success(result);
+    }
 }
