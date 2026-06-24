@@ -87,12 +87,12 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
             Asserts.fail("您已达到该优惠券的领取上限");
         }
         
-        // 3. Redis预减库存（Lua原子操作，毫秒级拦截）
+        // 3. 确保Redis中有库存（首次访问时从DB同步）
+        ensureCouponRedisStock(couponId, coupon.getCount());
+
+        // 4. Redis预减库存（Lua原子操作，毫秒级拦截）
         Boolean success = redisService.deductCouponStock(couponId);
-        if(success == null){
-            Asserts.fail("优惠券已领完");
-        }
-        if(!success){
+        if(success == null || !success){
             Asserts.fail("优惠券库存不足，请稍后再试");
         }
 
@@ -102,6 +102,19 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
         message.setMemberId(currentMember.getId());
         message.setMemberNickname(currentMember.getNickname());
         couponClaimSender.sendMessage(message);
+    }
+
+    /**
+     * 确保Redis中有优惠券库存（首次访问时从DB同步）
+     */
+    private void ensureCouponRedisStock(Long couponId, Integer dbStock) {
+        String redisKey = "coupon:stock:" + couponId;
+        if (!Boolean.TRUE.equals(redisService.hasKey(redisKey))) {
+            // 从DB读取当前剩余库存并同步到Redis
+            SmsCoupon coupon = couponMapper.selectById(couponId);
+            int stock = (coupon != null && coupon.getCount() != null) ? coupon.getCount() : 0;
+            redisService.set(redisKey, String.valueOf(stock));
+        }
     }
 
     /**
