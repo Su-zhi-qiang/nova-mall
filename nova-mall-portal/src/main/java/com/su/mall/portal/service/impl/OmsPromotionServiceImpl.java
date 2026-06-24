@@ -84,6 +84,23 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
             // 秒杀项按秒杀策略处理
             PromotionStrategy flashStrategy = promotionStrategyFactory.getFlashStrategy();
             for (OmsCartItem item : flashItemList) {
+                if (flashStrategy == null) {
+                    // 秒杀策略未注册，按无优惠处理
+                    PromotionStrategy noStrategy = promotionStrategyFactory.getStrategy(0);
+                    com.su.mall.model.SmsFlashPromotionProductRelation flashRelation =
+                            flashRelationMap.get(item.getFlashPromotionRelationId());
+                    PromotionContext context = PromotionContext.builder()
+                            .item(item)
+                            .promotionProduct(promotionProduct)
+                            .flashRelation(flashRelation)
+                            .dailyStock(dailyStockMapper.getCurrentStock(flashRelation.getId()))
+                            .build();
+                    CartPromotionItem cartPromotionItem = noStrategy.calculatePromotion(context);
+                    if (cartPromotionItem != null) {
+                        cartPromotionItemList.add(cartPromotionItem);
+                    }
+                    continue;
+                }
                 com.su.mall.model.SmsFlashPromotionProductRelation flashRelation =
                         flashRelationMap.get(item.getFlashPromotionRelationId());
                 if (flashRelation == null) continue;
