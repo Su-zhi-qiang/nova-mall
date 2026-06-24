@@ -16,6 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.su.mall.portal.domain.coupon.CouponScopeStrategy;
+import com.su.mall.portal.domain.coupon.CouponScopeStrategyFactory;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,6 +42,7 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
     private final SmsCouponProductRelationMapper couponProductRelationMapper;
     private final SmsCouponProductCategoryRelationMapper couponProductCategoryRelationMapper;
     private final PmsProductMapper productMapper;
+    private final CouponScopeStrategyFactory couponScopeStrategyFactory;
     @Override
     @Transactional
     public void add(Long couponId) {
@@ -150,45 +154,15 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
             Date endTime = couponHistoryDetail.getCoupon().getEndTime();
             // 检查优惠券是否已过期
             boolean isExpired = endTime != null && now.after(endTime);
-            // 检查是否满足最低消费
-            boolean isMinPointMet = minPoint == null || minPoint.compareTo(BigDecimal.ZERO) <= 0;
-            
-            if (Objects.equals(0, useType)) {
-                //0->全场通用
-                BigDecimal totalAmount = calcTotalAmount(cartItemList);
-                if (!isExpired && totalAmount.subtract(minPoint != null ? minPoint : BigDecimal.ZERO).compareTo(BigDecimal.ZERO) >= 0) {
-                    enableList.add(couponHistoryDetail);
-                } else {
-                    disableList.add(couponHistoryDetail);
-                }
-            } else if (Objects.equals(1, useType)) {
-                //1->指定分类
-                List<Long> productCategoryIds = new ArrayList<>();
-                if (couponHistoryDetail.getCategoryRelationList() != null) {
-                    for (SmsCouponProductCategoryRelation categoryRelation : couponHistoryDetail.getCategoryRelationList()) {
-                        productCategoryIds.add(categoryRelation.getProductCategoryId());
-                    }
-                }
-                BigDecimal totalAmount = calcTotalAmountByproductCategoryId(cartItemList, productCategoryIds);
-                if (!isExpired && totalAmount.compareTo(BigDecimal.ZERO) > 0 && totalAmount.subtract(minPoint != null ? minPoint : BigDecimal.ZERO).compareTo(BigDecimal.ZERO) >= 0) {
-                    enableList.add(couponHistoryDetail);
-                } else {
-                    disableList.add(couponHistoryDetail);
-                }
-            } else if (Objects.equals(2, useType)) {
-                //2->指定商品
-                List<Long> productIds = new ArrayList<>();
-                if (couponHistoryDetail.getProductRelationList() != null) {
-                    for (SmsCouponProductRelation productRelation : couponHistoryDetail.getProductRelationList()) {
-                        productIds.add(productRelation.getProductId());
-                    }
-                }
-                BigDecimal totalAmount = calcTotalAmountByProductId(cartItemList, productIds);
-                if (!isExpired && totalAmount.compareTo(BigDecimal.ZERO) > 0 && totalAmount.subtract(minPoint != null ? minPoint : BigDecimal.ZERO).compareTo(BigDecimal.ZERO) >= 0) {
-                    enableList.add(couponHistoryDetail);
-                } else {
-                    disableList.add(couponHistoryDetail);
-                }
+
+            CouponScopeStrategy strategy = couponScopeStrategyFactory.getStrategy(useType);
+            BigDecimal totalAmount = strategy.calcEligibleAmount(cartItemList, couponHistoryDetail);
+
+            if (!isExpired && totalAmount.compareTo(BigDecimal.ZERO) > 0
+                    && totalAmount.subtract(minPoint != null ? minPoint : BigDecimal.ZERO).compareTo(BigDecimal.ZERO) >= 0) {
+                enableList.add(couponHistoryDetail);
+            } else {
+                disableList.add(couponHistoryDetail);
             }
         }
         if(type.equals(1)){

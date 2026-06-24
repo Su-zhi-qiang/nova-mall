@@ -7,6 +7,9 @@ import com.su.mall.model.PmsSkuStock;
 import com.su.mall.portal.dao.PortalProductDao;
 import com.su.mall.portal.domain.CartPromotionItem;
 import com.su.mall.portal.domain.PromotionProduct;
+import com.su.mall.portal.domain.promotion.PromotionContext;
+import com.su.mall.portal.domain.promotion.PromotionStrategy;
+import com.su.mall.portal.domain.promotion.PromotionStrategyFactory;
 import com.su.mall.portal.service.OmsPromotionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -26,6 +29,7 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
     private final PortalProductDao portalProductDao;
     private final com.su.mall.mapper.SmsFlashPromotionProductRelationMapper flashPromotionProductRelationMapper;
     private final com.su.mall.mapper.SmsFlashPromotionDailyStockMapper dailyStockMapper;
+    private final PromotionStrategyFactory promotionStrategyFactory;
 
     @Override
     public List<CartPromotionItem> calcCartPromotion(List<OmsCartItem> cartItemList) {
@@ -41,7 +45,17 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
             List<OmsCartItem> itemList = entry.getValue();
             if (promotionProduct == null) {
                 // 商品无促销信息，按无优惠处理
-                handleNoReduce(cartPromotionItemList, itemList, null);
+                PromotionStrategy noStrategy = promotionStrategyFactory.getStrategy(0);
+                for (OmsCartItem item : itemList) {
+                    PromotionContext context = PromotionContext.builder()
+                            .item(item)
+                            .promotionProduct(promotionProduct)
+                            .build();
+                    CartPromotionItem cartPromotionItem = noStrategy.calculatePromotion(context);
+                    if (cartPromotionItem != null) {
+                        cartPromotionItemList.add(cartPromotionItem);
+                    }
+                }
                 continue;
             }
             Integer promotionType = promotionProduct.getPromotionType();
@@ -67,109 +81,101 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
                 normalItemList.add(item);
             }
 
-            // 秒杀项按秒杀逻辑处理
+            // 秒杀项按秒杀策略处理
+            PromotionStrategy flashStrategy = promotionStrategyFactory.getFlashStrategy();
             for (OmsCartItem item : flashItemList) {
                 com.su.mall.model.SmsFlashPromotionProductRelation flashRelation =
                         flashRelationMap.get(item.getFlashPromotionRelationId());
                 if (flashRelation == null) continue;
-                CartPromotionItem cartPromotionItem = new CartPromotionItem();
-                BeanUtils.copyProperties(item, cartPromotionItem);
-                cartPromotionItem.setPromotionMessage("限时秒杀");
-                cartPromotionItem.setFlashPromotion(true);
-                cartPromotionItem.setFlashPromotionId(flashRelation.getFlashPromotionId());
-                cartPromotionItem.setFlashPromotionSessionId(flashRelation.getFlashPromotionSessionId());
-                cartPromotionItem.setFlashPromotionRelationId(flashRelation.getId());
-
-                PmsSkuStock skuStock = getOriginalPrice(promotionProduct, item.getProductSkuId());
-                if (skuStock == null) continue;
-                BigDecimal originalPrice = skuStock.getPrice();
-                cartPromotionItem.setPrice(originalPrice);
-                cartPromotionItem.setReduceAmount(originalPrice.subtract(flashRelation.getFlashPromotionPrice()));
-                Integer dailyStock = dailyStockMapper.getCurrentStock(flashRelation.getId());
-                int realStock = dailyStock != null ? dailyStock : 0;
-                cartPromotionItem.setRealStock(realStock);
-                cartPromotionItem.setIntegration(promotionProduct.getGiftPoint());
-                cartPromotionItem.setGrowth(promotionProduct.getGiftGrowth());
-                cartPromotionItemList.add(cartPromotionItem);
+                PromotionContext context = PromotionContext.builder()
+                        .item(item)
+                        .promotionProduct(promotionProduct)
+                        .flashRelation(flashRelation)
+                        .dailyStock(dailyStockMapper.getCurrentStock(flashRelation.getId()))
+                        .build();
+                CartPromotionItem cartPromotionItem = flashStrategy.calculatePromotion(context);
+                if (cartPromotionItem != null) {
+                    cartPromotionItemList.add(cartPromotionItem);
+                }
             }
 
             // 普通项走原来的促销逻辑
             itemList = normalItemList;
-            if (!itemList.isEmpty() && promotionType != null && promotionType == 1) {
-                //单品促销
-                for (OmsCartItem item : itemList) {
-                    CartPromotionItem cartPromotionItem = new CartPromotionItem();
-                    BeanUtils.copyProperties(item,cartPromotionItem);
-                    cartPromotionItem.setPromotionMessage("单品促销");
-                    //商品原价-促销价
-                    PmsSkuStock skuStock = getOriginalPrice(promotionProduct, item.getProductSkuId());
-                    if (skuStock == null) continue;
-                    BigDecimal originalPrice = skuStock.getPrice();
-                    //单品促销使用原价
-                    cartPromotionItem.setPrice(originalPrice);
-                    cartPromotionItem.setReduceAmount(originalPrice.subtract(skuStock.getPromotionPrice()));
-                    Integer lockStockVal = skuStock.getLockStock();
-                    int lockStock = lockStockVal == null ? 0 : lockStockVal;
-                    cartPromotionItem.setRealStock(skuStock.getStock() - lockStock);
-                    cartPromotionItem.setIntegration(promotionProduct.getGiftPoint());
-                    cartPromotionItem.setGrowth(promotionProduct.getGiftGrowth());
-                    cartPromotionItemList.add(cartPromotionItem);
-                }
-            } else if (promotionType != null && promotionType == 3) {
-                //打折优惠
-                int count = getCartItemCount(itemList);
-                PmsProductLadder ladder = getProductLadder(count, promotionProduct.getProductLadderList());
-                if(ladder!=null){
-                    for (OmsCartItem item : itemList) {
-                        CartPromotionItem cartPromotionItem = new CartPromotionItem();
-                        BeanUtils.copyProperties(item,cartPromotionItem);
-                        String message = getLadderPromotionMessage(ladder);
-                        cartPromotionItem.setPromotionMessage(message);
-                        //商品原价-折扣*商品原价
-                        PmsSkuStock skuStock = getOriginalPrice(promotionProduct,item.getProductSkuId());
-                        if (skuStock == null) continue;
-                        BigDecimal originalPrice = skuStock.getPrice();
-                        BigDecimal reduceAmount = originalPrice.subtract(ladder.getDiscount().multiply(originalPrice));
-                        cartPromotionItem.setReduceAmount(reduceAmount);
-                        Integer lockStockVal2 = skuStock.getLockStock();
-                        int lockStock2 = lockStockVal2 == null ? 0 : lockStockVal2;
-                        cartPromotionItem.setRealStock(skuStock.getStock() - lockStock2);
-                        cartPromotionItem.setIntegration(promotionProduct.getGiftPoint());
-                        cartPromotionItem.setGrowth(promotionProduct.getGiftGrowth());
-                        cartPromotionItemList.add(cartPromotionItem);
+            if (!itemList.isEmpty()) {
+                PromotionStrategy strategy = promotionStrategyFactory.getStrategy(promotionType);
+                // 对于打折和满减，需要先计算ladder或fullReduction
+                if (promotionType != null && promotionType == 3) {
+                    int count = getCartItemCount(itemList);
+                    PmsProductLadder ladder = getProductLadder(count, promotionProduct.getProductLadderList());
+                    if (ladder != null) {
+                        for (OmsCartItem item : itemList) {
+                            PromotionContext context = PromotionContext.builder()
+                                    .item(item)
+                                    .promotionProduct(promotionProduct)
+                                    .ladder(ladder)
+                                    .build();
+                            CartPromotionItem cartPromotionItem = strategy.calculatePromotion(context);
+                            if (cartPromotionItem != null) {
+                                cartPromotionItemList.add(cartPromotionItem);
+                            }
+                        }
+                    } else {
+                        // 没有满足条件的打折策略，按无优惠处理
+                        PromotionStrategy noStrategy = promotionStrategyFactory.getStrategy(0);
+                        for (OmsCartItem item : itemList) {
+                            PromotionContext context = PromotionContext.builder()
+                                    .item(item)
+                                    .promotionProduct(promotionProduct)
+                                    .build();
+                            CartPromotionItem cartPromotionItem = noStrategy.calculatePromotion(context);
+                            if (cartPromotionItem != null) {
+                                cartPromotionItemList.add(cartPromotionItem);
+                            }
+                        }
                     }
-                }else{
-                    handleNoReduce(cartPromotionItemList,itemList,promotionProduct);
-                }
-            } else if (promotionType != null && promotionType == 4) {
-                //满减
-                BigDecimal totalAmount= getCartItemAmount(itemList,promotionProductList);
-                PmsProductFullReduction fullReduction = getProductFullReduction(totalAmount,promotionProduct.getProductFullReductionList());
-                if(fullReduction!=null){
-                    for (OmsCartItem item : itemList) {
-                        CartPromotionItem cartPromotionItem = new CartPromotionItem();
-                        BeanUtils.copyProperties(item,cartPromotionItem);
-                        String message = getFullReductionPromotionMessage(fullReduction);
-                        cartPromotionItem.setPromotionMessage(message);
-                        //(商品原价/总价)*满减金额
-                        PmsSkuStock skuStock= getOriginalPrice(promotionProduct, item.getProductSkuId());
-                        if (skuStock == null) continue;
-                        BigDecimal originalPrice = skuStock.getPrice();
-                        BigDecimal reduceAmount = originalPrice.divide(totalAmount,RoundingMode.HALF_EVEN).multiply(fullReduction.getReducePrice());
-                        cartPromotionItem.setReduceAmount(reduceAmount);
-                        Integer lockStockVal3 = skuStock.getLockStock();
-                        int lockStock3 = lockStockVal3 == null ? 0 : lockStockVal3;
-                        cartPromotionItem.setRealStock(skuStock.getStock() - lockStock3);
-                        cartPromotionItem.setIntegration(promotionProduct.getGiftPoint());
-                        cartPromotionItem.setGrowth(promotionProduct.getGiftGrowth());
-                        cartPromotionItemList.add(cartPromotionItem);
+                } else if (promotionType != null && promotionType == 4) {
+                    BigDecimal totalAmount = getCartItemAmount(itemList, promotionProductList);
+                    PmsProductFullReduction fullReduction = getProductFullReduction(totalAmount, promotionProduct.getProductFullReductionList());
+                    if (fullReduction != null) {
+                        for (OmsCartItem item : itemList) {
+                            PromotionContext context = PromotionContext.builder()
+                                    .item(item)
+                                    .promotionProduct(promotionProduct)
+                                    .fullReduction(fullReduction)
+                                    .totalAmount(totalAmount)
+                                    .build();
+                            CartPromotionItem cartPromotionItem = strategy.calculatePromotion(context);
+                            if (cartPromotionItem != null) {
+                                cartPromotionItemList.add(cartPromotionItem);
+                            }
+                        }
+                    } else {
+                        // 没有满足条件的满减策略，按无优惠处理
+                        PromotionStrategy noStrategy = promotionStrategyFactory.getStrategy(0);
+                        for (OmsCartItem item : itemList) {
+                            PromotionContext context = PromotionContext.builder()
+                                    .item(item)
+                                    .promotionProduct(promotionProduct)
+                                    .build();
+                            CartPromotionItem cartPromotionItem = noStrategy.calculatePromotion(context);
+                            if (cartPromotionItem != null) {
+                                cartPromotionItemList.add(cartPromotionItem);
+                            }
+                        }
                     }
-                }else{
-                    handleNoReduce(cartPromotionItemList,itemList,promotionProduct);
+                } else {
+                    // 其他促销类型（包括单品促销和无优惠）
+                    for (OmsCartItem item : itemList) {
+                        PromotionContext context = PromotionContext.builder()
+                                .item(item)
+                                .promotionProduct(promotionProduct)
+                                .build();
+                        CartPromotionItem cartPromotionItem = strategy.calculatePromotion(context);
+                        if (cartPromotionItem != null) {
+                            cartPromotionItemList.add(cartPromotionItem);
+                        }
+                    }
                 }
-            } else {
-                //无优惠
-                handleNoReduce(cartPromotionItemList, itemList,promotionProduct);
             }
         }
         return cartPromotionItemList;
@@ -204,41 +210,7 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
         return productCartMap;
     }
 
-    /**
-     * 获取满减促销消息
-     */
-    private String getFullReductionPromotionMessage(PmsProductFullReduction fullReduction) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("满减优惠：");
-        sb.append("满");
-        sb.append(fullReduction.getFullPrice());
-        sb.append("元，");
-        sb.append("减");
-        sb.append(fullReduction.getReducePrice());
-        sb.append("元");
-        return sb.toString();
-    }
 
-    /**
-     * 对没满足优惠条件的商品进行处理
-     */
-    private void handleNoReduce(List<CartPromotionItem> cartPromotionItemList, List<OmsCartItem> itemList,PromotionProduct promotionProduct) {
-        for (OmsCartItem item : itemList) {
-            CartPromotionItem cartPromotionItem = new CartPromotionItem();
-            BeanUtils.copyProperties(item,cartPromotionItem);
-            cartPromotionItem.setPromotionMessage("无优惠");
-            cartPromotionItem.setReduceAmount(new BigDecimal(0));
-            PmsSkuStock skuStock = getOriginalPrice(promotionProduct,item.getProductSkuId());
-            if(skuStock!=null){
-                Integer lockStockVal4 = skuStock.getLockStock();
-                int lockStock4 = lockStockVal4 == null ? 0 : lockStockVal4;
-                cartPromotionItem.setRealStock(skuStock.getStock() - lockStock4);
-            }
-            cartPromotionItem.setIntegration(promotionProduct.getGiftPoint());
-            cartPromotionItem.setGrowth(promotionProduct.getGiftGrowth());
-            cartPromotionItemList.add(cartPromotionItem);
-        }
-    }
 
     private PmsProductFullReduction getProductFullReduction(BigDecimal totalAmount,List<PmsProductFullReduction> fullReductionList) {
         //按条件从高到低排序
@@ -254,21 +226,6 @@ public class OmsPromotionServiceImpl implements OmsPromotionService {
             }
         }
         return null;
-    }
-
-    /**
-     * 获取打折优惠的促销信息
-     */
-    private String getLadderPromotionMessage(PmsProductLadder ladder) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("打折优惠：");
-        sb.append("满");
-        sb.append(ladder.getCount());
-        sb.append("件，");
-        sb.append("打");
-        sb.append(ladder.getDiscount().multiply(new BigDecimal(10)));
-        sb.append("折");
-        return sb.toString();
     }
 
     /**

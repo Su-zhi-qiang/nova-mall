@@ -50,3 +50,25 @@ alipay:
   returnUrl: http://localhost:8060/#/pages/money/paySuccess
   notifyUrl:
 
+# 促销策略映射：promotionType值 -> 策略Bean名称
+promotion:
+  types:
+    "-1": flashPromotionStrategy
+    "0": noPromotionStrategy
+    "1": singleItemPromotionStrategy
+    "3": ladderDiscountPromotionStrategy
+    "4": fullReductionPromotionStrategy
+
+# 优惠券适用范围策略映射：useType值 -> 策略Bean名称
+coupon:
+  scopeTypes:
+    "0": allProductCouponScopeStrategy
+    "1": categoryCouponScopeStrategy
+    "2": productCouponScopeStrategy
+
+# 支付方式策略映射：payType值 -> 策略Bean名称
+payment:
+  types:
+    "1": alipayPaymentStrategy
+    # "2": wechatPaymentStrategy  # 未来新增微信支付
+
