@@ -24,7 +24,7 @@ public class PaymentStrategyFactory implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         paymentTypeConfig.getTypes().forEach((key, beanName) -> {
-            strategyPool.put(key, (PaymentStrategy) applicationContext.getBean(beanName));
+            strategyPool.put(String.valueOf(key), (PaymentStrategy) applicationContext.getBean(beanName));
         });
     }
 
