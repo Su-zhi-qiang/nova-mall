@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
@@ -21,11 +22,13 @@ import java.util.Date;
 
 /**
  * MinIO对象存储管理Controller
+ * 仅在配置了 minio.endpoint 时加载（开发环境使用，生产环境使用OSS）
  * @author Su
  */
 @RestController
 @Tag(name = "MinioController", description = "MinIO对象存储管理")
 @RequestMapping("/minio")
+@ConditionalOnProperty(name = "minio.endpoint")
 public class MinioController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MinioController.class);

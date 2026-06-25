@@ -9,3 +9,22 @@ target/
 .settings/
 .classpath
 .project
+
+# 敏感配置文件 - 包含密码、密钥、Token等，不能提交到仓库
+**/application-prod.yml
+**/application-prod.yaml
+**/application-dev.yml
+**/application-dev.yaml
+**/.env.production
+**/.env.local
+**/.env
+**/docker-compose-env.yml
+**/docker-compose-app.yml
+**/docker-compose-agent.yml
+**/*.env
+
+# 部署配置 - 含服务器密码和密钥
+deploy/
+
+# SQL初始化文件 - 可能含敏感数据
+document/init.sql

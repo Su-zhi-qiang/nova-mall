@@ -26,7 +26,11 @@ public class PromotionStrategyFactory implements ApplicationContextAware {
      */
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        promotionTypeConfig.getTypes().forEach((key, beanName) -> {
+        Map<String, String> types = promotionTypeConfig.getTypes();
+        if (types == null || types.isEmpty()) {
+            return;
+        }
+        types.forEach((key, beanName) -> {
             strategyPool.put(String.valueOf(key), (PromotionStrategy) applicationContext.getBean(beanName));
         });
     }

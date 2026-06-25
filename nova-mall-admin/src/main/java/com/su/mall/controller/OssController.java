@@ -8,6 +8,7 @@ import com.su.mall.service.OssService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,12 +17,14 @@ import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Oss对象存储管理Controller
+ * 仅在配置了 aliyun.oss.endpoint 时加载（生产环境使用，开发环境使用MinIO）
  * @author Su
  */
 @RestController
 @Tag(name = "OssController", description = "Oss对象存储管理")
 @RequestMapping("/aliyun/oss")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "aliyun.oss.endpoint")
 public class OssController {
     private final OssService ossService;
 

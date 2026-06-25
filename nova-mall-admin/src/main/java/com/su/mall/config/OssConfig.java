@@ -2,14 +2,17 @@ package com.su.mall.config;
 
 import com.aliyun.oss.OSSClient;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * OSS对象存储相关配置
+ * 仅在配置了 aliyun.oss.endpoint 时加载（生产环境使用，开发环境使用MinIO）
  * @author Su
  */
 @Configuration
+@ConditionalOnProperty(name = "aliyun.oss.endpoint")
 public class OssConfig {
     @Value("${aliyun.oss.endpoint}")
     private String ALIYUN_OSS_ENDPOINT;

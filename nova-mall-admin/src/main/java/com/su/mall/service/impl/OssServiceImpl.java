@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,10 +22,12 @@ import java.util.Date;
 
 /**
  * Oss对象存储管理Service实现类
+ * 仅在配置了 aliyun.oss.endpoint 时加载（生产环境使用，开发环境使用MinIO）
  * @author Su
  */
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "aliyun.oss.endpoint")
 public class OssServiceImpl implements OssService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OssServiceImpl.class);

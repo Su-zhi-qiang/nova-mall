@@ -23,7 +23,11 @@ public class CouponScopeStrategyFactory implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        couponTypeConfig.getScopeTypes().forEach((key, beanName) -> {
+        Map<String, String> scopeTypes = couponTypeConfig.getScopeTypes();
+        if (scopeTypes == null || scopeTypes.isEmpty()) {
+            return;
+        }
+        scopeTypes.forEach((key, beanName) -> {
             strategyPool.put(String.valueOf(key), (CouponScopeStrategy) applicationContext.getBean(beanName));
         });
     }
