@@ -1,7 +1,9 @@
 # Nova Mall 后端服务
 
 基于 Spring Boot 3.5 + MyBatis-Plus + Spring Security 的电商后端，Maven 多模块工程，包含后台管理、商城前台、全文搜索三个独立服务。
-
+- 后台管理前端：[Nova-Mall Admin Web](https://github.com/Su-zhi-qiang/noval-mall-admin-web "商城后台管理系统")
+- 移动端H5商城：[Nova-Mall App Web](https://github.com/Su-zhi-qiang/nova-mall-app-web "手机端商城网页")
+- AI智能代理模块：[Nova-Mall Agent](https://github.com/Su-zhi-qiang/nova-mall-agent "商城AI智能客服、后台管理助手")
 ---
 
 ## 技术架构
