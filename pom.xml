@@ -43,7 +43,6 @@
         <mybatis-plus.version>3.5.15</mybatis-plus.version>
         <mybatis-spring-boot-starter.version>3.0.3</mybatis-spring-boot-starter.version>
         <mysql-connector.version>9.3.0</mysql-connector.version>
-        <spring-data-commons.version>3.5.11</spring-data-commons.version>
         <aliyun-oss.version>3.18.5</aliyun-oss.version>
         <alipay-sdk.version>4.40.630.ALL</alipay-sdk.version>
         <logstash-logback.version>8.0</logstash-logback.version>
@@ -139,12 +138,6 @@
                 <groupId>com.mysql</groupId>
                 <artifactId>mysql-connector-j</artifactId>
                 <version>${mysql-connector.version}</version>
-            </dependency>
-            <!--SpringData工具包-->
-            <dependency>
-                <groupId>org.springframework.data</groupId>
-                <artifactId>spring-data-commons</artifactId>
-                <version>${spring-data-commons.version}</version>
             </dependency>
 
             <!-- 阿里云OSS -->

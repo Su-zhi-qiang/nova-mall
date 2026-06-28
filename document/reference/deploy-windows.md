@@ -1,105 +1,104 @@
-# windows下环境搭建
+# Windows 环境搭建
 
-## IDEA
+## 开发工具
 
-- 关于IDEA的安装与使用具体参考[https://github.com/judasn/IntelliJ-IDEA-Tutorial](https://github.com/judasn/IntelliJ-IDEA-Tutorial)
-- 搜索插件仓库，安装插件lombok
+- **IDEA**：推荐使用 IntelliJ IDEA，安装 Lombok 插件
+- **VSCode**：前端开发推荐，安装 Volar、ESLint、Prettier 插件
+- **Node.js**：v20.19.0+ 或 v22.12.0+（前端构建）
+- **JDK**：OpenJDK 17（后端运行）
+- **Python**：3.10+（Agent 服务）
 
-## Eclipse
+## MySQL 8.0
 
-- 导入项目，以maven项目形式导入  
-    ![eclipse_import_1.png](https://github.com/macrozheng/mall/blob/master/document/resource/eclipse_import_1.png)  
-    ![eclipse_import_2.png](https://github.com/macrozheng/mall/blob/master/document/resource/eclipse_import_2.png)
-- 安装lombok插件，下载地址：https://projectlombok.org/downloads/lombok.jar  
-- 下载完后双击，使用java程序打开
-- 按照提示选择eclipse.exe的安装路径安装插件，完成后重启Eclipse
-- 启动项目：右击com.su.mall.MallAdminApplication的main方法，选择run as Java Application
+- 下载地址：https://dev.mysql.com/downloads/mysql/
+- 安装后执行初始化脚本：`mysql -u root -p < document/init.sql`
+- 验证：`mysql -u root -p -e "SHOW DATABASES;"` 应看到 `mall` 数据库
 
-## mysql
+## Redis
 
-- 下载地址：https://dev.mysql.com/downloads/mysql/5.7.html#downloads
-- 下载后按提示进行安装
-- 导入document/sql下的mall.sql文件
+- Windows 版下载：https://github.com/tporadowski/redis/releases
+- 或使用 Docker：`docker run -d -p 6379:6379 redis:7.0`
+- 启动：`redis-server.exe redis.windows.conf`
 
-## redis
+## Elasticsearch 7.17
 
-- 下载地址：https://github.com/MicrosoftArchive/redis/releases
-- 下载后按提示进行安装
-- 启动redis:redis-server.exe redis.windows.conf
+- 下载地址：https://www.elastic.co/downloads/past-releases/elasticsearch-7-17-3
+- 解压后运行 `bin\elasticsearch.bat`
+- 安装 IK 中文分词插件：
+  ```bash
+  bin\elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.17.3/elasticsearch-analysis-ik-7.17.3.zip
+  ```
+- 验证：访问 `http://localhost:9200`
 
-## elasticsearch
+## MongoDB 5.0
 
-- 下载地址：https://www.elastic.co/downloads/past-releases/elasticsearch-6-2-2
-- 下载.zip文件，解压到指定目录
-- 安装kibana，用于在浏览器中访问es,请下载6.2.2版本，具体参考：https://www.elastic.co/downloads/kibana
-- 下载.zip包后解压即可，运行bin\kibana.bat，访问http://localhost:5601 查看是否安装成功
-- 中文分词插件地址：https://github.com/medcl/elasticsearch-analysis-ik
-- 安装中文分词插件，在elasticsearch-6.2.2\bin目录下执行以下命令：
-elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v6.2.2/elasticsearch-analysis-ik-6.2.2.zip
-- 启动elasticsearch:运行elasticsearch-6.2.2\bin\elasticsearch.bat
-- 不使用kibana的可以安装head插件，具体参考：https://github.com/mobz/elasticsearch-head
-- 注意：如果你修改了mall-search中的es的cluster-name: mall-es，你需要在elasticsearch-6.2.2\config\elasticsearch.yml文件中修改cluster.name: mall-es
+- 下载地址：https://www.mongodb.com/try/download/community
+- 安装后创建数据目录：`mkdir c:\mongodb\data\db`
+- 启动：`mongod --dbpath c:\mongodb\data\db`
+- 客户端工具：https://robomongo.org/download（Robo 3T）
 
-## mongodb
+## RabbitMQ 3.9
 
-- 下载地址：https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-3.2.21-signed.msi
-- 选择路径（c:\mongodb\）进行安装，在安装路径下创建data\db和data\log两个文件夹
-- 服务端运行程序：mongodb\bin\mongod.exe
-- 客户端运行程序：mongodb\bin\mongo.exe
-- 创建配置文件：mongodb\mongod.cfg
-    ``` lua
-    systemLog:
-        destination: file
-        path: c:\mongodb\data\log\mongod.log
-    storage:
-        dbPath: c:\mongodb\data\db
-    ```
-- 安装为服务（运行命令需要用管理员权限）：C:\mongodb\bin\mongod.exe --config "C:\mongodb\mongod.cfg" --install
-- 启动服务：net start MongoDB
-- 关闭服务：net stop MongoDB
-- 移除服务：C:\mongodb\bin\mongod.exe --remove
-- 下载客户端程序：https://download.robomongo.org/1.2.1/windows/robo3t-1.2.1-windows-x86_64-3e50a65.zip
-- 解压到指定目录，打开robo3t.exe并连接到localhost:27017
+- 先安装 Erlang：http://erlang.org/download/
+- 下载 RabbitMQ：https://www.rabbitmq.com/install-windows.html
+- 启用管理插件：
+  ```bash
+  rabbitmq-plugins enable rabbitmq_management
+  ```
+- 访问管理界面：`http://127.0.0.1:15672`（guest/guest）
+- 创建用户 `mall`，密码 `mall`，创建 virtual host `/mall`
 
-## rabbitmq
+## MinIO（可选）
 
-- 安装Erlang：http://erlang.org/download/otp_win64_21.3.exe
-- 下载rabbitmq：https://dl.bintray.com/rabbitmq/all/rabbitmq-server/3.7.14/rabbitmq-server-3.7.14.exe
-- 按照提示进行安装，安装完成后进入rabbitmq的安装目录:D:\RabbitMQ Server\rabbitmq_server-3.7.14\sbin
-- 在地址栏输入cmd并回车启动命令行输入以下命令：rabbitmq-plugins enable rabbitmq_management
-- 访问地址查看是否安装成功：http://127.0.0.1:15672/
-- 输入账号密码登录：guest guest
-- 创建用户并设置其角色为管理员：mall mall
-    ![rabbitmq_install_2.png](https://github.com/macrozheng/mall/blob/master/document/resource/rabbitmq_install_2.png)
-- 创建virtual host:/mall
-    ![rabbitmq_install_3.png](https://github.com/macrozheng/mall/blob/master/document/resource/rabbitmq_install_3.png)
-- 给mall用户配置范围该virtual host的权限
-    ![rabbitmq_install_4.png](https://github.com/macrozheng/mall/blob/master/document/resource/rabbitmq_install_4.png)
-- rabbitmq安装延迟消息插件（可不装）：
-    - 下载延迟消息插件（rabbitmq_delayed_message_exchange）：https://www.rabbitmq.com/community-plugins.html
-    - 复制插件到插件目录：D:\RabbitMQ Server\rabbitmq_server-3.7.14\plugins
-    - 在sbin目录下运行如下命令启用插件：rabbitmq-plugins enable rabbitmq_delayed_message_exchange
-    
-## OSS
+- 下载地址：https://min.io/download
+- 启动：
+  ```bash
+  minio.exe server D:\minio\data --console-address ":9001"
+  ```
+- 访问控制台：`http://localhost:9001`（minioadmin/minioadmin）
 
-- 该项目文件上传采用OSS，需要自行注册OSS账号并配置
-- 首先将mall-admin\src\main\resources\application.properties文件中以aliyun.oss.开头的配置改为你自己的配置
-- OSS上传文件需要配置跨域资源共享(CORS)规则，参考文档：https://help.aliyun.com/document_detail/31928.html
-- 上传方式采用服务端签名后直传的形式，参考文档：https://help.aliyun.com/document_detail/31926.html
+## 启动后端
 
-## mall-admin
+```bash
+cd nova-mall
 
-- 启动项目：直接运行com.su.mall.MallAdminApplication的main方法即可
-- 接口文档地址：http://localhost:8080/swagger-ui.html
+# 首次打包公共模块
+mvn clean install -pl nova-mall-common,nova-mall-security -am
 
-## mall-search
+# 启动后台管理 (8080)
+mvn spring-boot:run -pl nova-mall-admin
 
-- 启动项目：直接运行com.su.mall.search.MallSearchApplication的main方法即可
-- 接口文档地址：http://localhost:8081/swagger-ui.html
-- 使用前需要先调用接口导入数据；http://localhost:8081/esProduct/importAll
-- 如出现无法启动的问题，可以先删除elasticsearch里面的数据再启动
+# 启动商城前台 (8085)
+mvn spring-boot:run -pl nova-mall-portal
 
-## mall-portal
+# 启动搜索服务 (8081)
+mvn spring-boot:run -pl nova-mall-search
+```
 
-- 启动mall-portal项目：直接运行com.su.mall.portal.MallPortalApplication的main方法即可
-- 接口文档地址：http://localhost:8085/swagger-ui.html
+## 启动前端
+
+```bash
+# 后台管理前端 (5173)
+cd nova-mall-admin-web && npm install && npm run dev
+
+# 移动端 H5 (5174)
+cd nova-mall-app-web && npm install && npm run dev:h5
+```
+
+## 启动 Agent
+
+```bash
+cd nova-mall-agent
+pip install -r requirements.txt
+cp .env.example .env  # 填入 DashScope API Key
+python -m app.main    # 8090
+```
+
+## API 文档地址
+
+| 服务 | 地址 |
+|------|------|
+| Admin | http://localhost:8080/swagger-ui.html |
+| Portal | http://localhost:8085/swagger-ui.html |
+| Search | http://localhost:8081/swagger-ui.html |
+| Agent | http://localhost:8090/docs |

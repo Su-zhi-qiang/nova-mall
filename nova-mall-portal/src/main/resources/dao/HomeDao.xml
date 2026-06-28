@@ -3,10 +3,18 @@
 <mapper namespace="com.su.mall.portal.dao.HomeDao">
     <!-- 改为使用 resultType -->
     <select id="getRecommendBrandList" resultType="com.su.mall.model.PmsBrand">
-        SELECT b.*
+        SELECT
+            b.*,
+            COALESCE(p.product_count, 0) AS product_count
         FROM
             sms_home_brand hb
             LEFT JOIN pms_brand b ON hb.brand_id = b.id
+            LEFT JOIN (
+                SELECT brand_id, COUNT(*) AS product_count
+                FROM pms_product
+                WHERE delete_status = 0 AND publish_status = 1
+                GROUP BY brand_id
+            ) p ON b.id = p.brand_id
         WHERE
             hb.recommend_status = 1
             AND b.show_status = 1

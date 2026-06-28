@@ -1,15 +1,15 @@
-# mall 项目设计模式重构文档
+# 项目设计模式重构文档
 
-## 一、概述
+## 概述
 
-对 mall 后端项目进行设计模式重构，提升代码可扩展性和可维护性。主要应用了两种设计模式：
+对 nova-mall 后端项目进行设计模式重构，提升代码可扩展性和可维护性。主要应用了两种设计模式：
 
 - **工厂模式 + 策略模式**：消除 if-else 分支，实现开闭原则
 - **责任链模式**：将长流程拆分为独立的处理器，顺序执行
 
 ---
 
-## 二、工厂+策略模式
+## 工厂+策略模式
 
 ### 2.1 促销计算重构
 
@@ -477,7 +477,7 @@ public class AlipayController {
 
 ---
 
-## 三、责任链模式
+## 责任链模式
 
 ### 3.1 订单生成流程
 
@@ -676,9 +676,7 @@ public void cancelOrder(Long orderId) {
 }
 ```
 
----
-
-## 四、文件变更汇总
+## 文件变更汇总
 
 ### 新增文件
 
@@ -702,7 +700,7 @@ public void cancelOrder(Long orderId) {
 
 ---
 
-## 五、扩展指南
+## 扩展指南
 
 ### 新增促销类型
 1. 实现 `PromotionStrategy` 接口并加 `@Component`
@@ -720,3 +718,6 @@ public void cancelOrder(Long orderId) {
 ### 新增订单处理步骤
 1. 继承 `OrderHandler` 实现 `handle()` 方法
 2. 在构建链时通过 `addHandler()` 添加
+
+
+

@@ -1,42 +1,65 @@
-version: '3'
 services:
   mall-admin:
-    image: mall/mall-admin:1.0-SNAPSHOT
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: mall-admin
+    restart: always
     ports:
-      - 8080:8080
+      - "8080:8080"
     volumes:
-      - /mydata/app/mall-admin/logs:/var/logs
-      - /etc/localtime:/etc/localtime
+      - /opt/mall/logs/mall-admin:/app/logs
+      - /etc/localtime:/etc/localtime:ro
     environment:
-      - 'TZ="Asia/Shanghai"'
-    external_links:
-      - mysql:db #可以用db这个域名访问mysql服务
-  mall-search:
-    image: mall/mall-search:1.0-SNAPSHOT
-    container_name: mall-search
-    ports:
-      - 8081:8081
-    volumes:
-      - /mydata/app/mall-search/logs:/var/logs
-      - /etc/localtime:/etc/localtime
-    environment:
-      - 'TZ="Asia/Shanghai"'
-    external_links:
-      - elasticsearch:es #可以用es这个域名访问elasticsearch服务
-      - mysql:db #可以用db这个域名访问mysql服务
+      TZ: Asia/Shanghai
+    deploy:
+      resources:
+        limits:
+          memory: 450M
+    networks:
+      - mall-network
+
   mall-portal:
-    image: mall/mall-portal:1.0-SNAPSHOT
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: mall-portal
+    restart: always
     ports:
-      - 8085:8085
+      - "8085:8085"
     volumes:
-      - /mydata/app/mall-portal/logs:/var/logs
-      - /etc/localtime:/etc/localtime
+      - /opt/mall/logs/mall-portal:/app/logs
+      - /etc/localtime:/etc/localtime:ro
     environment:
-      - 'TZ="Asia/Shanghai"'
-    external_links:
-      - redis:redis #可以用redis这个域名访问redis服务
-      - mongo:mongo #可以用mongo这个域名访问mongo服务
-      - mysql:db #可以用db这个域名访问mysql服务
-      - rabbitmq:rabbit #可以用rabbit这个域名访问rabbitmq服务
+      TZ: Asia/Shanghai
+    deploy:
+      resources:
+        limits:
+          memory: 450M
+    networks:
+      - mall-network
+
+  mall-search:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mall-search
+    restart: always
+    ports:
+      - "8081:8081"
+    volumes:
+      - /opt/mall/logs/mall-search:/app/logs
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      TZ: Asia/Shanghai
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+    networks:
+      - mall-network
+
+networks:
+  mall-network:
+    name: mall-network
+    external: true
