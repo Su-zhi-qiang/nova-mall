@@ -512,59 +512,47 @@ docker compose -f docker-compose-app.yml up -d --build
 
 数据概览 + ECharts 统计图表
 
-<p align="center">
   <img src="document/resource/screenshot-admin-home.png" width="80%" alt="后台首页">
-</p>
 
 #### 优惠券管理
 
 创建/编辑/领取历史
 
-<p align="center">
   <img src="document/resource/screenshot-admin-coupon_1.png" width="30%" alt="优惠券列表">
   <img src="document/resource/screenshot-admin-coupon_2.png" width="30%" alt="创建优惠券">
   <img src="document/resource/screenshot-admin-coupon_3.png" width="30%" alt="领取历史">
-</p>
 
 #### 秒杀管理
 
 活动创建/场次/商品关联
 
-<p align="center">
   <img src="document/resource/screenshot-admin-flash_1.png" width="30%" alt="秒杀活动">
   <img src="document/resource/screenshot-admin-flash_2.png" width="30%" alt="秒杀场次">
   <img src="document/resource/screenshot-admin-flash_3.png" width="30%" alt="秒杀商品关联">
-</p>
 
 #### 订单管理
 
 状态筛选 + 详情弹窗
 
-<p align="center">
   <img src="document/resource/screenshot-admin-order_1.png" width="30%" alt="订单列表">
   <img src="document/resource/screenshot-admin-order_2.png" width="30%" alt="订单详情">
-</p>
 
 #### 商品管理
 
 列表筛选 + 多步骤表单
 
-<p align="center">
   <img src="document/resource/screenshot-admin-product_1.png" width="18%" alt="商品列表">
   <img src="document/resource/screenshot-admin-product_2.png" width="18%" alt="商品信息">
   <img src="document/resource/screenshot-admin-product_3.png" width="18%" alt="商品属性">
   <img src="document/resource/screenshot-admin-product_4.png" width="18%" alt="商品详情">
   <img src="document/resource/screenshot-admin-product_5.png" width="18%" alt="商品预览">
-</p>
 
 #### 权限管理
 
 角色-资源分配
 
-<p align="center">
   <img src="document/resource/screenshot-admin-role_1.png" width="30%" alt="角色列表">
   <img src="document/resource/screenshot-admin-role_2.png" width="30%" alt="资源分配">
-</p>
 
 ### 移动端商城（App）
 
@@ -572,79 +560,61 @@ docker compose -f docker-compose-app.yml up -d --build
 
 轮播图 + 分类导航 + 推荐商品
 
-<p align="center">
   <img src="document/resource/screenshot-app-home_1.png" width="30%" alt="首页-轮播图">
   <img src="document/resource/screenshot-app-home_2.png" width="30%" alt="首页-分类导航">
   <img src="document/resource/screenshot-app-home_3.png" width="30%" alt="首页-推荐商品">
-</p>
 
 #### 秒杀活动
 
 限时秒杀 + 倒计时 + 抢购
 
-<p align="center">
   <img src="document/resource/screenshot-app-flash_1.png" width="30%" alt="秒杀列表">
   <img src="document/resource/screenshot-app-flash_2.png" width="30%" alt="秒杀详情">
-</p>
 
 #### 优惠券
 
 领取优惠券 + 我的优惠券
 
-<p align="center">
   <img src="document/resource/screenshot-app-coupon_1.png" width="30%" alt="优惠券列表">
   <img src="document/resource/screenshot-app-coupon_2.png" width="30%" alt="我的优惠券">
-</p>
 
 #### 购物车
 
 商品列表 + 数量修改 + 结算
 
-<p align="center">
   <img src="document/resource/screenshot-app-cart.png" width="24%" alt="购物车">
-</p>
 
 #### 商品详情
 
 规格选择 + 加购
 
-<p align="center">
   <img src="document/resource/screenshot-app-product_1.png" width="30%" alt="商品详情">
   <img src="document/resource/screenshot-app-product_2.png" width="30%" alt="商品规格">
-</p>
 
 #### 订单列表
 
-<p align="center">
   <img src="document/resource/screenshot-app-order_1.png" width="30%" alt="订单列表">
   <img src="document/resource/screenshot-app-order_2.png" width="30%" alt="订单详情">
-</p>
 
 #### 售后服务
 
 退货申请 + 售后进度
 
-<p align="center">
   <img src="document/resource/screenshot-app-return.png" width="30%" alt="售后服务">
-</p>
 
 #### 会员中心
 
 个人信息 + 积分 + 收藏
 
-<p align="center">
   <img src="document/resource/screenshot-app-user.png" width="30%" alt="会员中心">
-</p>
 
 ### AI 智能客服（Agent）
 
 自然语言对话交互 + 自动聚合统计工具
 
-<p align="center">
   <img src="document/resource/screenshot-agent-chat.gif" width="45%" alt="智能客服对话">
   <img src="document/resource/screenshot-agent-daily.gif" width="45%" alt="运营日报">
-</p>
 
 ---
 
-Dockerfile 和 docker-compose 配置见 `deploy/` 目录，完整部署方案见 [DEPLOYMENT.md](../DEPLOYMENT.md)。
+Dockerfile 和 docker-compose 配置见 `deploy/` 目录，完整部署方案见 [DEPLOYMENT.md](./DEPLOYMENT.md)。
