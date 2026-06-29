@@ -1,15 +1,9 @@
 package com.su.mall.portal.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.su.mall.common.api.CommonPage;
 import com.su.mall.common.api.CommonResult;
 import com.su.mall.model.SmsCoupon;
 import com.su.mall.model.SmsCouponHistory;
-import com.su.mall.portal.domain.CartPromotionItem;
-import com.su.mall.portal.domain.SmsCouponHistoryDetail;
-import com.su.mall.portal.service.OmsCartItemService;
 import com.su.mall.portal.service.UmsMemberCouponService;
-import com.su.mall.portal.service.UmsMemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -31,8 +25,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UmsMemberCouponController {
     private final UmsMemberCouponService memberCouponService;
-    private final OmsCartItemService cartItemService;
-    private final UmsMemberService memberService;
 
     @Operation(summary = "领取指定优惠券")
     @RequestMapping(value = "/add/{couponId}", method = RequestMethod.POST)
@@ -61,15 +53,7 @@ public class UmsMemberCouponController {
         return CommonResult.success(couponList);
     }
 
-    @Operation(summary = "获取登录会员购物车的相关优惠券")
-    @Parameter(name = "type", description = "使用可用:0->不可用；1->可用",
-            in = ParameterIn.PATH,schema = @Schema(type = "integer",defaultValue = "1",allowableValues = {"0","1"}))
-    @RequestMapping(value = "/list/cart/{type}", method = RequestMethod.GET)
-    public CommonResult<List<SmsCouponHistoryDetail>> listCart(@PathVariable Integer type) {
-        List<CartPromotionItem> cartPromotionItemList = cartItemService.listPromotion(memberService.getCurrentMember().getId(), null);
-        List<SmsCouponHistoryDetail> couponHistoryList = memberCouponService.listCart(cartPromotionItemList, type);
-        return CommonResult.success(couponHistoryList);
-    }
+
 
     @Operation(summary = "获取当前商品相关优惠券")
     @RequestMapping(value = "/listByProduct/{productId}", method = RequestMethod.GET)
