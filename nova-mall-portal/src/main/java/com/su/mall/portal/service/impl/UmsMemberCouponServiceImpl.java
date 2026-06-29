@@ -153,6 +153,12 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
                 .orderByDesc(SmsCouponHistory::getCreateTime));
     }
 
+    /**
+     * 根据购物车商品列表判断用户是否有可用的优惠券
+     * @param cartItemList 购物车商品列表
+     * @param type           优惠券类型（1=全场通用, 2=指定分类, 3=指定商品）
+     * @return 适用的优惠券详情列表
+     */
     @Override
     public List<SmsCouponHistoryDetail> listCart(List<CartPromotionItem> cartItemList, Integer type) {
         UmsMember currentMember = memberService.getCurrentMember();
@@ -173,9 +179,11 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
             // 检查优惠券是否已过期
             boolean isExpired = endTime != null && now.after(endTime);
 
+            // 根据优惠券使用类型获取适用范围策略
             CouponScopeStrategy strategy = couponScopeStrategyFactory.getStrategy(useType);
+            // 计算优惠券适用的总金额
             BigDecimal totalAmount = strategy.calcEligibleAmount(cartItemList, couponHistoryDetail);
-
+            // 检查优惠券是否可用
             if (!isExpired && totalAmount.compareTo(BigDecimal.ZERO) > 0
                     && totalAmount.subtract(minPoint != null ? minPoint : BigDecimal.ZERO).compareTo(BigDecimal.ZERO) >= 0) {
                 enableList.add(couponHistoryDetail);
@@ -190,6 +198,11 @@ public class UmsMemberCouponServiceImpl implements UmsMemberCouponService {
         }
     }
 
+    /**
+     * 根据商品ID获取适用的优惠券
+     * @param productId 商品ID
+     * @return 适用的优惠券列表
+     */
     @Override
     public List<SmsCoupon> listByProduct(Long productId) {
         Date now = new Date();

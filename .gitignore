@@ -13,8 +13,6 @@ target/
 # 敏感配置文件 - 包含密码、密钥、Token等，不能提交到仓库
 **/application-prod.yml
 **/application-prod.yaml
-**/application-dev.yml
-**/application-dev.yaml
 **/.env.production
 **/.env.local
 **/.env

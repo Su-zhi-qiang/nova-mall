@@ -9,8 +9,12 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 /**
- *  取消订单消息的接收者
- * @author Su
+ * 取消订单消息消费者（MQ消费端）
+ * <p>监听 mall.order.cancel 队列，接收订单ID后执行取消操作
+ * <p>由延迟队列（死信队列）超时后自动转发到此队列
+ *
+ * @see CancelOrderSender 消息发送端
+ * @see com.su.mall.portal.domain.QueueEnum#QUEUE_ORDER_CANCEL
  */
 @Component
 @RabbitListener(queues = "mall.order.cancel")
@@ -18,6 +22,12 @@ import org.springframework.stereotype.Component;
 public class CancelOrderReceiver {
     private static final Logger LOGGER = LoggerFactory.getLogger(CancelOrderReceiver.class);
     private final OmsPortalOrderService portalOrderService;
+
+    /**
+     * 处理取消订单消息
+     *
+     * @param orderId 待取消的订单ID
+     */
     @RabbitHandler
     public void handle(Long orderId){
         try {

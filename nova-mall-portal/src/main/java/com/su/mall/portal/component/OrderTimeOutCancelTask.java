@@ -8,8 +8,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * 取消超时订单并解锁库存的定时器
- * @author Su
+ * 超时订单自动取消定时任务
+ * <p>每10分钟扫描一次超时未支付的订单，执行取消并释放锁定库存
+ * <p>与 {@link CancelOrderReceiver} 的延迟消息机制互补，作为兜底保障
+ *
+ * @see OmsPortalOrderService#cancelTimeOutOrder()
  */
 @Component
 @RequiredArgsConstructor
@@ -18,8 +21,8 @@ public class OrderTimeOutCancelTask {
     private final OmsPortalOrderService portalOrderService;
 
     /**
-     * cron表达式：Seconds Minutes Hours DayofMonth Month DayofWeek [Year]
-     * 每10分钟扫描一次，扫描超时未支付订单，进行取消操作
+     * 每10分钟执行一次，扫描并取消超时未支付订单
+     * <p>cron表达式：秒 分 时 日 月 周
      */
     @Scheduled(cron = "0 0/10 * ? * ?")
     private void cancelTimeOutOrder(){

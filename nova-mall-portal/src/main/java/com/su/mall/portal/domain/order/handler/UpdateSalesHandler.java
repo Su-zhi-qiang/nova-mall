@@ -10,7 +10,10 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 /**
- * 更新销量并清除缓存
+ * 支付成功链 - 第5步：更新销量并清除缓存
+ * <p>增加商品和SKU的销量统计 → 清除商品详情缓存（确保销量数据刷新）
+ *
+ * @see OrderHandler
  */
 @RequiredArgsConstructor
 public class UpdateSalesHandler extends OrderHandler {
@@ -20,13 +23,20 @@ public class UpdateSalesHandler extends OrderHandler {
 
     @Override
     public void handle(OrderHandlerContext context) {
+        // 1. 获取订单商品列表
         List<OmsOrderItem> orderItemList = context.getAttribute("orderItemList");
+
+        // 2. 增加商品表和SKU表的销量
         portalOrderDao.updateProductSale(orderItemList);
         portalOrderDao.updateSkuSale(orderItemList);
+
+        // 3. 清除商品详情缓存（下次访问会重新加载最新销量）
         for (OmsOrderItem item : orderItemList) {
             String cacheKey = "product:detail:" + item.getProductId();
             redisService.del(cacheKey);
         }
+
+        // 4. 传递给下一个处理器
         handleNext(context);
     }
 }

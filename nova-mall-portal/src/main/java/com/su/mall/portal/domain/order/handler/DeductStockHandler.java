@@ -15,9 +15,12 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 /**
- * 扣减库存（秒杀/普通）
- * 秒杀：已通过Redis预减库存拦截大部分请求，此处仅做DB原子扣减（兜底）
- * 普通：直接扣减SKU和商品库存
+ * 支付成功链 - 第4步：扣减库存
+ * <p>秒杀订单：先原子SQL扣减秒杀库存（DB兜底）→ 扣减SKU和商品库存 → 清除秒杀缓存
+ * <p>普通订单：直接扣减SKU和商品库存
+ * <p>DB扣减失败时恢复Redis库存（补偿机制）
+ *
+ * @see OrderHandler
  */
 @RequiredArgsConstructor
 public class DeductStockHandler extends OrderHandler {
@@ -29,11 +32,13 @@ public class DeductStockHandler extends OrderHandler {
 
     @Override
     public void handle(OrderHandlerContext context) {
+        // 1. 获取订单信息和订单商品列表
         OmsOrder fullOrder = context.getAttribute("fullOrder");
         List<OmsOrderItem> orderItemList = context.getAttribute("orderItemList");
 
+        // 2. 判断是否为秒杀订单（orderType=1）
         if (fullOrder.getOrderType() != null && fullOrder.getOrderType() == 1) {
-            // 秒杀订单：原子SQL扣减数据库库存（兜底，Redis已预减）
+            // 3. 秒杀订单：原子SQL扣减秒杀每日库存（Redis已预减，此处为DB兜底）
             for (OmsOrderItem orderItem : orderItemList) {
                 if (orderItem.getFlashPromotionRelationId() != null) {
                     int result = dailyStockMapper.decreaseStock(
@@ -41,7 +46,7 @@ public class DeductStockHandler extends OrderHandler {
                             orderItem.getProductQuantity()
                     );
                     if (result == 0) {
-                        // DB库存不足，恢复Redis库存
+                        // 4. DB库存不足，恢复Redis预减库存（补偿）
                         redisService.restoreSeckillStock(
                                 orderItem.getFlashPromotionRelationId(),
                                 orderItem.getProductQuantity());
@@ -49,17 +54,26 @@ public class DeductStockHandler extends OrderHandler {
                     }
                 }
             }
+
+            // 5. 扣减SKU库存和商品库存
             portalOrderDao.updateSkuStock(orderItemList);
             portalOrderDao.updateProductStock(orderItemList);
+
+            // 6. 清除秒杀活动的首页缓存（确保库存数据刷新）
             clearFlashPromotionCache(orderItemList);
         } else {
-            // 普通订单
+            // 7. 普通订单：直接扣减SKU库存和商品库存
             portalOrderDao.updateSkuStock(orderItemList);
             portalOrderDao.updateProductStock(orderItemList);
         }
+
+        // 8. 传递给下一个处理器
         handleNext(context);
     }
 
+    /**
+     * 清除秒杀活动的首页缓存
+     */
     private void clearFlashPromotionCache(List<OmsOrderItem> orderItemList) {
         for (OmsOrderItem item : orderItemList) {
             if (item.getFlashPromotionRelationId() != null) {

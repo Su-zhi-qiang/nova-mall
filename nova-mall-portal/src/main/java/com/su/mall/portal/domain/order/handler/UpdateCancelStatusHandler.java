@@ -12,7 +12,10 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 /**
- * 更新订单状态为取消
+ * 订单取消链 - 第2步：更新订单状态为已取消
+ * <p>将订单状态更新为4（已关闭），同时查询订单商品列表供后续库存恢复使用
+ *
+ * @see OrderHandler
  */
 @RequiredArgsConstructor
 public class UpdateCancelStatusHandler extends OrderHandler {
@@ -22,13 +25,19 @@ public class UpdateCancelStatusHandler extends OrderHandler {
 
     @Override
     public void handle(OrderHandlerContext context) {
+        // 1. 获取待取消的订单
         OmsOrder cancelOrder = context.getAttribute("cancelOrder");
+
+        // 2. 更新订单状态为"已关闭"(status=4)
         cancelOrder.setStatus(4);
         orderMapper.updateById(cancelOrder);
 
+        // 3. 查询订单商品列表（供后续恢复库存使用）
         List<OmsOrderItem> orderItemList = orderItemMapper.selectList(
                 new LambdaQueryWrapper<OmsOrderItem>().eq(OmsOrderItem::getOrderId, cancelOrder.getId()));
         context.putAttribute("cancelOrderItemList", orderItemList);
+
+        // 4. 传递给下一个处理器
         handleNext(context);
     }
 }

@@ -17,8 +17,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.List;
 
 /**
- * SpringDoc相关配置
- * @author Su
+ * SpringDoc（Swagger3）接口文档配置
+ * <p>配置API文档标题、描述、服务器地址和JWT认证方案
+ * <p>访问地址：http://localhost:8085/swagger-ui/index.html
  */
 @Configuration
 public class SpringDocConfig implements WebMvcConfigurer {
@@ -28,6 +29,10 @@ public class SpringDocConfig implements WebMvcConfigurer {
     @Value("${server.port:8085}")
     private String serverPort;
 
+    /**
+     * 配置OpenAPI文档元信息
+     * <p>包含标题、版本、联系方式、许可证和JWT认证方案
+     */
     @Bean
     public OpenAPI mallPortalOpenAPI() {
         return new OpenAPI()
@@ -57,9 +62,11 @@ public class SpringDocConfig implements WebMvcConfigurer {
                                         .description("JWT令牌认证")));
     }
 
+    /**
+     * 将 /swagger-ui/ 重定向到 /swagger-ui/index.html
+     */
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/swagger-ui/").setViewName("redirect:/swagger-ui/index.html");
     }
-
 }

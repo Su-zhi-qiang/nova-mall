@@ -14,56 +14,65 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * JwtToken生成的工具类
- * JWT token的格式：header.payload.signature
- * header的格式（算法、token的类型）：
- * {"alg": "HSHS256","typ": "JWT"}
- * payload的格式（用户名、创建时间、生成时间）：
- * {"sub":"wang","created":1489079981393,"exp":1489684781}
- * signature的生成算法：
- * HMACSHAHS256(base64UrlEncode(header) + "." +base64UrlEncode(payload),secret)
- * @author Su
- * Refactored to use Hutool JWTUtil
+ * JWT Token工具类
+ * <p>基于Hutool JWTUtil实现，提供Token的生成、验证、解析和自动续期
+ * <p>Token格式：header.payload.signature
+ * <p>payload包含：sub(用户名)、created(创建时间)、exp(过期时间)
+ *
+ * @see com.su.mall.security.component.JwtAuthenticationTokenFilter
  */
 public class JwtTokenUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenUtil.class);
-    private static final String CLAIM_KEY_USERNAME = "sub";
-    private static final String CLAIM_KEY_CREATED = "created";
+    private static final String CLAIM_KEY_USERNAME = "sub";      // payload中的用户名字段
+    private static final String CLAIM_KEY_CREATED = "created";  // payload中的创建时间字段
+
     @Value("${jwt.secret}")
-    private String secret;
+    private String secret;        // 签名密钥
+
     @Value("${jwt.expiration}")
-    private Long expiration;
+    private Long expiration;      // 过期时间（秒）
+
     @Value("${jwt.tokenHead}")
-    private String tokenHead;
+    private String tokenHead;     // Token前缀（如 "Bearer "）
 
     /**
-     * 获取签名密钥
+     * 获取签名密钥字节数组
      */
     private byte[] getSigningKey() {
         return secret.getBytes(StandardCharsets.UTF_8);
     }
 
     /**
-     * 根据负责生成JWT的token
+     * 根据claims生成JWT Token
+     * <p>自动设置过期时间 = 当前时间 + expiration秒
+     *
+     * @param claims 负载数据（用户名、创建时间等）
+     * @return JWT Token字符串
      */
     private String generateToken(Map<String, Object> claims) {
-        // 设置过期时间
+        // 1. 计算过期时间戳
         long expireTime = System.currentTimeMillis() + expiration * 1000;
         claims.put("exp", expireTime);
+
+        // 2. 使用Hutool JWTUtil生成Token
         return JWTUtil.createToken(claims, getSigningKey());
     }
 
     /**
-     * 从token中获取JWT中的负载
+     * 从Token中解析payload
+     * <p>先验证签名，签名无效则返回null
+     *
+     * @param token JWT Token字符串
+     * @return payload数据Map，签名无效或格式错误返回null
      */
     private Map<String, Object> getPayloadFromToken(String token) {
         try {
-            // 验证token签名
+            // 1. 验证Token签名
             if (!JWTUtil.verify(token, getSigningKey())) {
                 LOGGER.info("JWT签名验证失败:{}", token);
                 return null;
             }
-            // 解析token payload
+            // 2. 解析Token payload
             return JWTUtil.parseToken(token).getPayloads();
         } catch (Exception e) {
             LOGGER.info("JWT格式验证失败:{}", token);
@@ -72,7 +81,10 @@ public class JwtTokenUtil {
     }
 
     /**
-     * 从token中获取登录用户名
+     * 从Token中获取用户名
+     *
+     * @param token JWT Token
+     * @return 用户名，解析失败返回null
      */
     public String getUserNameFromToken(String token) {
         String username;
@@ -86,10 +98,12 @@ public class JwtTokenUtil {
     }
 
     /**
-     * 验证token是否还有效
+     * 验证Token是否有效
+     * <p>校验条件：用户名匹配 + Token未过期
      *
-     * @param token       客户端传入的token
-     * @param userDetails 从数据库中查询出来的用户信息
+     * @param token       客户端传入的Token
+     * @param userDetails 从数据库查询的用户信息
+     * @return true=Token有效
      */
     public boolean validateToken(String token, UserDetails userDetails) {
         String username = getUserNameFromToken(token);
@@ -97,11 +111,11 @@ public class JwtTokenUtil {
     }
 
     /**
-     * 判断token是否已经失效
+     * 判断Token是否已过期
+     * <p>通过比较payload中的exp字段和当前时间戳
      */
     private boolean isTokenExpired(String token) {
         try {
-            // 手动检查 exp 字段判断是否过期
             Map<String, Object> payload = getPayloadFromToken(token);
             if (payload == null) {
                 return true;
@@ -118,7 +132,7 @@ public class JwtTokenUtil {
     }
 
     /**
-     * 从token中获取过期时间
+     * 从Token中获取过期时间
      */
     private Date getExpiredDateFromToken(String token) {
         Map<String, Object> payload = getPayloadFromToken(token);
@@ -135,7 +149,10 @@ public class JwtTokenUtil {
     }
 
     /**
-     * 根据用户信息生成token
+     * 根据用户信息生成Token
+     *
+     * @param userDetails Spring Security用户详情
+     * @return JWT Token字符串
      */
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
@@ -145,46 +162,66 @@ public class JwtTokenUtil {
     }
 
     /**
-     * 当原来的token没过期时是可以刷新的
+     * Token自动续期（核心方法）
+     * <p>处理流程：
+     * <ol>
+     *   <li>截取Token前缀（Bearer ）</li>
+     *   <li>校验签名是否有效</li>
+     *   <li>Token已过期 → 返回null（需重新登录）</li>
+     *   <li>Token在30分钟内刚刷新过 → 返回原Token（避免频繁刷新）</li>
+     *   <li>否则 → 更新created时间，生成新Token返回</li>
+     * </ol>
      *
-     * @param oldToken 带tokenHead的token
+     * @param oldToken 带tokenHead前缀的完整Token
+     * @return 续期后的新Token，无法续期返回null
      */
     public String refreshHeadToken(String oldToken) {
+        // 1. 空值校验
         if (StrUtil.isEmpty(oldToken)) {
             return null;
         }
+
+        // 2. 截取Token前缀（如 "Bearer "）
         String token = oldToken.substring(tokenHead.length());
         if (StrUtil.isEmpty(token)) {
             return null;
         }
-        // token校验不通过
+
+        // 3. 验证Token签名
         Map<String, Object> payload = getPayloadFromToken(token);
         if (payload == null) {
             return null;
         }
-        // 如果token已经过期，不支持刷新
+
+        // 4. Token已过期，不支持刷新（需重新登录）
         if (isTokenExpired(token)) {
             return null;
         }
-        // 如果token在30分钟之内刚刷新过，返回原token
+
+        // 5. 30分钟内刚刷新过，返回原Token（避免频繁刷新）
         if (tokenRefreshJustBefore(token)) {
             return token;
         } else {
+            // 6. 更新创建时间，生成新Token
             payload.put(CLAIM_KEY_CREATED, new Date());
             return generateToken(payload);
         }
     }
 
     /**
-     * 判断token在指定时间内是否刚刚刷新过
+     * 判断Token是否在30分钟内刚刷新过
+     * <p>如果created时间距当前时间小于30分钟，认为是刚刷新的，不再重复刷新
      *
-     * @param token 原token
+     * @param token 原Token
+     * @return true=刚刷新过
      */
     private boolean tokenRefreshJustBefore(String token) {
         Map<String, Object> payload = getPayloadFromToken(token);
         if (payload == null) {
             return false;
         }
+
+        // 1. 获取Token创建时间
         Object created = payload.get(CLAIM_KEY_CREATED);
         Date createdDate = null;
         if (created instanceof Long) {
@@ -195,8 +232,9 @@ public class JwtTokenUtil {
         if (createdDate == null) {
             return false;
         }
+
+        // 2. 判断当前时间是否在 [created, created+30分钟] 区间内
         Date refreshDate = new Date();
-        // 刷新时间在创建时间的指定时间内
         return refreshDate.after(createdDate) && refreshDate.before(DateUtil.offsetSecond(createdDate, 1800));
     }
 }

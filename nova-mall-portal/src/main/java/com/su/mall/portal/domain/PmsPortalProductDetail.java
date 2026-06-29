@@ -8,31 +8,41 @@ import lombok.Setter;
 import java.util.List;
 
 /**
- * 前台商品详情
- * @author Su
+ * 前台商品详情页完整数据
+ * <p>聚合商品基础信息、品牌、属性、SKU库存、促销规则、可用优惠券及秒杀信息
+ * <p>由 {@link com.su.mall.portal.service.PmsPortalProductService#detail(Long)} 构建返回
  */
 @Getter
 @Setter
-public class PmsPortalProductDetail{
-    @Schema(title = "商品信息")
+public class PmsPortalProductDetail {
+
+    @Schema(title = "商品基础信息")
     private PmsProduct product;
+
     @Schema(title = "商品品牌")
     private PmsBrand brand;
-    @Schema(title = "商品属性与参数")
+
+    @Schema(title = "商品属性定义列表（如：颜色、尺码等）")
     private List<PmsProductAttribute> productAttributeList;
-    @Schema(title = "手动录入的商品属性与参数值")
+
+    @Schema(title = "商品属性值列表（手动录入的属性值）")
     private List<PmsProductAttributeValue> productAttributeValueList;
-    @Schema(title = "商品的sku库存信息")
+
+    @Schema(title = "SKU库存列表（各规格组合的价格和库存）")
     private List<PmsSkuStock> skuStockList;
-    @Schema(title = "商品阶梯价格设置")
+
+    @Schema(title = "阶梯打折规则列表（满N件打X折）")
     private List<PmsProductLadder> productLadderList;
-    @Schema(title = "商品满减价格设置")
+
+    @Schema(title = "满减规则列表（满X元减Y元）")
     private List<PmsProductFullReduction> productFullReductionList;
-    @Schema(title = "商品可用优惠券")
+
+    @Schema(title = "商品可用优惠券列表")
     private List<SmsCoupon> couponList;
 
     // ========== 秒杀相关字段 ==========
-    @Schema(title = "是否在秒杀活动中")
+
+    @Schema(title = "是否参与秒杀活动")
     private Boolean flashPromotion;
 
     @Schema(title = "秒杀关联ID")
@@ -47,7 +57,7 @@ public class PmsPortalProductDetail{
     @Schema(title = "秒杀已售数量")
     private Integer flashPromotionSold;
 
-    @Schema(title = "限购数量")
+    @Schema(title = "秒杀限购数量")
     private Integer flashPromotionLimit;
 
     @Schema(title = "秒杀场次开始时间")

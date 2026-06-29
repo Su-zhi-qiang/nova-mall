@@ -8,23 +8,22 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
-
 /**
- * Jackson相关配置
- * 配置json不返回null的字段
- * @author Su
+ * Jackson序列化配置
+ * <p>设置全局ObjectMapper在序列化时忽略null字段，减少API响应体积
+ * <p>返回的JSON中不会包含值为null的字段
  */
 @Configuration
 public class JacksonConfig {
+
+    /**
+     * 注册主ObjectMapper Bean
+     * <p>使用NON_NULL策略：值为null的字段不序列化到JSON
+     */
     @Bean
     @Primary
     @ConditionalOnMissingBean(ObjectMapper.class)
     public ObjectMapper jacksonObjectMapper(Jackson2ObjectMapperBuilder builder) {
-        // 通过该方法对mapper对象进行设置，所有序列化的对象都将按该规则进行系列化
-        // Include.ALWAYS 默认
-        // Include.NON_DEFAULT 属性为默认值不序列化
-        // Include.NON_EMPTY 属性为空（""）或者为NULL都不序列化，返回的json是没有这个字段的
-        // Include.NON_NULL 属性为NULL的字段不序列化
         return builder.createXmlMapper(false).serializationInclusion(JsonInclude.Include.NON_NULL).build();
     }
 }

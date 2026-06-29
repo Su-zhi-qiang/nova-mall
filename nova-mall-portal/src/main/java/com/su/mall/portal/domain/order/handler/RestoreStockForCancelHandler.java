@@ -14,7 +14,15 @@ import org.springframework.util.CollectionUtils;
 import java.util.List;
 
 /**
- * 取消订单时恢复库存（DB + Redis）
+ * 订单取消链 - 第3步：恢复库存
+ * <p>根据订单原始状态区分处理：
+ * <ul>
+ *   <li>已支付(status=1)：恢复真实库存 + 商品表库存</li>
+ *   <li>未支付(status=0)：仅释放锁定库存</li>
+ * </ul>
+ * <p>秒杀商品额外恢复：每日库存快照(DB) + Redis预减库存
+ *
+ * @see OrderHandler
  */
 @RequiredArgsConstructor
 public class RestoreStockForCancelHandler extends OrderHandler {
@@ -26,26 +34,30 @@ public class RestoreStockForCancelHandler extends OrderHandler {
 
     @Override
     public void handle(OrderHandlerContext context) {
+        // 1. 获取订单商品列表和原始订单状态
         List<OmsOrderItem> orderItemList = context.getAttribute("cancelOrderItemList");
         Integer originalStatus = context.getAttribute("originalStatus");
 
         if (!CollectionUtils.isEmpty(orderItemList)) {
             if (originalStatus != null && originalStatus == 1) {
-                // 已支付的订单：恢复真实库存 + 商品表库存
+                // 2. 已支付订单：恢复SKU真实库存和商品表库存
                 portalOrderDao.restoreSkuStock(orderItemList);
                 portalOrderDao.restoreProductStock(orderItemList);
             } else {
-                // 未支付的订单：只释放锁定库存
+                // 3. 未支付订单：仅释放锁定库存
                 portalOrderDao.releaseSkuStockLock(orderItemList);
             }
-            // 恢复秒杀商品库存和已售数量（DB）
+
+            // 4. 恢复秒杀商品库存（DB + Redis）
             for (OmsOrderItem orderItem : orderItemList) {
                 if (orderItem.getFlashPromotionRelationId() != null) {
+                    // 5. 恢复秒杀每日库存快照（DB）
                     dailyStockMapper.restoreStock(
                             orderItem.getFlashPromotionRelationId(),
                             orderItem.getProductQuantity()
                     );
-                    // 恢复Redis预减库存
+
+                    // 6. 恢复Redis预减库存
                     redisService.restoreSeckillStock(
                             orderItem.getFlashPromotionRelationId(),
                             orderItem.getProductQuantity());
@@ -54,6 +66,8 @@ public class RestoreStockForCancelHandler extends OrderHandler {
                 }
             }
         }
+
+        // 7. 传递给下一个处理器
         handleNext(context);
     }
 }

@@ -7,25 +7,23 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 /**
- * 全局跨域相关配置
- * @author Su
+ * 全局跨域（CORS）配置
+ * <p>允许所有域名、请求方法和请求头跨域调用
+ * <p>支持携带Cookie的跨域请求
  */
 @Configuration
 public class GlobalCorsConfig {
 
     /**
-     * 允许跨域调用的过滤器
+     * 注册全局跨域过滤器
+     * <p>对所有路径（/**）生效，前端开发环境和移动端均可正常调用API
      */
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        //允许所有域名进行跨域调用
         config.addAllowedOriginPattern("*");
-        //允许跨越发送cookie
         config.setAllowCredentials(true);
-        //放行全部原始头信息
         config.addAllowedHeader("*");
-        //允许所有请求方法跨域调用
         config.addAllowedMethod("*");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

@@ -11,20 +11,31 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * 消息队列相关配置
- * @author Su
+ * RabbitMQ消息队列配置
+ * <p>定义交换机、队列和绑定关系，配置JSON消息序列化
+ * <p>包含两类业务队列：
+ * <ul>
+ *   <li>订单取消：TTL延迟队列 + 死信消费队列</li>
+ *   <li>优惠券领取：直连消费队列</li>
+ * </ul>
+ *
+ * @see QueueEnum 队列枚举定义
  */
 @Configuration
 public class RabbitMqConfig {
 
     /**
      * 配置JSON消息转换器，替代默认的Java序列化
+     * <p>使消息在RabbitMQ管理界面可读，且支持跨语言消费
      */
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
+    /**
+     * 配置RabbitTemplate使用JSON序列化
+     */
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
@@ -32,6 +43,9 @@ public class RabbitMqConfig {
         return rabbitTemplate;
     }
 
+    /**
+     * 配置监听容器使用JSON反序列化
+     */
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
@@ -40,8 +54,10 @@ public class RabbitMqConfig {
         return factory;
     }
 
+    // ==================== 订单取消队列 ====================
+
     /**
-     * 订单消息实际消费队列所绑定的交换机
+     * 订单取消消费队列绑定的直连交换机
      */
     @Bean
     DirectExchange orderDirect() {
@@ -52,7 +68,7 @@ public class RabbitMqConfig {
     }
 
     /**
-     * 订单延迟队列队列所绑定的交换机
+     * 订单取消延迟队列绑定的直连交换机
      */
     @Bean
     DirectExchange orderTtlDirect() {
@@ -63,7 +79,7 @@ public class RabbitMqConfig {
     }
 
     /**
-     * 订单实际消费队列
+     * 订单取消消费队列
      */
     @Bean
     public Queue orderQueue() {
@@ -71,33 +87,28 @@ public class RabbitMqConfig {
     }
 
     /**
-     * 订单延迟队列（死信队列）
+     * 订单取消延迟队列（TTL + 死信）
+     * <p>消息到期后通过死信交换机转发到消费队列
      */
     @Bean
     public Queue orderTtlQueue() {
         return QueueBuilder
                 .durable(QueueEnum.QUEUE_TTL_ORDER_CANCEL.getName())
-                .withArgument("x-dead-letter-exchange", QueueEnum.QUEUE_ORDER_CANCEL.getExchange())//到期后转发的交换机
-                .withArgument("x-dead-letter-routing-key", QueueEnum.QUEUE_ORDER_CANCEL.getRouteKey())//到期后转发的路由键
+                .withArgument("x-dead-letter-exchange", QueueEnum.QUEUE_ORDER_CANCEL.getExchange())
+                .withArgument("x-dead-letter-routing-key", QueueEnum.QUEUE_ORDER_CANCEL.getRouteKey())
                 .build();
     }
 
-    /**
-     * 将订单队列绑定到交换机
-     */
     @Bean
-    Binding orderBinding(DirectExchange orderDirect,Queue orderQueue){
+    Binding orderBinding(DirectExchange orderDirect, Queue orderQueue) {
         return BindingBuilder
                 .bind(orderQueue)
                 .to(orderDirect)
                 .with(QueueEnum.QUEUE_ORDER_CANCEL.getRouteKey());
     }
 
-    /**
-     * 将订单延迟队列绑定到交换机
-     */
     @Bean
-    Binding orderTtlBinding(DirectExchange orderTtlDirect,Queue orderTtlQueue){
+    Binding orderTtlBinding(DirectExchange orderTtlDirect, Queue orderTtlQueue) {
         return BindingBuilder
                 .bind(orderTtlQueue)
                 .to(orderTtlDirect)
@@ -106,6 +117,9 @@ public class RabbitMqConfig {
 
     // ==================== 优惠券领取队列 ====================
 
+    /**
+     * 优惠券领取直连交换机
+     */
     @Bean
     DirectExchange couponDirect() {
         return ExchangeBuilder
@@ -114,6 +128,9 @@ public class RabbitMqConfig {
                 .build();
     }
 
+    /**
+     * 优惠券领取消费队列
+     */
     @Bean
     public Queue couponClaimQueue() {
         return new Queue(QueueEnum.QUEUE_COUPON_CLAIM.getName());
@@ -126,5 +143,4 @@ public class RabbitMqConfig {
                 .to(couponDirect)
                 .with(QueueEnum.QUEUE_COUPON_CLAIM.getRouteKey());
     }
-
 }

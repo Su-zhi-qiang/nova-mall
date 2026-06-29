@@ -11,8 +11,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * 取消订单消息的发送者
- * @author Su
+ * 取消订单消息生产者（MQ发送端）
+ * <p>向延迟队列（TTL队列）发送取消消息，消息到期后通过死信机制转发到消费队列
+ * <p>实现订单超时未支付自动取消的延迟触发
+ *
+ * @see CancelOrderReceiver 消息消费端
+ * @see QueueEnum#QUEUE_TTL_ORDER_CANCEL 延迟队列
  */
 @Component
 @RequiredArgsConstructor
@@ -20,12 +24,16 @@ public class CancelOrderSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(CancelOrderSender.class);
     private final AmqpTemplate amqpTemplate;
 
+    /**
+     * 发送延迟取消订单消息
+     *
+     * @param orderId    待取消的订单ID
+     * @param delayTimes 延迟时间（毫秒），消息在此时间后被消费
+     */
     public void sendMessage(Long orderId,final long delayTimes){
-        //给延迟队列发送消息
         amqpTemplate.convertAndSend(QueueEnum.QUEUE_TTL_ORDER_CANCEL.getExchange(), QueueEnum.QUEUE_TTL_ORDER_CANCEL.getRouteKey(), orderId, new MessagePostProcessor() {
             @Override
             public Message postProcessMessage(Message message) throws AmqpException {
-                //给消息设置延迟毫秒值
                 message.getMessageProperties().setExpiration(String.valueOf(delayTimes));
                 return message;
             }

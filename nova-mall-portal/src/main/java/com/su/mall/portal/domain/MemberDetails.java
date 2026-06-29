@@ -9,10 +9,14 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
- * SpringSecurity需要的用户信息封装类
- * @author Su
+ * Spring Security用户详情封装
+ * <p>将 {@link UmsMember} 适配为Spring Security的UserDetails接口
+ * <p>用于认证流程中的用户身份加载和权限校验
+ *
+ * @see com.su.mall.portal.config.MallSecurityConfig
  */
 public class MemberDetails implements UserDetails {
+
     private final UmsMember umsMember;
 
     public MemberDetails(UmsMember umsMember) {
@@ -21,7 +25,6 @@ public class MemberDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        //返回当前用户的权限
         return Arrays.asList(new SimpleGrantedAuthority("TEST"));
     }
 
@@ -52,9 +55,14 @@ public class MemberDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return umsMember.getStatus()==1;
+        return umsMember.getStatus() == 1;
     }
 
+    /**
+     * 获取原始会员对象
+     *
+     * @return UmsMember实体
+     */
     public UmsMember getUmsMember() {
         return umsMember;
     }

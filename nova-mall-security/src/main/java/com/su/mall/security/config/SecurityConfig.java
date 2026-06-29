@@ -19,8 +19,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 
 /**
- * SpringSecurity相关配置，仅用于配置SecurityFilterChain
- * @author Su
+ * Spring Security安全配置
+ * <p>配置认证授权链：白名单放行 → CSRF禁用 → 无状态Session → JWT过滤器 → 动态权限管理
+ *
+ * @see JwtAuthenticationTokenFilter JWT认证过滤器
+ * @see DynamicAuthorizationManager 动态权限管理器
  */
 @Configuration
 @EnableWebSecurity
@@ -31,35 +34,41 @@ public class SecurityConfig {
     private final RestfulAccessDeniedHandler restfulAccessDeniedHandler;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
-    
+
     @Autowired(required = false)
     private DynamicAuthorizationManager dynamicAuthorizationManager;
 
+    /**
+     * 配置Security过滤器链
+     * <p>配置顺序：白名单 → OPTIONS放行 → 动态权限/认证要求 → CSRF禁用 → 无状态Session → 异常处理 → JWT过滤器
+     */
     @Bean
     SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(registry -> {
-            //不需要保护的资源路径允许访问
+            // 1. 白名单路径直接放行（登录、注册、首页等公开接口）
             for (String url : ignoreUrlsConfig.getUrls()) {
                 registry.requestMatchers(url).permitAll();
             }
-            //允许跨域请求的OPTIONS请求
+            // 2. 跨域预检请求OPTIONS直接放行
             registry.requestMatchers(HttpMethod.OPTIONS).permitAll();
-            //任何请求需要身份认证
         })
-        //任何请求需要身份认证
-        .authorizeHttpRequests(registry-> registry.anyRequest()
-            //有动态权限配置时添加动态权限管理器
-            .access(dynamicAuthorizationManager==null? AuthenticatedAuthorizationManager.authenticated():dynamicAuthorizationManager)
+        // 3. 其他请求需要认证，有动态权限配置时使用动态权限管理器
+        .authorizeHttpRequests(registry -> registry.anyRequest()
+            .access(dynamicAuthorizationManager == null
+                    ? AuthenticatedAuthorizationManager.authenticated()  // 无动态权限：只要已认证即可
+                    : dynamicAuthorizationManager)                       // 有动态权限：按URL-角色映射判断
         )
-        //关闭跨站请求防护
+        // 4. 禁用CSRF（REST API不需要）
         .csrf(AbstractHttpConfigurer::disable)
-        //修改Session生成策略为无状态会话
+        // 5. 设置Session策略为无状态（JWT不需要Session）
         .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        //自定义权限拒绝处理类
-        .exceptionHandling(configurer -> configurer.accessDeniedHandler(restfulAccessDeniedHandler).authenticationEntryPoint(restAuthenticationEntryPoint))
-        //自定义权限拦截器JWT过滤器
+        // 6. 配置权限不足和未认证的异常处理（返回JSON而非重定向）
+        .exceptionHandling(configurer -> configurer
+                .accessDeniedHandler(restfulAccessDeniedHandler)
+                .authenticationEntryPoint(restAuthenticationEntryPoint))
+        // 7. 在UsernamePasswordAuthenticationFilter之前插入JWT过滤器
         .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
         return httpSecurity.build();
     }
-
 }
