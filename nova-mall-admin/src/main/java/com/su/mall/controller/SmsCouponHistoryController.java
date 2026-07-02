@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 优惠券领取记录管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "SmsCouponHistoryController", description = "优惠券领取记录管理")

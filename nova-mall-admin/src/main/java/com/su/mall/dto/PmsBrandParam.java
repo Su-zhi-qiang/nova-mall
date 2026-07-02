@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotEmpty;
 
 /**
  * 品牌请求参数
- * @author Su
+ * 
  */
 @Data
 @EqualsAndHashCode

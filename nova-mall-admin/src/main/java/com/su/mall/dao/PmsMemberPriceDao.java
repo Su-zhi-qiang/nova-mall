@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 会员价格管理自定义Dao
- * @author Su
+ * 
  */
 public interface PmsMemberPriceDao {
     /**

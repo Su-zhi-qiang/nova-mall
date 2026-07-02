@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * 首页专题推荐管理Service
- * @author Su
+ * 
  */
 public interface SmsHomeRecommendSubjectService {
     /**

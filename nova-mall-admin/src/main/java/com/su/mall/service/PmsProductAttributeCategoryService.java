@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * 商品属性分类管理Service
- * @author Su
+ * 
  */
 public interface PmsProductAttributeCategoryService {
     /**

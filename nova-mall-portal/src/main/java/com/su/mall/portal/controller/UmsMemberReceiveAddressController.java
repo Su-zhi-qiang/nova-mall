@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * 会员收货地址管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "UmsMemberReceiveAddressController", description = "会员收货地址管理")

@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 商品相册
- * @author Su
+ * 
  */
 @Data
 public class PmsAlbum implements Serializable {

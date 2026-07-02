@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * 优惠券领取记录管理Service实现类
- * @author Su
+ * 
  */
 @Service
 @RequiredArgsConstructor

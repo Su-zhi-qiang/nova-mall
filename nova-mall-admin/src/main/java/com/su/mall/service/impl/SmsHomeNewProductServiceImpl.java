@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * 首页新品推荐管理Service实现类
  *
- * @author Su
+ * 
  */
 @Service
 @RequiredArgsConstructor

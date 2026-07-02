@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * 搜索商品的属性值信息
  * 使用普通POJO，不依赖Spring Data Elasticsearch注解
- * @author Su
+ * 
  */
 @Data
 @EqualsAndHashCode

@@ -8,7 +8,10 @@ import java.util.List;
 
 /**
  * 后台菜单管理Service
- * @author Su
+ * <p>管理后台前端菜单树（侧边栏导航），支持树形结构查询
+ * <p>菜单通过角色菜单关系表（UmsRoleMenuRelation）与角色关联，控制前端页面可见性
+ *
+ * @see UmsMenuServiceImpl
  */
 public interface UmsMenuService {
     /**

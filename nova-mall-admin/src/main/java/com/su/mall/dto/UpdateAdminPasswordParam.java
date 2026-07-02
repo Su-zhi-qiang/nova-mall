@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotEmpty;
 
 /**
  * 修改用户名密码参数
- * @author Su
+ * 
  */
 @Data
 public class UpdateAdminPasswordParam {

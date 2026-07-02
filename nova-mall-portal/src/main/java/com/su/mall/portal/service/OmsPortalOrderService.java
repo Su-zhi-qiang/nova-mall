@@ -12,7 +12,12 @@ import java.util.Map;
 
 /**
  * 前台订单管理Service
- * @author Su
+ * <p>提供订单确认、下单、支付回调、取消、收货、查询等完整的订单生命周期管理
+ * <p>下单流程采用责任链模式（{@link com.su.mall.portal.domain.order.OrderCreationChain}），
+ * 将地址校验、库存扣减、优惠计算等步骤解耦为独立Handler
+ * <p>订单取消采用RabbitMQ延迟消息实现超时自动取消
+ *
+ * @see OmsPortalOrderServiceImpl
  */
 public interface OmsPortalOrderService {
     /**

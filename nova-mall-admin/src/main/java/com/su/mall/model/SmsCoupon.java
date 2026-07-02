@@ -11,7 +11,7 @@ import java.util.Date;
 
 /**
  * 优惠券
- * @author Su
+ * 
  */
 @Data
 public class SmsCoupon implements Serializable {

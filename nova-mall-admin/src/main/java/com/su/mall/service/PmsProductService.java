@@ -13,7 +13,10 @@ import java.util.List;
 
 /**
  * 商品管理Service
- * @author Su
+ * <p>提供商品的CRUD、批量状态变更（审核/上架/推荐/新品/删除）、模糊搜索等功能
+ * <p>商品创建和更新涉及多表操作（商品基本信息+SKU库存+属性值+阶梯价+满减+会员价），需事务保证
+ *
+ * @see PmsProductServiceImpl
  */
 public interface PmsProductService {
     /**

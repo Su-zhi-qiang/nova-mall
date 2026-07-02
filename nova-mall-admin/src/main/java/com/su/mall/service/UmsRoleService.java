@@ -10,7 +10,10 @@ import java.util.List;
 
 /**
  * 后台角色管理Service
- * @author Su
+ * <p>提供角色的CRUD、菜单分配、资源分配等功能
+ * <p>角色通过菜单关联控制前端页面可见性，通过资源关联控制后端接口访问权限
+ *
+ * @see UmsRoleServiceImpl
  */
 public interface UmsRoleService {
     /**

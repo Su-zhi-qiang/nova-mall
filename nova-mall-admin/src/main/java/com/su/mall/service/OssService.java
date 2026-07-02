@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Oss对象存储管理Service
- * @author Su
+ * 
  */
 public interface OssService {
     /**

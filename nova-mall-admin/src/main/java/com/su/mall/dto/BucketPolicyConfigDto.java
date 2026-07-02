@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * Minio Bucket访问策略配置
- * @author Su
+ * 
  */
 @Data
 @EqualsAndHashCode

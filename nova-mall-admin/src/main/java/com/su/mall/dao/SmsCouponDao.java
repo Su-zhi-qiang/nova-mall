@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 /**
  * 优惠券管理自定义Dao
- * @author Su
+ * 
  */
 public interface SmsCouponDao {
     /**

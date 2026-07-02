@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 会员浏览记录管理Service
- * @author Su
+ * 
  */
 public interface MemberReadHistoryService {
     /**

@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 专题和产品关系
- * @author Su
+ * 
  */
 @Data
 public class CmsSubjectProductRelation implements Serializable {

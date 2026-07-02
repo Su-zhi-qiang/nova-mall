@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * 前台商品管理Service
- * @author Su
+ * 
  */
 public interface PmsPortalProductService {
     /**

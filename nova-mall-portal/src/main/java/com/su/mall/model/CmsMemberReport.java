@@ -9,7 +9,7 @@ import java.util.Date;
 
 /**
  * 用户举报
- * @author Su
+ * 
  */
 @Data
 public class CmsMemberReport implements Serializable {

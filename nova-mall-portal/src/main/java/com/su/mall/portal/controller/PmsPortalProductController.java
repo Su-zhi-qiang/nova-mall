@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * 前台商品管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "PmsPortalProductController", description = "前台商品管理")

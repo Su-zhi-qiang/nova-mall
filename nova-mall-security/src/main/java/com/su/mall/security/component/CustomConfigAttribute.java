@@ -4,7 +4,7 @@ import java.util.Objects;
 
 /**
  * 自定义配置属性
- * @author Su
+ * 
  */
 public record CustomConfigAttribute(String attribute) {
 

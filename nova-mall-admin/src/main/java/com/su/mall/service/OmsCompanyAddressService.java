@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * 收货地址管理Service
- * @author Su
+ * 
  */
 public interface OmsCompanyAddressService {
     /**

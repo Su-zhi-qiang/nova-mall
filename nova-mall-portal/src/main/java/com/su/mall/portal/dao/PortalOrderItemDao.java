@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 订单商品信息管理自定义Dao
- * @author Su
+ * 
  */
 public interface PortalOrderItemDao {
     /**

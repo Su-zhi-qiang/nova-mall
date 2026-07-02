@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * OSS对象存储相关配置
  * 仅在配置了 aliyun.oss.endpoint 时加载（生产环境使用，开发环境使用MinIO）
- * @author Su
+ * 
  */
 @Configuration
 @ConditionalOnProperty(name = "aliyun.oss.endpoint")

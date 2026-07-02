@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * 商品品牌管理Service实现类
- * @author Su
+ * 
  */
 @Service
 @RequiredArgsConstructor

@@ -5,7 +5,7 @@ import com.su.mall.model.SmsCouponHistory;
 
 /**
  * 优惠券领取记录管理Service
- * @author Su
+ * 
  */
 public interface SmsCouponHistoryService {
     /**

@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 限时购场次管理Service
- * @author Su
+ * 
  */
 public interface SmsFlashPromotionSessionService {
     /**

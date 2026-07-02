@@ -9,7 +9,7 @@ import java.util.Date;
 
 /**
  * 限时购日志
- * @author Su
+ * 
  */
 @Data
 public class SmsFlashPromotionLog implements Serializable {

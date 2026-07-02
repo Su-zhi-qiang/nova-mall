@@ -6,7 +6,7 @@ import lombok.Setter;
 
 /**
  * 订单发货参数
- * @author Su
+ * 
  */
 @Getter
 @Setter

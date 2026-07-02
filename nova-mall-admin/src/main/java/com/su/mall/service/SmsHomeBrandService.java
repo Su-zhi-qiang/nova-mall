@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * 首页品牌管理Service
- * @author Su
+ * 
  */
 public interface SmsHomeBrandService {
     /**

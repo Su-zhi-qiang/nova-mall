@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 商品和专题关系自定义Dao
- * @author Su
+ * 
  */
 public interface CmsSubjectProductRelationDao {
     /**

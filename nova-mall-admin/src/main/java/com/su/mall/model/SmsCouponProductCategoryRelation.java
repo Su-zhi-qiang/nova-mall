@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 优惠券商品分类关系
- * @author Su
+ * 
  */
 @Data
 public class SmsCouponProductCategoryRelation implements Serializable {

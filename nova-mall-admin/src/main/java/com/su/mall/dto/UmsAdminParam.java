@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotEmpty;
 
 /**
  * 用户注册参数
- * @author Su
+ * 
  */
 @Data
 public class UmsAdminParam {

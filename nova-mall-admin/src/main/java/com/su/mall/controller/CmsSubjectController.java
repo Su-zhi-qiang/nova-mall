@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * 商品专题管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "CmsSubjectController", description = "商品专题管理")

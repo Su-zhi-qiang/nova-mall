@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotEmpty;
 
 /**
  * 用户登录参数
- * @author Su
+ * 
  */
 @Data
 @EqualsAndHashCode

@@ -6,7 +6,7 @@ import java.lang.annotation.*;
 
 /**
  * 用于验证状态是否在指定范围内的注解
- * @author Su
+ * 
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

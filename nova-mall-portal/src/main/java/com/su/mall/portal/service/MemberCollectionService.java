@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 
 /**
  * 会员商品收藏管理Service
- * @author Su
+ * 
  */
 public interface MemberCollectionService {
     /**

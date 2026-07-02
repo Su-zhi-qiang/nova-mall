@@ -4,7 +4,7 @@ import com.su.mall.model.OmsOrderSetting;
 
 /**
  * 订单设置管理Service
- * @author Su
+ * 
  */
 public interface OmsOrderSettingService {
     /**

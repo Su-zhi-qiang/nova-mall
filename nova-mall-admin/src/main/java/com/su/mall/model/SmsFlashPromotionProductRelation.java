@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 /**
  * 限时购商品关系
- * @author Su
+ * 
  */
 @Data
 public class SmsFlashPromotionProductRelation implements Serializable {

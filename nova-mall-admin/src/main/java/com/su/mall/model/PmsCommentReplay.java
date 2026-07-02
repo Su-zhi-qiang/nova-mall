@@ -9,7 +9,7 @@ import java.util.Date;
 
 /**
  * 商品评价回复
- * @author Su
+ * 
  */
 @Data
 public class PmsCommentReplay implements Serializable {

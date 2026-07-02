@@ -9,7 +9,7 @@ import java.util.Date;
 
 /**
  * 优惠券使用记录
- * @author Su
+ * 
  */
 @Data
 public class SmsCouponHistory implements Serializable {

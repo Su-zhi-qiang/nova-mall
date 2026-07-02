@@ -19,17 +19,24 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.List;
 
 /**
- * SpringDoc相关配置
- * @author Su
+ * SpringDoc (OpenAPI 3.0) 配置
+ * <p>定义后台管理系统的Swagger文档元信息（标题、描述、版本、联系方式）
+ * <p>配置JWT Bearer认证方案，使Swagger UI中的接口可直接携带Token调试
+ * <p>同时注册视图控制器，将 /swagger-ui/ 重定向到 /swagger-ui/index.html
  */
 @Configuration
 public class SpringDocConfig implements WebMvcConfigurer {
 
+    /** 安全方案名称（与Swagger UI中的Authorize按钮对应） */
     private static final String SECURITY_SCHEME_NAME = "Authorization";
 
     @Value("${server.port:8080}")
     private String serverPort;
 
+    /**
+     * 配置OpenAPI文档元信息
+     * <p>包含文档标题、描述、版本、服务器地址、JWT安全方案
+     */
     @Bean
     public OpenAPI mallAdminOpenAPI() {
         return new OpenAPI()

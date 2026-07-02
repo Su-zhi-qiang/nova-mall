@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
  * 会员商品收藏Repository
- * @author Su
+ * 
  */
 public interface MemberProductCollectionRepository extends MongoRepository<MemberProductCollection, String> {
     /**

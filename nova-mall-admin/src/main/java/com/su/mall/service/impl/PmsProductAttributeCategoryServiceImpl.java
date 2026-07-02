@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * 商品属性分类管理Service实现类
- * @author Su
+ * 
  */
 @Service
 @RequiredArgsConstructor

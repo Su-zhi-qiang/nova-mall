@@ -5,8 +5,10 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * 请求工具类
- * @author Su
+ * HTTP请求工具类
+ * <p>提供从HttpServletRequest中提取客户端真实IP地址的能力
+ * <p>IP获取优先级：X-Forwarded-For → Proxy-Client-IP → WL-Proxy-Client-IP → RemoteAddr
+ * <p>处理了多级代理场景（多个IP以逗号分隔时取第一个）
  */
 public class RequestUtil {
 

@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * 后台资源管理Service实现类
- * @author Su
+ * 
  */
 @Service
 @RequiredArgsConstructor

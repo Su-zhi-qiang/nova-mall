@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * 会员等级管理Service
- * @author Su
+ * 
  */
 public interface UmsMemberLevelService {
     /**

@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * 限时购商品关联管理Service
- * @author Su
+ * 
  */
 public interface SmsFlashPromotionProductRelationService {
     /**

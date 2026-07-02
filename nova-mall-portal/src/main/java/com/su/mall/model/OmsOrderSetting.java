@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 订单设置
- * @author Su
+ * 
  */
 @Data
 public class OmsOrderSetting implements Serializable {

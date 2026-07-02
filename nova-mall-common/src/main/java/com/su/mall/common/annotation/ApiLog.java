@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 /**
  * Swagger API操作日志注解
  * 用于标记需要记录操作日志的接口
- * @author Su
+ * 
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

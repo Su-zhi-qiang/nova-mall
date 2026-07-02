@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 /**
  * 商品审核记录
- * @author Su
+ * 
  */
 @Data
 @TableName("pms_product_vertify_record")

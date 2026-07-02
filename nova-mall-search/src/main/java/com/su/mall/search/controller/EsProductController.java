@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * 搜索商品管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "EsProductController",description = "搜索商品管理")

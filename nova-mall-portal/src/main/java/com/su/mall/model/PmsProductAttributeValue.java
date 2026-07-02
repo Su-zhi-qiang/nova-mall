@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 商品属性值
- * @author Su
+ * 
  */
 @Data
 public class PmsProductAttributeValue implements Serializable {

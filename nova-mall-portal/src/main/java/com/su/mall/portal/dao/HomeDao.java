@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * 首页内容管理自定义Dao
- * @author Su
+ * 
  */
 public interface HomeDao {
 

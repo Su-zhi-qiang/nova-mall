@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 商品满减自定义Dao
- * @author Su
+ * 
  */
 public interface PmsProductFullReductionDao {
     /**

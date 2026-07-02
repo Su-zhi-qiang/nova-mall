@@ -9,7 +9,7 @@ import java.util.Date;
 
 /**
  * 成长值变化历史
- * @author Su
+ * 
  */
 @Data
 public class UmsGrowthChangeHistory implements Serializable {

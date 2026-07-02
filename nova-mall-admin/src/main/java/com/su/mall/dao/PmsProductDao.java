@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 
 /**
  * 商品管理自定义Dao
- * @author Su
+ * 
  */
 public interface PmsProductDao {
     /**

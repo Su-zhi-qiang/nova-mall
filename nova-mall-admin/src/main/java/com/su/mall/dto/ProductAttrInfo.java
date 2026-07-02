@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 商品分类对应属性信息
- * @author Su
+ * 
  */
 @Data
 @EqualsAndHashCode

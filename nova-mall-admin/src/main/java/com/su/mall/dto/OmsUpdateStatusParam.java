@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 /**
  * 确认收货请求参数
- * @author Su
+ * 
  */
 @Getter
 @Setter

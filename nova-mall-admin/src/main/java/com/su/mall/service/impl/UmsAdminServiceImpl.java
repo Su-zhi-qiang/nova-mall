@@ -42,7 +42,13 @@ import java.util.List;
 
 /**
  * 后台用户管理Service实现类
- * @author Su
+ * <p>核心职责：管理员CRUD、登录认证、JWT Token管理、用户角色/资源分配
+ * <p>缓存策略：用户信息读写均经过 {@link UmsAdminCacheService}，Redis宕机时自动降级到DB查询
+ * <p>登录流程：密码校验 → 生成JWT → 写入登录日志 → 设置SecurityContext
+ *
+ * @see UmsAdminService
+ * @see UmsAdminCacheService
+ * @see JwtTokenUtil
  */
 @Service
 @RequiredArgsConstructor
@@ -95,6 +101,21 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         return umsAdmin;
     }
 
+    /**
+     * 登录功能
+     * <p>处理流程：
+     * <ol>
+     *   <li>根据用户名加载UserDetails（优先从缓存）</li>
+     *   <li>密码匹配校验（Spring Security PasswordEncoder）</li>
+     *   <li>检查账号启用状态</li>
+     *   <li>生成JWT Token并设置SecurityContext</li>
+     *   <li>记录登录日志（IP + 时间）</li>
+     * </ol>
+     *
+     * @param username 用户名
+     * @param password 密码（客户端加密后传递）
+     * @return 生成的JWT Token，登录失败返回null
+     */
     @Override
     @Transactional
     public String login(String username, String password) {
@@ -140,7 +161,7 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     /**
      * 根据用户名修改登录时间
      *
-     * @author Su
+     * 
      */
     private void updateLoginTimeByUsername(String username) {
         adminMapper.update(null,
@@ -205,6 +226,11 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         return count;
     }
 
+    /**
+     * 修改用户角色关系（先删后插策略）
+     * <p>事务操作：删除旧关系 → 批量插入新关系 → 清除该用户的资源列表缓存
+     * <p>注意：roleIds为null时仅删除不新增，返回0
+     */
     @Override
     @Transactional
     public int updateRole(Long adminId, List<Long> roleIds) {
@@ -249,6 +275,10 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         return resourceList;
     }
 
+    /**
+     * 修改用户密码
+     * <p>返回值约定：1=成功, -1=参数不合法, -2=用户不存在, -3=旧密码错误
+     */
     @Override
     @Transactional
     public int updatePassword(UpdateAdminPasswordParam param) {

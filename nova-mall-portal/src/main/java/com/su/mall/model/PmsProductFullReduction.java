@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 /**
  * 商品满减
- * @author Su
+ * 
  */
 @Data
 public class PmsProductFullReduction implements Serializable {

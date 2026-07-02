@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * 商品优选管理Service实现类
- * @author Su
+ * 
  */
 @Service
 @RequiredArgsConstructor

@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 首页推荐专题
- * @author Su
+ * 
  */
 @Data
 public class SmsHomeRecommendSubject implements Serializable {

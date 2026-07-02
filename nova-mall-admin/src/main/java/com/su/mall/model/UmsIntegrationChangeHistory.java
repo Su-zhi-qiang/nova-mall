@@ -9,7 +9,7 @@ import java.util.Date;
 
 /**
  * 积分变化历史
- * @author Su
+ * 
  */
 @Data
 public class UmsIntegrationChangeHistory implements Serializable {

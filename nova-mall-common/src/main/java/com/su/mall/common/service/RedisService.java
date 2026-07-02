@@ -6,7 +6,7 @@ import java.util.Set;
 
 /**
  * Redis操作Service
- * @author Su
+ * 
  */
 public interface RedisService {
 

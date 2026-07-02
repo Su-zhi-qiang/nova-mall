@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 搜索商品管理自定义Dao
- * @author Su
+ * 
  */
 public interface EsProductDao {
     /**

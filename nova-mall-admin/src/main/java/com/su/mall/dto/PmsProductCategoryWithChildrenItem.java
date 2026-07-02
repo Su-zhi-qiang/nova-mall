@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * 包含子级分类的商品分类
- * @author Su
+ * 
  */
 public class PmsProductCategoryWithChildrenItem extends PmsProductCategory {
     @Getter

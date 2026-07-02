@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * 后台角色管理自定义Dao
- * @author Su
+ * 
  */
 public interface UmsRoleDao {
     /**

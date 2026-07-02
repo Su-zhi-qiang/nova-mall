@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * SpringDoc相关配置
- * @author Su
+ * 
  */
 @Configuration
 public class SpringDocConfig implements WebMvcConfigurer {

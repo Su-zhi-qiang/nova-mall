@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 商品分类
- * @author Su
+ * 
  */
 @Data
 public class PmsProductCategory implements Serializable {

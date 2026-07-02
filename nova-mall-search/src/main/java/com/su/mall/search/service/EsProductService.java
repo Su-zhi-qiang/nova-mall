@@ -8,7 +8,10 @@ import java.util.List;
 
 /**
  * 搜索商品管理Service
- * @author Su
+ * <p>基于Elasticsearch的商品搜索服务，提供全文检索、复合查询、相关推荐、聚合统计等功能
+ * <p>底层通过 {@link com.su.mall.search.service.impl.EsClientService} 操作ES RestHighLevelClient
+ *
+ * @see EsProductServiceImpl
  */
 public interface EsProductService {
     /**

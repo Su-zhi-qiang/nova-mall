@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * 带有属性的商品属性分类
- * @author Su
+ * 
  */
 public class PmsProductAttributeCategoryItem extends PmsProductAttributeCategory {
     @Getter

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 /**
  * SpringSecurity需要的用户信息封装类
- * @author Su
+ * 
  */
 public class AdminUserDetails implements UserDetails {
     //后台用户

@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * 添加更新产品分类的参数
- * @author Su
+ * 
  */
 @Data
 @EqualsAndHashCode

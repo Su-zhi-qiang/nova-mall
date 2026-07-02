@@ -4,7 +4,7 @@ import com.su.mall.model.UmsMember;
 
 /**
  * 会员信息缓存业务类
- * @author Su
+ * 
  */
 public interface UmsMemberCacheService {
     /**

@@ -8,9 +8,10 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * 搜索商品的信息
- * 使用普通POJO，不依赖Spring Data Elasticsearch注解
- * @author Su
+ * Elasticsearch商品搜索文档
+ * <p>与ES索引中的商品文档一一对应，用于全文检索和聚合查询
+ * <p>通过 {@link com.su.mall.search.dao.EsProductDao} 从MySQL加载数据后写入ES
+ * <p>包含商品基本信息、品牌/分类信息、销售属性、促销状态等搜索相关字段
  */
 @Data
 @EqualsAndHashCode

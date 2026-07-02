@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * 订单详情信息
- * @author Su
+ * 
  */
 public class OmsOrderDetail extends OmsOrder {
     @Getter

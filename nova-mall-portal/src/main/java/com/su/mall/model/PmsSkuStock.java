@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 /**
  * SKU库存
- * @author Su
+ * 
  */
 @Data
 public class PmsSkuStock implements Serializable {

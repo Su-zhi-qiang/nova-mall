@@ -13,7 +13,11 @@ import java.util.List;
 
 /**
  * 后台用户管理Service
- * @author Su
+ * <p>提供管理员的注册、登录、Token管理、角色分配、缓存管理等核心功能
+ * <p>认证流程：login()生成JWT → 请求携带Token → JwtAuthenticationTokenFilter调用loadUserByUsername校验
+ *
+ * @see UmsAdminServiceImpl
+ * @see UmsAdminCacheService 缓存服务（Redis降级隔离）
  */
 public interface UmsAdminService {
     /**

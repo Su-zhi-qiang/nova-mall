@@ -31,7 +31,10 @@ import java.util.Map;
 
 /**
  * 统一日志处理切面
- * @author Su
+ * <p>拦截所有Controller方法，通过Logstash将结构化日志推送到Elasticsearch
+ * <p>记录的字段包括：URL、HTTP方法、请求参数、响应结果、耗时、接口描述
+ * <p>使用 @Order(1) 确保在其他切面之前执行（最先进入，最后退出）
+ * <p>日志输出格式为JSON，包含Markers标记便于Logstash解析
  */
 @Aspect
 @Component
@@ -39,18 +42,25 @@ import java.util.Map;
 public class WebLogAspect {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebLogAspect.class);
 
+    /** 切点：匹配admin模块和各子模块下的所有Controller public方法 */
     @Pointcut("execution(public * com.su.mall.controller.*.*(..))||execution(public * com.su.mall.*.controller.*.*(..))")
     public void webLog() {
     }
 
+    /** 前置通知（当前为空实现，预留扩展点） */
     @Before("webLog()")
     public void doBefore(JoinPoint joinPoint) throws Throwable {
     }
 
+    /** 后置返回通知（当前为空实现，预留扩展点） */
     @AfterReturning(value = "webLog()", returning = "ret")
     public void doAfterReturning(Object ret) throws Throwable {
     }
 
+    /**
+     * 环绕通知：记录请求响应的完整生命周期
+     * <p>流程：记录开始时间 → 执行目标方法 → 提取Swagger描述 → 构建WebLog对象 → 通过Logstash输出
+     */
     @Around("webLog()")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();

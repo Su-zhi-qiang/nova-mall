@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * 订单查询自定义Dao
- * @author Su
+ * 
  */
 public interface OmsOrderDao {
     /**

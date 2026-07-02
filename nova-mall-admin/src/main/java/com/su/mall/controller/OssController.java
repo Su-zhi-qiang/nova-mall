@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * Oss对象存储管理Controller
  * 仅在配置了 aliyun.oss.endpoint 时加载（生产环境使用，开发环境使用MinIO）
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "OssController", description = "Oss对象存储管理")

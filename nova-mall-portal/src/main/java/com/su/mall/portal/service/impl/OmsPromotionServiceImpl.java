@@ -20,7 +20,7 @@ import java.math.RoundingMode;
 import java.util.*;
 
 /**
- * @author Su
+ * 
  * 促销管理Service实现类
  */
 @Service

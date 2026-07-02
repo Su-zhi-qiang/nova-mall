@@ -3,8 +3,12 @@ package com.su.mall.common.api;
 import lombok.Getter;
 
 /**
- * API返回码封装类
- * @author Su
+ * API返回码枚举
+ * <p>统一定义所有HTTP接口的业务状态码和提示信息
+ * <p>状态码规范：200=成功, 400=业务异常, 401=未认证, 403=无权限, 404=参数错误, 500=操作失败, 501=系统异常, 502=空指针
+ *
+ * @see CommonResult 统一返回结果封装
+ * @see IErrorCode 错误码接口
  */
 @Getter
 public enum ResultCode implements IErrorCode {

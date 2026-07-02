@@ -12,7 +12,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * @author Su
+ * 
  * 前台商品查询逻辑单元测试
  */
 @SpringBootTest

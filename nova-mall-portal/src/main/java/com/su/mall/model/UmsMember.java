@@ -9,7 +9,7 @@ import java.util.Date;
 
 /**
  * 会员
- * @author Su
+ * 
  */
 @Data
 public class UmsMember implements Serializable {

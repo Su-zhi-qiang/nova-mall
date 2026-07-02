@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * 限时购场次管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "SmsFlashPromotionSessionController", description = "限时购场次管理")

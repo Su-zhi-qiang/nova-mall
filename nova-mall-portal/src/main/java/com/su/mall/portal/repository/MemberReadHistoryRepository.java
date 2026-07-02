@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
  * 会员商品浏览历史Repository
- * @author Su
+ * 
  */
 public interface MemberReadHistoryRepository extends MongoRepository<MemberReadHistory, String> {
     /**

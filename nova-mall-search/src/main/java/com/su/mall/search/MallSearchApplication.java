@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * @author Su
+ * 
  */
 @SpringBootApplication(scanBasePackages = "com.su.mall")
 public class MallSearchApplication {

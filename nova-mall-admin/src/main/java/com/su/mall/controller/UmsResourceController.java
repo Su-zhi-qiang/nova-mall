@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * 后台资源管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "UmsResourceController", description = "后台资源管理")

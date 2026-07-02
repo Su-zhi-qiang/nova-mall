@@ -2,7 +2,7 @@ package com.su.mall.common.api;
 
 /**
  * 响应状态码接口
- * @author Su
+ * 
  */
 public interface IResultCode extends IErrorCode {
 

@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * 首页轮播广告管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "SmsHomeAdvertiseController", description = "首页轮播广告管理")

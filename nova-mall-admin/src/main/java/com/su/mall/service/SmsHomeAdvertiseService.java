@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 首页广告管理Service
- * @author Su
+ * 
  */
 public interface SmsHomeAdvertiseService {
     /**

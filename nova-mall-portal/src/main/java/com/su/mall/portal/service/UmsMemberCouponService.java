@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * 用户优惠券管理Service
- * @author Su
+ * 
  */
 public interface UmsMemberCouponService {
     /**

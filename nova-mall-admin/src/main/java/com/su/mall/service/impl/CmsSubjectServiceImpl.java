@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * 商品专题管理Service实现类
- * @author Su
+ * 
  */
 @Service
 @RequiredArgsConstructor

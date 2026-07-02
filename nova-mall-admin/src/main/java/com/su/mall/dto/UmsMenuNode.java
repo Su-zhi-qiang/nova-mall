@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * 后台菜单节点封装
- * @author Su
+ * 
  */
 @Data
 public class UmsMenuNode extends UmsMenu {

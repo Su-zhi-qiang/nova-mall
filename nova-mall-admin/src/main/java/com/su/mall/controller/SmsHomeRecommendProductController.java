@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * 首页人气推荐管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "SmsHomeRecommendProductController", description = "首页人气推荐管理")

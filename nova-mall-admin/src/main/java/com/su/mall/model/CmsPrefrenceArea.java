@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 优选专区
- * @author Su
+ * 
  */
 @Data
 public class CmsPrefrenceArea implements Serializable {

@@ -8,7 +8,10 @@ import java.util.List;
 
 /**
  * 优惠券管理Service
- * @author Su
+ * <p>提供优惠券的创建、修改、删除、分页查询等后台管理功能
+ * <p>优惠券类型包括：全场通用(useType=0)、指定分类(useType=1)、指定商品(useType=2)
+ *
+ * @see SmsCouponServiceImpl
  */
 public interface SmsCouponService {
     /**

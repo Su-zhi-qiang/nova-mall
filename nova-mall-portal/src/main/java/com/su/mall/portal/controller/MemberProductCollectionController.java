@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 会员商品收藏管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "MemberCollectionController",description = "会员收藏管理")

@@ -7,7 +7,11 @@ import java.util.List;
 
 /**
  * 后台资源管理Service
- * @author Su
+ * <p>资源（API接口）是动态权限控制的基础单元
+ * <p>每个资源关联一个URL路径，角色通过资源关联获得对应接口的访问权限
+ * <p>listAll() 被 {@link com.su.mall.security.component.DynamicSecurityService} 调用，构建运行时URL→权限映射
+ *
+ * @see UmsResourceServiceImpl
  */
 public interface UmsResourceService {
     /**

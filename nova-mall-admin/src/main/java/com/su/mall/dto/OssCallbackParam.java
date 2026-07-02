@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * OSS上传成功后的回调参数
- * @author Su
+ * 
  */
 @Data
 @EqualsAndHashCode

@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * 秒杀功能测试
- * @author Su
+ * 
  */
 @SpringBootTest
 public class FlashPromotionTests {

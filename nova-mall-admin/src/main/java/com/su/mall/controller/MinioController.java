@@ -23,7 +23,7 @@ import java.util.Date;
 /**
  * MinIO对象存储管理Controller
  * 仅在配置了 minio.endpoint 时加载（开发环境使用，生产环境使用OSS）
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "MinioController", description = "MinIO对象存储管理")

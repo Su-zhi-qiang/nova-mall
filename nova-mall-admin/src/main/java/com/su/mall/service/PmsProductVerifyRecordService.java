@@ -5,7 +5,7 @@ import java.util.Map;
 
 /**
  * 商品审核记录Service
- * @author Su
+ * 
  */
 
 public interface PmsProductVerifyRecordService {

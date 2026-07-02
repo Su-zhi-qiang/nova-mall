@@ -6,7 +6,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 会员管理Service
- * @author Su
+ * <p>提供前台会员的注册、登录、验证码、密码修改、积分管理等功能
+ * <p>认证流程与后台管理员类似，使用JWT Token + Spring Security
+ *
+ * @see UmsMemberServiceImpl
  */
 public interface UmsMemberService {
     /**

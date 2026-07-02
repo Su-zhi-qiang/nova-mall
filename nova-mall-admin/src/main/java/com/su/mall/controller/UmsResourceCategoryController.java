@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * 后台资源分类管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "UmsResourceCategoryController", description = "后台资源分类管理")

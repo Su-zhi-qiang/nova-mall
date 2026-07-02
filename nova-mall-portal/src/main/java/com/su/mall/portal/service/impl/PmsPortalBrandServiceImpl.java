@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * 前台品牌管理Service实现类
- * @author Su
+ * 
  */
 @Service
 @RequiredArgsConstructor

@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 用户地址管理Service
- * @author Su
+ * 
  */
 public interface UmsMemberReceiveAddressService {
     /**

@@ -8,8 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 订单管理Service
- * @author Su
+ * 后台订单管理Service
+ * <p>提供订单查询、发货、关闭、删除以及修改收货人/费用/备注等后台管理功能
+ *
+ * @see OmsOrderServiceImpl
  */
 public interface OmsOrderService {
     /**

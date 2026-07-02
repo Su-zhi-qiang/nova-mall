@@ -21,7 +21,7 @@ import java.util.Set;
 
 /**
  * 限时购商品关联管理Service实现类
- * @author Su
+ * 
  */
 @Service
 @RequiredArgsConstructor

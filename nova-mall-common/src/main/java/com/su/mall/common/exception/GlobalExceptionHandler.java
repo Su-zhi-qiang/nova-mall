@@ -16,7 +16,18 @@ import java.util.stream.Collectors;
 
 /**
  * 全局异常处理类
- * @author Su
+ * <p>通过 @ControllerAdvice 拦截所有Controller层异常，统一返回 {@link CommonResult} 格式的JSON响应
+ * <p>异常处理优先级（由具体到通用）：
+ * <ol>
+ *   <li>{@link ApiException} — 业务异常（通过Asserts.fail()主动抛出）</li>
+ *   <li>{@link SQLSyntaxErrorException} — SQL语法错误（演示环境权限提示）</li>
+ *   <li>{@link SQLException} — 数据库约束违反（唯一键/外键冲突）</li>
+ *   <li>{@link NullPointerException} — 空指针异常</li>
+ *   <li>{@link RuntimeException} — 运行时异常</li>
+ *   <li>{@link MethodArgumentNotValidException} — 参数校验失败（@Validated）</li>
+ *   <li>{@link BindException} — 参数绑定失败</li>
+ *   <li>{@link Exception} — 兜底：所有未处理异常</li>
+ * </ol>
  */
 @Slf4j
 @ControllerAdvice

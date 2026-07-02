@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * 前台购物车商品管理自定义Dao
- * @author Su
+ * 
  */
 public interface PortalProductDao {
     /**

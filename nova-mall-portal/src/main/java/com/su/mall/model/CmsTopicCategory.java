@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 话题分类
- * @author Su
+ * 
  */
 @Data
 public class CmsTopicCategory implements Serializable {

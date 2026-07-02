@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * 商品SKU库存管理Service
- * @author Su
+ * 
  */
 public interface PmsSkuStockService {
     /**

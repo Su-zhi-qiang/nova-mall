@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 角色权限关系
- * @author Su
+ * 
  */
 @Data
 public class UmsRolePermissionRelation implements Serializable {

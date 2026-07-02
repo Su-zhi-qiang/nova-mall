@@ -9,7 +9,7 @@ import java.util.Date;
 
 /**
  * 订单操作历史记录
- * @author Su
+ * 
  */
 @Data
 public class OmsOrderOperateHistory implements Serializable {

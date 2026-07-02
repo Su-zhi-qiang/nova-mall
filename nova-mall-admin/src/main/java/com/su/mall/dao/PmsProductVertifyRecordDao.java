@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 商品审核日志管理自定义Dao
- * @author Su
+ * 
  */
 public interface PmsProductVertifyRecordDao {
     /**

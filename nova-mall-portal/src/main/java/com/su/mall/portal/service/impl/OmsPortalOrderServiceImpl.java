@@ -35,8 +35,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 前台订单管理Service
- * @author Su
+ * 前台订单管理Service实现类
+ * <p>订单创建采用责任链模式，将校验地址、加载购物车、秒杀校验、库存扣减、
+ * 优惠券/积分计算、构建订单、持久化等步骤解耦为独立的Handler
+ * <p>支付回调后更新库存、销量、优惠券状态，并通过MQ发送取消订单的延迟消息
+ * <p>超时订单取消：定时任务扫描 + RabbitMQ延迟消息双通道保障
+ *
+ * @see com.su.mall.portal.domain.order.OrderCreationChain
+ * @see com.su.mall.portal.domain.order.handler
  */
 @Service
 @RequiredArgsConstructor

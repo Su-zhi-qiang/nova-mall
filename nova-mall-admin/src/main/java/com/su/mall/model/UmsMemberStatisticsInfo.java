@@ -10,7 +10,7 @@ import java.util.Date;
 
 /**
  * 会员统计信息
- * @author Su
+ * 
  */
 @Data
 public class UmsMemberStatisticsInfo implements Serializable {

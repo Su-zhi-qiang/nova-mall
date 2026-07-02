@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 搜索商品的关联信息，包括品牌名称，分类名称及属性
- * @author Su
+ * 
  */
 @Data
 @EqualsAndHashCode

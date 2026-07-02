@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * 会员收藏Service实现类
- * @author Su
+ * 
  */
 @Service
 @RequiredArgsConstructor

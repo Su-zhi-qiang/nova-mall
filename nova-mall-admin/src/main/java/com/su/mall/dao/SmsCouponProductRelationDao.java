@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 优惠券和商品关系自定义Dao
- * @author Su
+ * 
  */
 public interface SmsCouponProductRelationDao {
     /**

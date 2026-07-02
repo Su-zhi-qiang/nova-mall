@@ -9,7 +9,10 @@ import java.util.List;
 
 /**
  * 购物车管理Service
- * @author Su
+ * <p>提供购物车的增删改查、商品规格修改、促销信息计算等功能
+ * <p>listPromotion() 方法在获取购物车列表时同步计算各商品的促销优惠信息
+ *
+ * @see OmsCartItemServiceImpl
  */
 public interface OmsCartItemService {
     /**

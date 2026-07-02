@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 会员商品分类关系
- * @author Su
+ * 
  */
 @Data
 public class UmsMemberProductCategoryRelation implements Serializable {

@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * 首页专题推荐管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "SmsHomeRecommendSubjectController", description = "首页专题推荐管理")

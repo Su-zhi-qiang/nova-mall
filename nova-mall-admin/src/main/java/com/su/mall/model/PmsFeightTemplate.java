@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 /**
  * 运费模板
- * @author Su
+ * 
  */
 @Data
 public class PmsFeightTemplate implements Serializable {

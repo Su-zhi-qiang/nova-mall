@@ -10,7 +10,7 @@ import lombok.Setter;
 
 /**
  * 限时购商品信息封装
- * @author Su
+ * 
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 /**
  * 购物车管理Service实现类
- * @author Su
+ * 
  */
 @Service
 @RequiredArgsConstructor
@@ -83,7 +83,7 @@ public class OmsCartItemServiceImpl implements OmsCartItemService {
         /**
  * 根据会员id,商品id,规格和秒杀关联ID获取购物车中商品
  *
- * @author Su
+ * 
  */
 private OmsCartItem getCartItem(OmsCartItem cartItem) {
     LambdaQueryWrapper<OmsCartItem> wrapper = new LambdaQueryWrapper<OmsCartItem>()

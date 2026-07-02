@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 /**
  * 会员积分成长规则设置
- * @author Su
+ * 
  */
 @Data
 public class UmsMemberRuleSetting implements Serializable {

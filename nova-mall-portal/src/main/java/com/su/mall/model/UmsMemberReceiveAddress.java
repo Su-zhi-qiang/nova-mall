@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 会员收货地址
- * @author Su
+ * 
  */
 @Data
 public class UmsMemberReceiveAddress implements Serializable {

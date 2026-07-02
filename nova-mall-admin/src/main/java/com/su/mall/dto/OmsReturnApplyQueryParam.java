@@ -6,7 +6,7 @@ import lombok.Setter;
 
 /**
  * 订单退货申请查询参数
- * @author Su
+ * 
  */
 @Getter
 @Setter

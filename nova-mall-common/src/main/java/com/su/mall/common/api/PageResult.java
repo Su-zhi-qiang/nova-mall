@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * 分页结果封装
- * @author Su
+ * 
  */
 @Schema(description = "分页结果")
 public class PageResult<T> {

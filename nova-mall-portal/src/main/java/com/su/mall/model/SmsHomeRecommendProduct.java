@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /**
  * 首页人气推荐
- * @author Su
+ * 
  */
 @Data
 public class SmsHomeRecommendProduct implements Serializable {

@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 
 /**
  * 限时购商品关系管理自定义Dao
- * @author Su
+ * 
  */
 public interface SmsFlashPromotionProductRelationDao {
     /**

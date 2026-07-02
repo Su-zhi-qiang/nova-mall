@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * 商品品牌管理Service
- * @author Su
+ * 
  */
 public interface PmsBrandService {
     /**

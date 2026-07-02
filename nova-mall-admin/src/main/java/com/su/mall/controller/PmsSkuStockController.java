@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * 商品SKU库存管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "PmsSkuStockController", description = "sku商品库存管理")

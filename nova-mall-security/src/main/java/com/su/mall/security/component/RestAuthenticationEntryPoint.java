@@ -10,7 +10,7 @@ import java.io.IOException;
 
 /**
  * 自定义未登录或者token失效时的返回结果
- * @author Su
+ * 
  */
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override

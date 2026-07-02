@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * 会员浏览记录管理Service实现类
- * @author Su
+ * 
  */
 @Service
 @RequiredArgsConstructor

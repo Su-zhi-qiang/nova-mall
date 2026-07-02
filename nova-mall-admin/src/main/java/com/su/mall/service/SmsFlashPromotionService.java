@@ -6,8 +6,10 @@ import com.su.mall.model.SmsFlashPromotion;
 import java.util.List;
 
 /**
- * 限时购活动管理Service
- * @author Su
+ * 限时购（秒杀）活动管理Service
+ * <p>提供秒杀活动的创建、修改、删除、上下线状态变更等后台管理功能
+ *
+ * @see SmsFlashPromotionServiceImpl
  */
 public interface SmsFlashPromotionService {
     /**

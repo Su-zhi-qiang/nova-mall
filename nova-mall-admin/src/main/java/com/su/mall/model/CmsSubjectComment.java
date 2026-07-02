@@ -9,7 +9,7 @@ import java.util.Date;
 
 /**
  * 专题评论
- * @author Su
+ * 
  */
 @Data
 public class CmsSubjectComment implements Serializable {

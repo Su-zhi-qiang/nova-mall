@@ -9,7 +9,7 @@ import java.util.Date;
 
 /**
  * 限时购每日库存快照
- * @author Su
+ * 
  */
 @Data
 public class SmsFlashPromotionDailyStock implements Serializable {

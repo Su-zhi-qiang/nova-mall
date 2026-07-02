@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * 后台资源分类管理Service
- * @author Su
+ * 
  */
 public interface UmsResourceCategoryService {
 

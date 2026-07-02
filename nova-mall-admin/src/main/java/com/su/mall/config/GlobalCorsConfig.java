@@ -8,13 +8,15 @@ import org.springframework.web.filter.CorsFilter;
 
 /**
  * 全局跨域配置
- * @author Su
+ * <p>允许所有域名、所有请求方法的跨域调用
+ * <p>注意：生产环境应限制allowedOriginPattern为具体域名，避免CSRF安全风险
  */
 @Configuration
 public class GlobalCorsConfig {
 
     /**
-     * 允许跨域调用的过滤器
+     * 注册全局CORS过滤器
+     * <p>匹配所有路径（/**），允许携带Cookie，放行所有请求头和HTTP方法
      */
     @Bean
     public CorsFilter corsFilter() {

@@ -8,7 +8,12 @@ import java.util.List;
 
 /**
  * 通用分页数据封装类
- * @author Su
+ * <p>统一不同分页框架（PageHelper / MyBatis-Plus / Spring Data）的返回格式
+ * <p>前端通过此结构获取：当前页码、每页数量、总页数、总条数、数据列表
+ *
+ * @see #restPage(List) PageHelper分页转换
+ * @see #restPage(Page) MyBatis-Plus分页转换
+ * @see #restPage(org.springframework.data.domain.Page) Spring Data分页转换
  */
 @Data
 public class CommonPage<T> {

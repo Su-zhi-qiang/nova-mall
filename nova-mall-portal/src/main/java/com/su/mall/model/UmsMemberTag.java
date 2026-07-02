@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 /**
  * 会员标签
- * @author Su
+ * 
  */
 @Data
 public class UmsMemberTag implements Serializable {

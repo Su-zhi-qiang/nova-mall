@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 /**
  * 搜索商品管理Service实现类
  * 使用RestHighLevelClient连接Elasticsearch 7.17.3
- * @author Su
+ * 
  */
 @Service
 @RequiredArgsConstructor

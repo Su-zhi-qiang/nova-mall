@@ -10,7 +10,7 @@ import java.util.Date;
 
 /**
  * 订单退货申请
- * @author Su
+ * 
  */
 @Data
 public class OmsOrderReturnApply implements Serializable {

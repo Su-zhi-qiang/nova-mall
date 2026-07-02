@@ -10,7 +10,7 @@ import java.util.Date;
 
 /**
  * 订单信息
- * @author Su
+ * 
  */
 @Data
 public class OmsOrder implements Serializable {

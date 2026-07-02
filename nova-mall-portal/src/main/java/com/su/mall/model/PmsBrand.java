@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 商品品牌
- * @author Su
+ * 
  */
 @Data
 public class PmsBrand implements Serializable {

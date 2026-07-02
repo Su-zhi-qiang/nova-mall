@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * 优惠券信息封装，包括绑定商品和分类
- * @author Su
+ * 
  */
 public class SmsCouponParam extends SmsCoupon {
     @Getter

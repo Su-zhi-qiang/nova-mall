@@ -10,7 +10,7 @@ import java.util.Date;
 
 /**
  * 商品信息
- * @author Su
+ * 
  */
 @Data
 public class PmsProduct implements Serializable {

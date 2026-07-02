@@ -13,7 +13,7 @@ import java.util.Date;
 
 /**
  * 商品操作日志
- * @author Su
+ * 
  */
 @Data
 @TableName("pms_product_operate_log")

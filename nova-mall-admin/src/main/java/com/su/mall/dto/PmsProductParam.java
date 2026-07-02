@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * 创建和修改商品的请求参数
- * @author Su
+ * 
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

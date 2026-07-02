@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * 商品分类管理Service
- * @author Su
+ * 
  */
 public interface PmsProductCategoryService {
     /**

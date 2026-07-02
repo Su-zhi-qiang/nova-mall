@@ -10,7 +10,7 @@ import java.io.IOException;
 
 /**
  * 自定义无权限访问的返回结果
- * @author Su
+ * 
  */
 public class RestfulAccessDeniedHandler implements AccessDeniedHandler{
     @Override

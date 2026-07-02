@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * 会员优惠券管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "UmsMemberCouponController", description = "用户优惠券管理")

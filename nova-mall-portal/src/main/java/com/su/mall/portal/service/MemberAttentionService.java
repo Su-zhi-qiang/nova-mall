@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 
 /**
  * 会员品牌关注管理Service
- * @author Su
+ * 
  */
 public interface MemberAttentionService {
     /**

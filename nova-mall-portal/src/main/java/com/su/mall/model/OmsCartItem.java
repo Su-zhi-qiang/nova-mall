@@ -10,7 +10,7 @@ import java.util.Date;
 
 /**
  * 购物车
- * @author Su
+ * 
  */
 @Data
 public class OmsCartItem implements Serializable {

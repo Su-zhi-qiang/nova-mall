@@ -9,8 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
- * MyBatis-Plus相关配置
- * @author Su
+ * MyBatis-Plus配置
+ * <p>启用事务管理 + Mapper接口自动扫描（com.su.mall.mapper 和 com.su.mall.dao）
+ * <p>配置分页拦截器，限制单页最多500条，页码溢出时自动返回第一页
  */
 @Configuration
 @EnableTransactionManagement

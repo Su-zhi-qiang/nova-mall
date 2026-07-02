@@ -4,7 +4,7 @@ import com.su.mall.common.api.IErrorCode;
 
 /**
  * 自定义API异常
- * @author Su
+ * 
  */
 public class ApiException extends RuntimeException {
     private IErrorCode errorCode;

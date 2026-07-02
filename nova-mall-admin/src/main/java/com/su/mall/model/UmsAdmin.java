@@ -9,7 +9,7 @@ import java.util.Date;
 
 /**
  * 后台管理员
- * @author Su
+ * 
  */
 @Data
 public class UmsAdmin implements Serializable {

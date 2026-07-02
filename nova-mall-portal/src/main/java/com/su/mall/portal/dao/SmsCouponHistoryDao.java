@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * 会员优惠券领取记录管理自定义Dao
- * @author Su
+ * 
  */
 public interface SmsCouponHistoryDao {
     /**

@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * 商品属性管理Service
- * @author Su
+ * 
  */
 public interface PmsProductAttributeService {
     /**

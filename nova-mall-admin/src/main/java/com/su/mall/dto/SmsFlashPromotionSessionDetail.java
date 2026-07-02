@@ -9,7 +9,7 @@ import lombok.Setter;
 
 /**
  * 包含商品数量的场次信息
- * @author Su
+ * 
  */
 @EqualsAndHashCode(callSuper = true) // 调用父类的equals方法
 @Data

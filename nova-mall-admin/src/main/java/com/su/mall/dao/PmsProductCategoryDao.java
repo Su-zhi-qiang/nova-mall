@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * 商品分类自定义Dao
- * @author Su
+ * 
  */
 public interface PmsProductCategoryDao {
     /**

@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * 优选专区管理Service
- * @author Su
+ * 
  */
 public interface CmsPreferenceAreaService {
     /**

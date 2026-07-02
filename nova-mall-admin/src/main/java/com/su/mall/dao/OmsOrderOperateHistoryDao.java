@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 订单操作记录自定义Dao
- * @author Su
+ * 
  */
 public interface OmsOrderOperateHistoryDao {
     /**

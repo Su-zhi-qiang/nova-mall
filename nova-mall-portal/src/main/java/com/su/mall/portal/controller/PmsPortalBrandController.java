@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * 首页品牌推荐管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "PmsPortalBrandController", description = "前台品牌管理")

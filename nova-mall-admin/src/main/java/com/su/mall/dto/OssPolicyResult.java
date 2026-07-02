@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 获取OSS上传文件授权返回结果
- * @author Su
+ * 
  */
 @Data
 @EqualsAndHashCode

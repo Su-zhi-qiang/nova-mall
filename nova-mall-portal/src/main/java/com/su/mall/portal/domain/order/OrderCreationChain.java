@@ -37,9 +37,11 @@ public class OrderCreationChain {
         if (handlers.isEmpty()) {
             return;
         }
+        // 构建责任链
         for (int i = 0; i < handlers.size() - 1; i++) {
             handlers.get(i).setNext(handlers.get(i + 1));
         }
+        // 执行责任链, 从第一个处理器开始
         handlers.get(0).handle(context);
     }
 }

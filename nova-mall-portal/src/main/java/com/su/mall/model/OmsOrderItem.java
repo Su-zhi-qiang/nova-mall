@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 /**
  * 订单商品信息
- * @author Su
+ * 
  */
 @Data
 public class OmsOrderItem implements Serializable {

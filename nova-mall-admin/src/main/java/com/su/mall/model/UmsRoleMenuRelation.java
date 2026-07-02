@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 角色菜单关系
- * @author Su
+ * 
  */
 @Data
 public class UmsRoleMenuRelation implements Serializable {

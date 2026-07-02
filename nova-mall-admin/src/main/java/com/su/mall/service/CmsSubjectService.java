@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 商品专题管理Service
- * @author Su
+ * 
  */
 public interface CmsSubjectService {
     /**

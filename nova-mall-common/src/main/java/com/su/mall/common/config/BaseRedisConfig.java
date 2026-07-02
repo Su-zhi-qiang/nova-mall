@@ -20,11 +20,20 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 /**
- * Redis基础配置
- * @author Su
+ * Redis基础配置（供各模块继承）
+ * <p>定义RedisTemplate、序列化器、缓存管理器和RedisService四个核心Bean
+ * <p>序列化策略：Key使用String序列化，Value使用Jackson JSON序列化（支持多态反序列化）
+ * <p>缓存管理器默认过期时间：1天
+ *
+ * @see RedisServiceImpl RedisService实现类
  */
 public class BaseRedisConfig {
 
+    /**
+     * 配置RedisTemplate
+     * <p>统一Key序列化为String，Value序列化为Jackson JSON
+     * <p>Hash结构同样采用String Key + JSON Value
+     */
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory,RedisSerializer<Object> redisSerializer) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
@@ -37,6 +46,11 @@ public class BaseRedisConfig {
         return redisTemplate;
     }
 
+    /**
+     * 创建Jackson JSON序列化器
+     * <p>启用DefaultTyping以支持多态反序列化（如List中存储不同子类型）
+     * <p>注意：启用DefaultTyping存在安全风险，仅适用于可信环境
+     */
     @Bean
     public RedisSerializer<Object> redisSerializer() {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -47,6 +61,11 @@ public class BaseRedisConfig {
         return new Jackson2JsonRedisSerializer<>(objectMapper,Object.class);
     }
 
+    /**
+     * 创建RedisCacheManager
+     * <p>使用非锁定写入器（适用于单实例场景）
+     * <p>所有缓存条目默认TTL为1天
+     */
     @Bean
     public RedisCacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory) {
         RedisCacheWriter redisCacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(redisConnectionFactory);
@@ -57,6 +76,10 @@ public class BaseRedisConfig {
     }
 
 
+    /**
+     * 创建RedisService实例
+     * <p>封装了String/Hash/Set/List/分布式锁/秒杀库存等常用Redis操作
+     */
     @Bean
     public RedisService redisService(RedisTemplate<String, Object> redisTemplate){
         return new RedisServiceImpl(redisTemplate);

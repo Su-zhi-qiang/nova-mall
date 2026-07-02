@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * 商品优选管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "CmsPreferenceAreaController", description = "商品优选管理")

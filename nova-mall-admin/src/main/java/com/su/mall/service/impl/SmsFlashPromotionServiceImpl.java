@@ -22,7 +22,7 @@ import java.util.Set;
 
 /**
  * 限时购活动管理Service实现类
- * @author Su
+ * 
  */
 @Service
 @RequiredArgsConstructor

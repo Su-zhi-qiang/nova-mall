@@ -21,7 +21,7 @@ import java.util.List;
 
 /**
  * 商品属性管理Controller
- * @author Su
+ * 
  */
 @RestController
 @Tag(name = "PmsProductAttributeController", description = "商品属性管理")
