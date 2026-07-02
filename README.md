@@ -5,7 +5,7 @@
 - 移动端H5商城：[Nova-Mall App Web](https://github.com/Su-zhi-qiang/nova-mall-app-web "手机端商城网页")
 - AI智能代理模块：[Nova-Mall Agent](https://github.com/Su-zhi-qiang/nova-mall-agent "商城AI智能客服、后台管理助手")
 ---
-
+Dockerfile 和 docker-compose 配置见 `deploy/` 目录，完整部署方案见 [DEPLOYMENT.md](./DEPLOYMENT.md)。
 ## 技术架构
 
 ```
@@ -508,6 +508,14 @@ docker compose -f docker-compose-app.yml up -d --build
 
 ## 项目截图(部分功能)
 
+### AI 智能客服（Agent）
+
+自然语言对话交互 + 自动聚合统计工具
+
+  <img src="document/resource/screenshot-agent-chat.gif" width="45%" alt="智能客服对话">
+  <img src="document/resource/screenshot-agent-daily.gif" width="45%" alt="运营日报">
+
+
 ### 后台管理（Admin）
 
 #### 后台首页
@@ -610,13 +618,10 @@ docker compose -f docker-compose-app.yml up -d --build
 
   <img src="document/resource/screenshot-app-user.png" width="30%" alt="会员中心">
 
-### AI 智能客服（Agent）
-
-自然语言对话交互 + 自动聚合统计工具
-
-  <img src="document/resource/screenshot-agent-chat.gif" width="45%" alt="智能客服对话">
-  <img src="document/resource/screenshot-agent-daily.gif" width="45%" alt="运营日报">
 
 ---
-
-Dockerfile 和 docker-compose 配置见 `deploy/` 目录，完整部署方案见 [DEPLOYMENT.md](./DEPLOYMENT.md)。
+### Open Source Notice
+Basic infrastructure refers to open-source e-commerce project macrozheng/mall (Apache 2.0).
+Original repo: https://github.com/macrozheng/mall
+Most business architecture, high-concurrency logic and AI agent modules are fully refactored and independently developed.
+For cleaner code reading, partial source file copyright comments are omitted, all modification records can be traced via Git commit history.
