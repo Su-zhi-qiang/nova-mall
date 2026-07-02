@@ -2,10 +2,13 @@ package com.su.mall.config;
 
 import com.su.mall.model.UmsResource;
 import com.su.mall.security.component.CustomConfigAttribute;
+import com.su.mall.security.component.DynamicAuthorizationManager;
+import com.su.mall.security.component.DynamicSecurityMetadataSource;
 import com.su.mall.security.component.DynamicSecurityService;
 import com.su.mall.service.UmsAdminService;
 import com.su.mall.service.UmsResourceService;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.security.SecurityConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.UserDetailsService;
